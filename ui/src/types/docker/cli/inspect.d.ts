@@ -24,7 +24,28 @@ export type CliInspectOptions =
   Partial<CliInspectOptionSize> |
   Partial<CliInspectOptionType>
 
-export interface ContainerExtended extends Container {
+export interface ContainerExtended extends Omit<Container, 'Names' | 'Labels'> {
+  Name: string,
+  Config: {
+    Hostname: string
+    Domainname: string
+    User: string
+    AttachStdin: boolean
+    AttachStdout: boolean
+    AttachStderr: boolean
+    ExposedPorts: {[key: string]: {}}
+    Tty: boolean
+    OpenStdin: boolean
+    StdinOnce: boolean
+    Env: string[]
+    Cmd: string[] | string | null
+    Image: string
+    Volumes: null
+    WorkingDir: string
+    Entrypoint: string[]
+    OnBuild: null
+    Labels: {[key: string]: string}
+  }
   NetworkSettings: {
     Ports: {
       [key: string]: {
@@ -34,4 +55,3 @@ export interface ContainerExtended extends Container {
     }
   }
 }
-// ddClient.docker.cli.exec('inspect', ['1cc1bec63c70e6c66644b81bc5f4a5804ed94411c63193dc16600dc004f09e3a'])

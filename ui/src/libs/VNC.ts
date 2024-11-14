@@ -10,7 +10,7 @@ import ProxyContainerNetwork from './proxyContainer/ProxyContainerNetwork'
 export default class VNC {
   private readonly docker: Docker
   private readonly config: Config
-  private proxyContainer: ProxyContainer | undefined
+  public proxyContainer: ProxyContainer | undefined
 
   constructor() {
     this.docker = createDockerDesktopClient().docker

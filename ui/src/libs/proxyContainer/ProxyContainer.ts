@@ -3,6 +3,7 @@ import { createDockerDesktopClient } from '@docker/extension-api-client'
 import { Docker } from '@docker/extension-api-client-types/dist/v1'
 import { ContainerExtended } from '../../types/docker/cli/inspect'
 import ProxyContainerNetwork from './ProxyContainerNetwork'
+import { Container } from '../../types/docker/extension'
 
 export class ProxyContainer {
   private readonly docker: Docker
@@ -38,7 +39,7 @@ export class ProxyContainer {
   }
 
   getTargetContainerId(): string {
-    const targetContainerId = this.info.Labels[this.config.proxyContainerLabelContainerId]
+    const targetContainerId = this.info.Config.Labels[this.config.proxyContainerLabelContainerId]
 
     if (!targetContainerId)
       throw new Error(
@@ -48,8 +49,23 @@ export class ProxyContainer {
     return targetContainerId
   }
 
+  async getTargetContainerName(): Promise<string> {
+    const targetContainerId = this.getTargetContainerId()
+
+    const targetContainerList = await this.docker.listContainers({
+      filters: {
+        id: [targetContainerId],
+      }
+    }) as Container[]
+
+    if (targetContainerList.length !== 1)
+      throw new Error('Can\t find the target container')
+
+    return targetContainerList[0].Names[0]
+  }
+
   getTargetIp(): string {
-    const targetIp = this.info.Labels[this.config.proxyContainerLabelTargetIp]
+    const targetIp = this.info.Config.Labels[this.config.proxyContainerLabelTargetIp]
 
     if (!targetIp)
       throw new Error(
@@ -60,7 +76,7 @@ export class ProxyContainer {
   }
 
   getTargetPort(): string {
-    const targetPort = this.info.Labels[this.config.proxyContainerLabelTargetPort]
+    const targetPort = this.info.Config.Labels[this.config.proxyContainerLabelTargetPort]
 
     if (!targetPort)
       throw new Error(
@@ -85,7 +101,7 @@ export class ProxyContainer {
 
     await this.network.clear()
 
-    const removeExecResult = await this.docker.cli.exec('rm', [this.info.Id])
+    const removeExecResult = await this.docker.cli.exec('rm', ['-f', this.info.Id])
     if (removeExecResult.stderr)
       throw new Error(removeExecResult.stderr)
 
