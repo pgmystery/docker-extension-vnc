@@ -1,0 +1,26 @@
+services:
+  vnc-server:
+    hostname: vnc_server
+    build:
+      dockerfile: vnc_ubuntu.Dockerfile
+      context: ./vnc_ubuntu
+    ports:
+      - "5901:5901"
+    networks:
+      - vnc
+
+  novnc_proxy:
+    build:
+      context: ./novnc_proxy
+      dockerfile: novnc_proxy.Dockerfile
+    environment:
+      NONVC_REMOTE_SERVER: vnc_server:5901
+    ports:
+      - "6081:6081"
+    networks:
+      - vnc
+    depends_on:
+      - vnc-server
+
+networks:
+  vnc:

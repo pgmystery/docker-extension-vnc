@@ -1,11 +1,5 @@
 {
   "icon": "docker.svg",
-  "vm": {
-    "composefile": "docker-compose.yaml",
-    "exposes": {
-      "socket": "backend.sock"
-    }
-  },
   "ui": {
     "dashboard-tab": {
       "title": "Vnc",

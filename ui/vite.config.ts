@@ -7,9 +7,15 @@ export default defineConfig({
   base: "./",
   build: {
     outDir: "build",
+    target: 'esnext', // you can also use 'es2020' here
   },
   server: {
     port: 3000,
     strictPort: true,
-  }
+  },
+  optimizeDeps: {
+    esbuildOptions: {
+      target: 'esnext', // you can also use 'es2020' here
+    },
+  },
 });
