@@ -21,6 +21,19 @@
 #RUN poetry config virtualenvs.create false
 #RUN poetry install
 
+# BUILD lib react-vnc
+FROM --platform=$BUILDPLATFORM node:21.6-alpine3.18 AS lib-react-vnc
+RUN apk add git
+WORKDIR /react-vnc
+COPY .git .
+COPY .gitmodules .
+COPY ui/libs/react-vnc ./ui/libs/react-vnc
+RUN git submodule update --init --recursive
+RUN --mount=type=cache,target=/usr/src/app/.npm \
+    npm set cache /usr/src/app/.npm && \
+    npm ci
+RUN npm run build:lib
+
 FROM --platform=$BUILDPLATFORM node:21.6-alpine3.18 AS client-builder
 WORKDIR /ui
 # cache packages in layer
@@ -32,6 +45,8 @@ RUN --mount=type=cache,target=/usr/src/app/.npm \
     npm ci
 # install
 COPY ui /ui
+# copy libs
+COPY --from=lib-react-vnc /ui/libs/dist /ui/libs/react-vnc/dist
 RUN npm run build
 
 FROM alpine
