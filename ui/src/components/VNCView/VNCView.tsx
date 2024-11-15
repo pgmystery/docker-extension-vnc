@@ -5,9 +5,6 @@ import VNCCredentialsDialog from './VNCCredentialsDialog'
 import VNCSessionBar from '../vncSessionBar/VNCSessionBar'
 
 
-// https://stackoverflow.com/a/9490267
-
-
 interface VNCViewProps {
   url: string
   onCancel: ()=>void
@@ -72,7 +69,7 @@ export default function VNCView({ url, onCancel }: VNCViewProps) {
   }
 
   return (
-    <Stack direction="column" spacing={1}>
+    <Stack direction="column" spacing={1} sx={{height: '100%'}} >
       <VNCSessionBar
         onFullscreenClicked={handleFullscreenClick}
         onSettingsClicked={handleSettingsClick}
