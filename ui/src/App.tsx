@@ -4,7 +4,7 @@ import { Backdrop, CircularProgress, Stack } from '@mui/material'
 import VNC from './libs/VNC'
 import ConnectBar, { ConnectBarConnectedData } from './components/connectbar/ConnectBar'
 import useConnectionQueue from './hooks/useConnectionQueue'
-import VNCView from './components/VNCView'
+import VNCView from './components/VNCView/VNCView'
 
 
 export interface ConnectedData {
@@ -107,7 +107,7 @@ export function App() {
         {
           loading || connectedData.url === '' || !connectedData.url
             ? <div></div>
-            : <VNCView url={connectedData.url} />
+            : <VNCView url={connectedData.url} onCancel={disconnect} />
         }
 
       </Stack>
