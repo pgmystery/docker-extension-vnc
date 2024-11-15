@@ -1,6 +1,6 @@
 import React, { useMemo, useRef, useState } from 'react'
 import { createDockerDesktopClient } from '@docker/extension-api-client'
-import { Stack } from '@mui/material'
+import { Backdrop, CircularProgress, Stack } from '@mui/material'
 import { VncScreen } from 'react-vnc'
 import VNC from './libs/VNC'
 import ConnectBar, { ConnectBarConnectedData } from './components/connectbar/ConnectBar'
@@ -29,9 +29,12 @@ export function App() {
 
   async function reconnect() {
     const proxyContainer = await vnc.reconnect()
-    setLoading(false)
 
-    if (!proxyContainer) return
+    if (!proxyContainer) {
+      setLoading(false)
+
+      return
+    }
 
     const targetContainerName = await proxyContainer.getTargetContainerName()
 
@@ -42,6 +45,7 @@ export function App() {
         port: Number(proxyContainer.getTargetPort()),
       }
     })
+    setLoading(false)
   }
 
   async function handleConnectClicked(containerId: string, targetPort: number) {
@@ -119,6 +123,10 @@ export function App() {
         }
 
       </Stack>
+
+      <Backdrop sx={(theme) => ({ color: '#fff', zIndex: theme.zIndex.drawer + 1 })} open={loading}>
+        <CircularProgress />
+      </Backdrop>
     </>
   )
 }
