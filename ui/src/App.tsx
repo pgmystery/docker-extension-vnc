@@ -1,13 +1,13 @@
-import React, { useMemo, useRef, useState } from 'react'
+import React, { useMemo, useState } from 'react'
 import { createDockerDesktopClient } from '@docker/extension-api-client'
-import { Stack } from '@mui/material'
-import { VncScreen } from 'react-vnc'
+import { Backdrop, CircularProgress, Stack } from '@mui/material'
 import VNC from './libs/VNC'
 import ConnectBar, { ConnectBarConnectedData } from './components/connectbar/ConnectBar'
 import useConnectionQueue from './hooks/useConnectionQueue'
+import VNCView from './components/VNCView'
 
 
-interface ConnectedData {
+export interface ConnectedData {
   url: string
   targetInfo?: ConnectBarConnectedData
 }
@@ -20,7 +20,6 @@ export function App() {
   const [connectedData, setConnectedData] = useState<ConnectedData>({
     url: '',
   })
-  const vncScreenRef = useRef<React.ElementRef<typeof VncScreen>>(null)
   const { connect, disconnect } = useConnectionQueue({
     onConnect: handleConnectClicked,
     onDisconnect: handleDisconnectClicked,
@@ -29,9 +28,12 @@ export function App() {
 
   async function reconnect() {
     const proxyContainer = await vnc.reconnect()
-    setLoading(false)
 
-    if (!proxyContainer) return
+    if (!proxyContainer) {
+      setLoading(false)
+
+      return
+    }
 
     const targetContainerName = await proxyContainer.getTargetContainerName()
 
@@ -42,6 +44,7 @@ export function App() {
         port: Number(proxyContainer.getTargetPort()),
       }
     })
+    setLoading(false)
   }
 
   async function handleConnectClicked(containerId: string, targetPort: number) {
@@ -89,7 +92,10 @@ export function App() {
 
   return (
     <>
-      <Stack alignItems="start" spacing={2}>
+      <Stack alignItems="start" spacing={2} sx={{
+        height: '100%',
+        alignItems: 'stretch',
+      }}>
 
         <ConnectBar
           onConnect={connect}
@@ -101,24 +107,14 @@ export function App() {
         {
           loading || connectedData.url === '' || !connectedData.url
             ? <div></div>
-            : <VncScreen
-                url={connectedData.url}
-                scaleViewport
-                style={{
-                  width: '75vw',
-                  height: '75vh',
-                }}
-                debug
-                ref={vncScreenRef}
-                rfbOptions={{
-                  credentials: {
-                    password: 'password',
-                  },
-                }}
-              />
+            : <VNCView url={connectedData.url} />
         }
 
       </Stack>
+
+      <Backdrop sx={(theme) => ({ color: '#fff', zIndex: theme.zIndex.drawer + 1 })} open={loading}>
+        <CircularProgress />
+      </Backdrop>
     </>
   )
 }

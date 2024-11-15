@@ -8,19 +8,17 @@ export interface ConnectButtonProps extends ButtonProps {
   connected: boolean
 }
 
-export default function ConnectButton(props: ConnectButtonProps) {
-  const { connected } = props
-
+export default function ConnectButton({ connected, onConnect, onDisconnect, ...buttonProps }: ConnectButtonProps) {
   return (
     connected
       ? <ConnectButtonConnected
-          { ...props }
+          { ...buttonProps }
           color="error"
-          onClick={props.onDisconnect}
+          onClick={onDisconnect}
         />
       : <ConnectButtonDisconnected
-          { ...props }
-          onClick={props.onConnect}
+          { ...buttonProps }
+          onClick={onConnect}
         />
   )
 }
