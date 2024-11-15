@@ -6,12 +6,13 @@ import { Container } from '../../types/docker/extension'
 export interface ContainerSelectProps {
   containers: Container[]
   disabled?: boolean
+  selectedContainerName: string
+  setSelectedContainerName: (name: string)=>void
 }
 
 
-export default function ContainerSelect({ containers, disabled }: ContainerSelectProps) {
+export default function ContainerSelect({ containers, disabled, selectedContainerName, setSelectedContainerName }: ContainerSelectProps) {
   const [containerNames, setContainerNames] = useState<string[]>([])
-  const [selectedContainerName, setSelectedContainerName] = useState<string>('')
 
   useEffect(() => {
     setContainerNames(containers.map(container => container.Names[0]))
@@ -21,10 +22,10 @@ export default function ContainerSelect({ containers, disabled }: ContainerSelec
     <Autocomplete
       disabled={disabled}
       options={containerNames}
-      renderInput={params => <TextField { ...params } key={params.id} />}
+      renderInput={params => <TextField { ...params } label="Docker Container" />}
       inputValue={selectedContainerName}
       onInputChange={(_, value) => setSelectedContainerName(value)}
-      onChange={(_, value) => setSelectedContainerName(value || '')}
+      sx={{ width: 300 }}
     />
   )
 }

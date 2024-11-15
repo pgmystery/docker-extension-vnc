@@ -1,4 +1,4 @@
-import { Autocomplete, FormControl, FormLabel, MenuItem, Select, Stack, TextField } from '@mui/material'
+import { Autocomplete, FormControl, FormLabel, Stack, TextField } from '@mui/material'
 import React, { useEffect, useMemo, useState } from 'react'
 import { Container } from '../../types/docker/extension'
 import { createDockerDesktopClient } from '@docker/extension-api-client'
@@ -22,9 +22,8 @@ export interface ConnectBarConnectedData {
 export default function ConnectBar({ disabled, onConnect, onDisconnect, connected }: ConnectBarProps) {
   const ddClient = useMemo(createDockerDesktopClient, [])
   const [containers, setContainers] = useState<Container[]>([])
-  const [containerNames, setContainerNames] = useState<string[]>([])
   const [selectedContainerName, setSelectedContainerName] = useState<string>('')
-  const [selectedContainerPorts] = useState<string[]>([])
+  const [selectedContainerPorts, setSelectedContainerPorts] = useState<string[]>([])
   const [selectedPort, setSelectedPort] = useState<string>('')
 
   useEffect(() => {
@@ -51,12 +50,12 @@ export default function ConnectBar({ disabled, onConnect, onDisconnect, connecte
     setRunningContainersState()
   }, [])
 
-  function selectedContainerChanged(name: string) {
-    if (selectedContainerName !== name) {
-      setSelectedContainerName(name)
-      setSelectedPort('')
-    }
-  }
+  useEffect(() => {
+    setSelectedPort('')
+    const selectedContainer = getContainerByName(selectedContainerName)
+
+    setSelectedContainerPorts(selectedContainer?.Ports.map(portInfo => portInfo.PrivatePort.toString()) || [])
+  }, [selectedContainerName])
 
   function getContainerByName(name: string): Container | null {
     return containers.find(container => container.Names[0] == name) || null
@@ -81,25 +80,28 @@ export default function ConnectBar({ disabled, onConnect, onDisconnect, connecte
         <ContainerSelect
           containers={containers}
           disabled={disabled || connected !== undefined}
+          selectedContainerName={selectedContainerName}
+          setSelectedContainerName={setSelectedContainerName}
         />
-        {/*<Autocomplete*/}
-        {/*  disabled={!selectedContainerName || disabled || connected !== undefined}*/}
-        {/*  options={selectedContainerPorts}*/}
-        {/*  renderInput={params => <TextField { ...params } key={params.id} />}*/}
-        {/*  inputValue={selectedPort}*/}
-        {/*  onInputChange={(_, value) => setSelectedPort(value)}*/}
-        {/*  onChange={(_, value) => setSelectedPort(value?.toString() || '')}*/}
-        {/*  freeSolo*/}
-        {/*/>*/}
-        {/*<ConnectButton*/}
-        {/*  onConnect={handleConnectClicked}*/}
-        {/*  onDisconnect={handleDisconnectClicked}*/}
-        {/*  connected={connected !== undefined}*/}
-        {/*  disabled={disabled}*/}
-        {/*  sx={{*/}
-        {/*    minWidth: '180px',*/}
-        {/*  }}*/}
-        {/*/>*/}
+        <Autocomplete
+          disabled={selectedContainerName === '' || disabled || connected !== undefined}
+          options={selectedContainerPorts}
+          renderInput={params => <TextField { ...params } label="Container internal port" />}
+          inputValue={selectedPort}
+          onInputChange={(_, value) => setSelectedPort(value)}
+          onChange={(_, value) => setSelectedPort(value?.toString() || '')}
+          freeSolo
+          sx={{ width: 300 }}
+        />
+        <ConnectButton
+          onConnect={handleConnectClicked}
+          onDisconnect={handleDisconnectClicked}
+          connected={connected !== undefined}
+          disabled={selectedContainerName === '' || selectedPort === '' || disabled}
+          sx={{
+            minWidth: '180px',
+          }}
+        />
       </Stack>
     </FormControl>
   )

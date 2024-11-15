@@ -100,7 +100,7 @@ export function App() {
 
         {
           loading || connectedData.url === '' || !connectedData.url
-            ? <div>loading...</div>
+            ? <div></div>
             : <VncScreen
                 url={connectedData.url}
                 scaleViewport
