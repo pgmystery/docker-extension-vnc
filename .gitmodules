@@ -1,3 +1,0 @@
-[submodule "ui/libs/react-vnc/src/noVNC"]
-	path = ui/libs/react-vnc/src/noVNC
-	url = https://github.com/novnc/noVNC.git
