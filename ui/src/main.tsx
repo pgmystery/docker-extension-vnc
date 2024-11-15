@@ -1,8 +1,9 @@
 import React from "react";
 import ReactDOM from "react-dom/client";
 import CssBaseline from "@mui/material/CssBaseline";
-import { DockerMuiThemeProvider } from "@docker/docker-mui-theme";
+import { DockerMuiV6ThemeProvider } from "@docker/docker-mui-theme";
 
+import MainStyle from './style/MainStyle'
 import { App } from './App';
 
 ReactDOM.createRoot(document.getElementById("root") as HTMLElement).render(
@@ -12,9 +13,10 @@ ReactDOM.createRoot(document.getElementById("root") as HTMLElement).render(
       the `dockerDesktopTheme` class to your root <html> element to get
       some minimal Docker theming.
     */}
-    <DockerMuiThemeProvider>
+    <DockerMuiV6ThemeProvider>
       <CssBaseline />
+      <MainStyle />
       <App />
-    </DockerMuiThemeProvider>
+    </DockerMuiV6ThemeProvider>
   </React.StrictMode>
 );

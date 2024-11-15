@@ -101,7 +101,7 @@ export default function ConnectBar({ disabled, onConnect, onDisconnect, connecte
 
   return (
     <FormControl fullWidth>
-      <FormLabel>Select a container to connect over VNC</FormLabel>
+      <FormLabel sx={{marginBottom: '10px'}}>Select a container to connect to it over VNC</FormLabel>
       <Stack direction="row" spacing={2}>
         <Stack
           direction="row"
