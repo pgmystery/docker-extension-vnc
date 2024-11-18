@@ -5,6 +5,8 @@ import { useEffect, useState } from 'react'
 import DeleteCredentials from './VNCSettingForms/DeleteCredentials'
 import { VNCSettingsData } from './VNCView'
 import CloseIcon from '@mui/icons-material/Close'
+import CompressionLevel from './VNCSettingForms/CompressionLevel'
+import ShowDotCursor from './VNCSettingForms/ShowDotCursor'
 
 
 interface VNCSettingsDialog {
@@ -56,6 +58,24 @@ export default function VNCSettingsDialog({ open, close, settingsData, onSetting
             onChange={qualityLevel => setSettings({
               ...settingsData,
               qualityLevel,
+            })}
+          />
+          <Divider />
+          <CompressionLevel
+            initValue={settingsData.compressionLevel}
+            reset={reset}
+            onChange={compressionLevel => setSettings({
+              ...settingsData,
+              compressionLevel,
+            })}
+          />
+          <Divider />
+          <ShowDotCursor
+            initValue={settingsData.showDotCursor}
+            reset={reset}
+            onChange={showDotCursor => setSettings({
+              ...settingsData,
+              showDotCursor,
             })}
           />
           <Divider />

@@ -23,6 +23,8 @@ export interface VNCCredentials {
 
 export interface VNCSettingsData {
   qualityLevel: number
+  compressionLevel: number
+  showDotCursor: boolean
 }
 
 
@@ -154,6 +156,8 @@ export default function VNCView({ url, onCancel, ddUIToast }: VNCViewProps) {
             }}
             loadingUI={<VNCViewSkeleton />}
             qualityLevel={settings.qualityLevel}
+            compressionLevel={settings.compressionLevel}
+            showDotCursor={settings.showDotCursor}
           />
         </Box>
       </Stack>
