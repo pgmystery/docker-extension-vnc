@@ -16,7 +16,7 @@ interface QualityLevelProps {
 
 
 export default function QualityLevel({ reset, onChange, initValue }: QualityLevelProps) {
-  const [qualityLevel, setQualityLevel] = useState<number>(initValue)
+  const [qualityLevel, setQualityLevel] = useState<number>(initValue === undefined ? QualityLevelRange.default : initValue)
 
   useEffect(() => {
     if (!reset) return
@@ -53,7 +53,6 @@ export default function QualityLevel({ reset, onChange, initValue }: QualityLeve
           max={QualityLevelRange.max}
           value={qualityLevel}
           onChange={handleSliderChange}
-          aria-labelledby="input-slider"
         />
         <Input
           value={qualityLevel}

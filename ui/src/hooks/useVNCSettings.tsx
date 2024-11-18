@@ -1,9 +1,14 @@
 import { useEffect, useState } from 'react'
 import { VNCSettingsData } from '../components/VNCView/VNCView'
+import { CompressionLevelRange } from '../components/VNCView/VNCSettingForms/CompressionLevel'
+import { QualityLevelRange } from '../components/VNCView/VNCSettingForms/QualityLevel'
+import { ShowDotCursorDefault } from '../components/VNCView/VNCSettingForms/ShowDotCursor'
 
 
 const defaultSettings: VNCSettingsData = {
-  qualityLevel: 6,
+  qualityLevel: QualityLevelRange.default,
+  compressionLevel: CompressionLevelRange.default,
+  showDotCursor: ShowDotCursorDefault,
 }
 
 
