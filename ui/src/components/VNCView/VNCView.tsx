@@ -3,9 +3,14 @@ import { VncScreen } from 'react-vnc'
 import { Box, Stack } from '@mui/material'
 import VNCCredentialsDialog from './VNCCredentialsDialog'
 import VNCSessionBar from '../vncSessionBar/VNCSessionBar'
+import VNCSettingsDialog from './VNCSettingsDialog'
+import { Toast } from '@docker/extension-api-client-types/dist/v1'
+import VNCViewSkeleton from './VNCViewSkeleton'
+import useVNCSettings from '../../hooks/useVNCSettings'
 
 
 interface VNCViewProps {
+  ddUIToast: Toast
   url: string
   onCancel: ()=>void
 }
@@ -13,14 +18,22 @@ interface VNCViewProps {
 export interface VNCCredentials {
   username?: string
   password?: string
+  saveCredentials: boolean
+}
+
+export interface VNCSettingsData {
+  qualityLevel: number
 }
 
 
-export default function VNCView({ url, onCancel }: VNCViewProps) {
+export default function VNCView({ url, onCancel, ddUIToast }: VNCViewProps) {
   const vncContainerRef = useRef<HTMLDivElement>(null)
   const vncScreenRef = useRef<React.ElementRef<typeof VncScreen>>(null)
-  const [credentials, setCredentials] = useState<VNCCredentials>({})
+  const [credentials, setCredentials] = useState<VNCCredentials>({saveCredentials: false})
   const [needsCredentials, setNeedsCredentials] = useState<boolean>(false)
+  const [trySaveCredentials, setTrySaveCredentials] = useState<boolean>(false)
+  const [openSettingsDialog, setOpenSettingsDialog] = useState<boolean>(false)
+  const [settings, saveSettings] = useVNCSettings()
 
   useEffect(() => {
     const { connect, connected, disconnect } = vncScreenRef.current ?? {};
@@ -32,8 +45,29 @@ export default function VNCView({ url, onCancel }: VNCViewProps) {
     connect?.();
   }, [credentials])
 
+  useEffect(() => {
+    reconnect()
+  }, [settings])
+
   function handleCredentialRequest() {
-    setNeedsCredentials(true)
+    if (trySaveCredentials) {
+      setTrySaveCredentials(false)
+      setNeedsCredentials(true)
+
+      return
+    }
+
+    const savedCredentialsJSON = localStorage.getItem('credentials')
+
+    if (!savedCredentialsJSON) {
+      setTrySaveCredentials(false)
+      setNeedsCredentials(true)
+
+      return
+    }
+
+    setTrySaveCredentials(true)
+    setCredentials(JSON.parse(savedCredentialsJSON))
   }
 
   function cancelCredentialDialog() {
@@ -42,7 +76,16 @@ export default function VNCView({ url, onCancel }: VNCViewProps) {
   }
 
   function handleCredentialDialogSubmit(credentials: VNCCredentials) {
-    console.log('credentials', credentials)
+    if (credentials.saveCredentials) {
+      localStorage.setItem('credentials', JSON.stringify({
+        username: credentials.username,
+        password: credentials.password,
+      }))
+    }
+    else {
+      localStorage.removeItem('credentials')
+    }
+
     setCredentials(credentials)
     setNeedsCredentials(false)
   }
@@ -56,6 +99,9 @@ export default function VNCView({ url, onCancel }: VNCViewProps) {
 
     if (e?.detail.status === 0) return
 
+    if (e)
+      ddUIToast.error(e?.detail.reason)
+
     handleCredentialRequest()
   }
 
@@ -63,48 +109,67 @@ export default function VNCView({ url, onCancel }: VNCViewProps) {
     vncContainerRef.current?.requestFullscreen()
   }
 
-  // TODO
   function handleSettingsClick() {
-    console.log('TODO')
+    setOpenSettingsDialog(true)
+  }
+
+  function handleSettingsChange(settings: VNCSettingsData) {
+    saveSettings(settings)
+  }
+
+  function reconnect() {
+    const { connect, connected, disconnect } = vncScreenRef.current ?? {}
+
+    if (connected) {
+      disconnect?.()
+      connect?.()
+    }
   }
 
   return (
-    <Stack direction="column" spacing={1} sx={{height: '100%'}} >
-      <VNCSessionBar
-        onFullscreenClicked={handleFullscreenClick}
-        onSettingsClicked={handleSettingsClick}
-      />
-      <Box ref={vncContainerRef} sx={{
-        display: 'flex',
-        height: '100%',
-      }}>
-        <VncScreen
-          url={url}
-          scaleViewport
-          clipViewport
-          style={{
-            width: '100%',
-            height: '100%',
-          }}
-          debug
-          ref={vncScreenRef}
-          onCredentialsRequired={handleCredentialRequest}
-          onSecurityFailure={handleSecurityFailure}  // TODO: IT SEEMS BUGGY...
-          rfbOptions={{
-            credentials,
-            // TODO: NEEDS TO BE REMOVED
-            // credentials: {
-            //   password: 'password',
-            // },
-          }}
+    <>
+      <Stack direction="column" spacing={1} sx={{height: '100%'}} >
+        <VNCSessionBar
+          onFullscreenClicked={handleFullscreenClick}
+          onSettingsClicked={handleSettingsClick}
         />
+        <Box ref={vncContainerRef} sx={{
+          width: '100%',
+          height: '100%',
+          position: "relative",
+        }}>
+          <VncScreen
+            url={url}
+            scaleViewport
+            clipViewport
+            style={{
+              width: '100%',
+              height: '100%',
+            }}
+            ref={vncScreenRef}
+            onCredentialsRequired={handleCredentialRequest}
+            onSecurityFailure={handleSecurityFailure}
+            rfbOptions={{
+              credentials,
+            }}
+            loadingUI={<VNCViewSkeleton />}
+            qualityLevel={settings.qualityLevel}
+          />
+        </Box>
+      </Stack>
 
-        <VNCCredentialsDialog
-          open={needsCredentials}
-          onClose={cancelCredentialDialog}
-          onSubmit={handleCredentialDialogSubmit}
-        />
-      </Box>
-    </Stack>
+      <VNCSettingsDialog
+        open={openSettingsDialog}
+        close={() => setOpenSettingsDialog(false)}
+        settingsData={settings}
+        onSettingChange={handleSettingsChange}
+      />
+
+      <VNCCredentialsDialog
+        open={needsCredentials}
+        onClose={cancelCredentialDialog}
+        onSubmit={handleCredentialDialogSubmit}
+      />
+    </>
   )
 }

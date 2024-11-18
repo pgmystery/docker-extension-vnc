@@ -6,18 +6,29 @@ export interface ConnectButtonProps extends ButtonProps {
   onConnect: ()=>void
   onDisconnect: ()=>void
   connected: boolean
+  connectButtonDisabled?: boolean
+  disconnectButtonDisabled?: boolean
 }
 
-export default function ConnectButton({ connected, onConnect, onDisconnect, ...buttonProps }: ConnectButtonProps) {
+export default function ConnectButton({
+  connected,
+  onConnect,
+  onDisconnect,
+  connectButtonDisabled,
+  disconnectButtonDisabled,
+  ...buttonProps
+}: ConnectButtonProps) {
   return (
     connected
       ? <ConnectButtonConnected
           { ...buttonProps }
+          disabled={disconnectButtonDisabled}
           color="error"
           onClick={onDisconnect}
         />
       : <ConnectButtonDisconnected
           { ...buttonProps }
+          disabled={connectButtonDisabled}
           onClick={onConnect}
         />
   )

@@ -1,4 +1,13 @@
-import { Dialog, DialogActions, DialogContent, DialogTitle, Stack, TextField } from '@mui/material'
+import {
+  Checkbox,
+  Dialog,
+  DialogActions,
+  DialogContent,
+  DialogTitle,
+  FormControlLabel,
+  Stack,
+  TextField
+} from '@mui/material'
 import { VNCCredentials } from './VNCView'
 import Button from '@mui/material/Button'
 
@@ -25,10 +34,12 @@ export default function VNCCredentialsDialog({ open, onClose, onSubmit }: VNCCre
 
           const username = formJson.username
           const password = formJson.password
+          const saveCredentials = formJson.hasOwnProperty('saveCredentials') && formJson.saveCredentials === 'on'
 
           onSubmit({
             username,
             password,
+            saveCredentials,
           })
         },
       }}
@@ -48,6 +59,7 @@ export default function VNCCredentialsDialog({ open, onClose, onSubmit }: VNCCre
             type="password"
             fullWidth
           />
+          <FormControlLabel control={<Checkbox name="saveCredentials" />} label="Save credentials in local-storage (not encrypted)" />
         </Stack>
       </DialogContent>
       <DialogActions>

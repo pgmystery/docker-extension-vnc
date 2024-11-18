@@ -33,14 +33,21 @@ export default function ConnectBar({ disabled, onConnect, onDisconnect, connecte
   }, [])
 
   useEffect(() => {
-    setSelectedPort('')
+    connected
+      ? setSelectedPort(connected.port.toString())
+      : setSelectedPort('')
+
     const selectedContainer = getContainerByName(selectedContainerName)
 
     setSelectedContainerPorts(selectedContainer?.Ports.map(portInfo => portInfo.PrivatePort.toString()) || [])
   }, [selectedContainerName])
 
   useEffect(() => {
-    if (!connected) return
+    if (!connected) {
+      setRunningContainersState()
+
+      return
+    }
 
     const { containerName, port } = connected
 
@@ -61,14 +68,18 @@ export default function ConnectBar({ disabled, onConnect, onDisconnect, connecte
 
     setContainers(containers)
 
-    if (containers.length > 0) {
-      const container = containers[0]
-      setSelectedContainerName(container.Names[0])
+    if (!connected) return
 
-      if (container.Ports.length > 0) {
-        setSelectedPort(container.Ports[0].PrivatePort.toString())
+    const { containerName, port } = connected
+
+    containers.forEach(container => {
+      if (container.Names.includes(containerName)) {
+        setSelectedContainerName(containerName)
+
+        if (container.Ports.some(containerPort => containerPort.PrivatePort === port))
+          setSelectedPort(port.toString())
       }
-    }
+    })
   }
 
   function getContainerByName(name: string): Container | null {
@@ -145,7 +156,8 @@ export default function ConnectBar({ disabled, onConnect, onDisconnect, connecte
           onConnect={handleConnectClicked}
           onDisconnect={handleDisconnectClicked}
           connected={connected !== undefined}
-          disabled={selectedContainerName === '' || selectedPort === '' || disabled}
+          connectButtonDisabled={selectedContainerName === '' || selectedPort === '' || disabled}
+          disconnectButtonDisabled={disabled}
           sx={{
             minWidth: '180px',
           }}

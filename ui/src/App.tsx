@@ -107,7 +107,11 @@ export function App() {
         {
           loading || connectedData.url === '' || !connectedData.url
             ? <div></div>
-            : <VNCView url={connectedData.url} onCancel={disconnect} />
+            : <VNCView
+                url={connectedData.url}
+                onCancel={disconnect}
+                ddUIToast={ddClient.desktopUI.toast}
+              />
         }
 
       </Stack>
