@@ -130,7 +130,7 @@ export default function VNCView({ url, onCancel, ddUIToast }: VNCViewProps) {
 
   return (
     <>
-      <Stack direction="column" spacing={1} sx={{height: '100%'}} >
+      <Stack direction="column" spacing={1} sx={{height: '100%', overflow: 'hidden',}} >
         <VNCSessionBar
           onFullscreenClicked={handleFullscreenClick}
           onSettingsClicked={handleSettingsClick}
@@ -139,6 +139,7 @@ export default function VNCView({ url, onCancel, ddUIToast }: VNCViewProps) {
           width: '100%',
           height: '100%',
           position: "relative",
+          overflow: 'hidden',
         }}>
           <VncScreen
             url={url}
@@ -147,6 +148,7 @@ export default function VNCView({ url, onCancel, ddUIToast }: VNCViewProps) {
             style={{
               width: '100%',
               height: '100%',
+              overflow: 'hidden',
             }}
             ref={vncScreenRef}
             onCredentialsRequired={handleCredentialRequest}
