@@ -36,8 +36,12 @@ export function App() {
 
       const targetContainerName = vnc.target.getContainerName()
 
-      if (!targetContainerName)
-        return ddClient.desktopUI.toast.error('Can\'t get the target Container name')
+      if (!targetContainerName) {
+        ddClient.desktopUI.toast.error('Can\'t get the target Container name')
+        setLoading(false)
+
+        return
+      }
 
       setConnectedData({
         url: vnc.proxy.url,
@@ -53,7 +57,7 @@ export function App() {
       if (e instanceof Error)
         ddClient.desktopUI.toast.error(e.message)
       else if (isRawExecResult(e))
-        return ddClient.desktopUI.toast.error(e.stderr)
+        ddClient.desktopUI.toast.error(e.stderr)
     }
 
     setLoading(false)
@@ -73,17 +77,21 @@ export function App() {
         console.error(e)
 
         if (e instanceof Error)
-          return ddClient.desktopUI.toast.error(e.message)
+          ddClient.desktopUI.toast.error(e.message)
         else if (isRawExecResult(e))
-          return ddClient.desktopUI.toast.error(e.stderr)
+          ddClient.desktopUI.toast.error(e.stderr)
       }
 
       setLoading(false)
       if (!vnc.connected) return
 
       const targetContainerName = vnc.target.getContainerName()
-      if (!targetContainerName)
-        return ddClient.desktopUI.toast.error('Cant get container name from target')
+      if (!targetContainerName) {
+        ddClient.desktopUI.toast.error('Cant get container name from target')
+        setLoading(false)
+
+        return
+      }
 
       setConnectedData({
         url: vnc.proxy.url,
@@ -113,9 +121,9 @@ export function App() {
           console.error(e)
 
           if (e instanceof Error)
-            return ddClient.desktopUI.toast.error(e.message)
+            ddClient.desktopUI.toast.error(e.message)
           else if (isRawExecResult(e))
-            return ddClient.desktopUI.toast.error(e.stderr)
+            ddClient.desktopUI.toast.error(e.stderr)
         }
       }
 

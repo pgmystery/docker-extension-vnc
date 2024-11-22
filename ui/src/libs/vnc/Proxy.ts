@@ -85,9 +85,27 @@ export default class Proxy extends DockerContainer {
     const gotDockerContainer = await super.get()
     if (!gotDockerContainer || !this.container) return false
 
-    const isInNetwork = await this.proxyNetwork.hasContainer(this.container.Id)
-    if (!isInNetwork)
+    if (this.container.State !== 'running') {
       await this.delete()
+
+      return false
+    }
+
+    const isInNetwork = await this.proxyNetwork.hasContainer(this.container.Id)
+    if (!isInNetwork) {
+      await this.delete()
+
+      return false
+    }
+
+    this.containerExtended = await this.inspect()
+
+    return true
+  }
+
+  async update() {
+    const gotDockerContainer = await super.get()
+    if (!gotDockerContainer || !this.container) return false
 
     this.containerExtended = await this.inspect()
 
@@ -155,7 +173,7 @@ export default class Proxy extends DockerContainer {
   }
 
   async delete() {
-    await this.get()
+    await this.update()
     if (!this.exist()) return new MultiExecResult()
 
     const execResult = await super.delete({force: true})
