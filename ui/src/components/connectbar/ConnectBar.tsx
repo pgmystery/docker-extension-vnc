@@ -1,4 +1,4 @@
-import { Autocomplete, FormControl, FormLabel, IconButton, Stack, TextField } from '@mui/material'
+import { Autocomplete, FormControl, FormLabel, IconButton, Stack, TextField, Tooltip } from '@mui/material'
 import React, { useEffect, useMemo, useState } from 'react'
 import { Container } from '../../types/docker/extension'
 import { createDockerDesktopClient } from '@docker/extension-api-client'
@@ -128,14 +128,15 @@ export default function ConnectBar({ disabled, onConnect, onDisconnect, connecte
             alignItems: "center",
           }}
         >
-          <IconButton
-            title="Refresh containerlist"
-            size="small"
-            onClick={setRunningContainersState}
-            disabled={disabled || connected !== undefined}
-          >
-            <RefreshIcon />
-          </IconButton>
+          <Tooltip title="Refresh Containerlist" arrow>
+            <IconButton
+              size="small"
+              onClick={setRunningContainersState}
+              disabled={disabled || connected !== undefined}
+            >
+              <RefreshIcon />
+            </IconButton>
+          </Tooltip>
           <ContainerSelect
             containers={containers}
             disabled={disabled || connected !== undefined}
