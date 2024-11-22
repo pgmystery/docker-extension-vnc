@@ -1,69 +1,95 @@
-import React, { useMemo, useState } from 'react'
+import React, { useEffect, useMemo, useState } from 'react'
 import { createDockerDesktopClient } from '@docker/extension-api-client'
 import { Backdrop, CircularProgress, Stack } from '@mui/material'
-import VNC from './libs/VNC'
 import ConnectBar, { ConnectBarConnectedData } from './components/connectbar/ConnectBar'
 import useConnectionQueue from './hooks/useConnectionQueue'
 import VNCView from './components/VNCView/VNCView'
+import { URL } from './libs/vnc/Proxy'
+import useVNC from './hooks/useVNC'
+import { isRawExecResult } from './libs/docker/cli/Exec'
 
 
 export interface ConnectedData {
-  url: string
+  url?: URL
   targetInfo?: ConnectBarConnectedData
 }
 
 
 export function App() {
   const ddClient = useMemo(createDockerDesktopClient, [])
-  const vnc = useMemo(() => new VNC(), [ddClient])
+  const vnc = useVNC(ddClient)
   const [loading, setLoading] = useState(true)
-  const [connectedData, setConnectedData] = useState<ConnectedData>({
-    url: '',
-  })
+  const [connectedData, setConnectedData] = useState<ConnectedData>()
   const { connect, disconnect } = useConnectionQueue({
     onConnect: handleConnectClicked,
     onDisconnect: handleDisconnectClicked,
-    onReconnect: reconnect,
-  }, {type: 'reconnect'})
+  })
+
+  useEffect(() => {reconnect()}, [vnc])
 
   async function reconnect() {
-    const proxyContainer = await vnc.reconnect()
+    if (!vnc) return
 
-    if (!proxyContainer) {
-      setLoading(false)
+    try {
+      await vnc.reconnect()
+      if (!vnc.connected) return setLoading(false)
 
-      return
+      const targetContainerName = vnc.target.getContainerName()
+
+      if (!targetContainerName)
+        return ddClient.desktopUI.toast.error('Can\'t get the target Container name')
+
+      setConnectedData({
+        url: vnc.proxy.url,
+        targetInfo: {
+          containerName: targetContainerName,
+          port: Number(vnc.proxy.getTargetPort()),
+        }
+      })
+    }
+    catch (e: any) {
+      console.error(e)
+
+      if (e instanceof Error)
+        ddClient.desktopUI.toast.error(e.message)
+      else if (isRawExecResult(e))
+        return ddClient.desktopUI.toast.error(e.stderr)
     }
 
-    const targetContainerName = await proxyContainer.getTargetContainerName()
-
-    setConnectedData({
-      url: proxyContainer.url,
-      targetInfo: {
-        containerName: targetContainerName,
-        port: Number(proxyContainer.getTargetPort()),
-      }
-    })
     setLoading(false)
   }
 
   async function handleConnectClicked(containerId: string, targetPort: number) {
     async function connect() {
-      const proxyContainer = await vnc.connect(
-        containerId,
-        targetPort,
-      )
+      if (!vnc) return
+
+      try {
+        await vnc.connect(
+          containerId,
+          targetPort,
+        )
+      }
+      catch (e: any) {
+        console.error(e)
+
+        if (e instanceof Error)
+          return ddClient.desktopUI.toast.error(e.message)
+        else if (isRawExecResult(e))
+          return ddClient.desktopUI.toast.error(e.stderr)
+      }
 
       setLoading(false)
-      if (!proxyContainer) return
+      if (!vnc.connected) return
 
-      const targetContainerName = await proxyContainer.getTargetContainerName()
+      const targetContainerName = vnc.target.getContainerName()
+      if (!targetContainerName)
+        return ddClient.desktopUI.toast.error('Cant get container name from target')
 
       setConnectedData({
-        url: proxyContainer.url,
+        url: vnc.proxy.url,
         targetInfo: {
           containerName: targetContainerName,
-          port: Number(proxyContainer.getTargetPort()),
+          port: vnc.proxy.getTargetPort(),
         }
       })
     }
@@ -77,11 +103,22 @@ export function App() {
 
   async function handleDisconnectClicked() {
     async function disconnect() {
-      await vnc.disconnect()
+      if (vnc) {
+        try {
+          await vnc.disconnect()
 
-      setConnectedData({
-        url: '',
-      })
+          setConnectedData(undefined)
+        }
+        catch (e: any) {
+          console.error(e)
+
+          if (e instanceof Error)
+            return ddClient.desktopUI.toast.error(e.message)
+          else if (isRawExecResult(e))
+            return ddClient.desktopUI.toast.error(e.stderr)
+        }
+      }
+
       setLoading(false)
     }
 
@@ -101,16 +138,17 @@ export function App() {
           onConnect={connect}
           onDisconnect={disconnect}
           disabled={loading}
-          connected={connectedData.targetInfo}
+          connected={connectedData?.targetInfo}
         />
 
         {
-          loading || connectedData.url === '' || !connectedData.url
+          loading || !connectedData
             ? <div></div>
             : <VNCView
                 url={connectedData.url}
                 onCancel={disconnect}
                 ddUIToast={ddClient.desktopUI.toast}
+                openBrowserURL={ddClient.host.openExternal}
               />
         }
 

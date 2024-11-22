@@ -7,11 +7,13 @@ import VNCSettingsDialog from './VNCSettingsDialog'
 import { Toast } from '@docker/extension-api-client-types/dist/v1'
 import VNCViewSkeleton from './VNCViewSkeleton'
 import useVNCSettings from '../../hooks/useVNCSettings'
+import { URL } from '../../libs/vnc/Proxy'
 
 
 interface VNCViewProps {
   ddUIToast: Toast
-  url: string
+  openBrowserURL: (url: string)=>void
+  url?: URL
   onCancel: ()=>void
 }
 
@@ -28,7 +30,7 @@ export interface VNCSettingsData {
 }
 
 
-export default function VNCView({ url, onCancel, ddUIToast }: VNCViewProps) {
+export default function VNCView({ url, onCancel, ddUIToast, openBrowserURL }: VNCViewProps) {
   const vncContainerRef = useRef<HTMLDivElement>(null)
   const vncScreenRef = useRef<React.ElementRef<typeof VncScreen>>(null)
   const [credentials, setCredentials] = useState<VNCCredentials>({saveCredentials: false})
@@ -119,6 +121,12 @@ export default function VNCView({ url, onCancel, ddUIToast }: VNCViewProps) {
     saveSettings(settings)
   }
 
+  function handleOpenInBrowserClick() {
+    if (!url?.browser) return
+
+    openBrowserURL(url.browser)
+  }
+
   function reconnect() {
     const { connect, connected, disconnect } = vncScreenRef.current ?? {}
 
@@ -134,6 +142,7 @@ export default function VNCView({ url, onCancel, ddUIToast }: VNCViewProps) {
         <VNCSessionBar
           onFullscreenClicked={handleFullscreenClick}
           onSettingsClicked={handleSettingsClick}
+          onOpenInBrowserClicked={handleOpenInBrowserClick}
         />
         <Box ref={vncContainerRef} sx={{
           width: '100%',
@@ -142,7 +151,7 @@ export default function VNCView({ url, onCancel, ddUIToast }: VNCViewProps) {
           overflow: 'hidden',
         }}>
           <VncScreen
-            url={url}
+            url={url?.ws || ''}
             scaleViewport
             clipViewport
             style={{
