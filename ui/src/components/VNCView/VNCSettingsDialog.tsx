@@ -29,8 +29,6 @@ export default function VNCSettingsDialog({ open, close, settingsData, onSetting
   }, [reset])
 
   function save(data: VNCSettingsSaveData) {
-    console.log(data)
-
     onSettingChange({
       qualityLevel: Number(data.qualityLevel),
       compressionLevel: Number(data.compressionLevel),
