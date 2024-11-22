@@ -18,13 +18,13 @@ export default function VNCSessionBar({
 }: VNCSessionBarProps) {
   return (
     <Stack direction="row" spacing={1}>
-      <IconButton onClick={onSettingsClicked}>
+      <IconButton title="VNC Settings" onClick={onSettingsClicked}>
         <SettingsIcon />
       </IconButton>
-      <IconButton onClick={onFullscreenClicked}>
+      <IconButton title="Fullscreen" onClick={onFullscreenClicked}>
         <FullscreenIcon />
       </IconButton>
-      <IconButton onClick={onOpenInBrowserClicked}>
+      <IconButton title="Open in Browser" onClick={onOpenInBrowserClicked}>
         <OpenInBrowserIcon />
       </IconButton>
     </Stack>

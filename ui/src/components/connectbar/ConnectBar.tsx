@@ -129,6 +129,7 @@ export default function ConnectBar({ disabled, onConnect, onDisconnect, connecte
           }}
         >
           <IconButton
+            title="Refresh containerlist"
             size="small"
             onClick={setRunningContainersState}
             disabled={disabled || connected !== undefined}
