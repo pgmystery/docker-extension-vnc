@@ -35,7 +35,11 @@ export default class Network {
     }) as Promise<Container[]>
   }
 
-  remove() {
+  async remove({force}={force: false}) {
+    if (force) {
+      await this.removeAllContainers()
+    }
+
     return this.docker.cli.exec('network', [
       'rm',
       this.name,
@@ -58,11 +62,21 @@ export default class Network {
     ])
   }
 
-  protected removeContainer(containerId: string) {
+  protected removeContainer(containerId: string, {force}={force:false}) {
     return this.docker.cli.exec('network', [
       'disconnect',
+      force ? '--force' : '',
       this.name,
       containerId,
     ])
+  }
+
+  protected async removeAllContainers() {
+    const containersInNetwork = await this.containers()
+    const removeContainerPromiseList = containersInNetwork.map(
+      container => this.removeContainer(container.Id, { force: true })
+    )
+
+    return Promise.all(removeContainerPromiseList)
   }
 }

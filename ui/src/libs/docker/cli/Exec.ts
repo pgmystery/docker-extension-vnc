@@ -1,6 +1,12 @@
 import { Docker as DockerClient } from '@docker/extension-api-client-types/dist/v1/docker'
 import { CliExecOptions } from '../../../types/docker/cli'
 import { ObjectValueTypes } from '../../../types/utils'
+import { RawExecResult } from '@docker/extension-api-client-types/dist/v1'
+
+
+export function isRawExecResult(rawExecResult: RawExecResult): rawExecResult is RawExecResult {
+  return (rawExecResult as RawExecResult).stderr !== undefined
+}
 
 
 export default class DockerCliExec {

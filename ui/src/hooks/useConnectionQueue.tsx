@@ -1,16 +1,12 @@
 import { useEffect, useState } from 'react'
 
 
-export type ConnectionQueueProps = ConnectionQueueConnect | ConnectionQueueDisconnect | ConnectionQueueReconnect
+export type ConnectionQueueProps = ConnectionQueueConnect | ConnectionQueueDisconnect
 
 interface ConnectionQueueConnect {
   type: 'connect'
   containerId: string
   targetPort: number
-}
-
-interface ConnectionQueueReconnect {
-  type: 'reconnect'
 }
 
 interface ConnectionQueueDisconnect {
@@ -20,7 +16,6 @@ interface ConnectionQueueDisconnect {
 interface ConnectionQueueCallbacks {
   onConnect: (containerId: string, targetPort: number)=>Promise<(() => Promise<void>) | undefined | void>
   onDisconnect: ()=>Promise<(() => Promise<void>) | undefined | void>
-  onReconnect: ()=>Promise<(() => Promise<void>) | undefined | void>
 }
 
 
@@ -31,10 +26,6 @@ export default function useConnectionQueue(callbacks: ConnectionQueueCallbacks, 
     if (connectionQueue === null) return
 
     switch (connectionQueue.type) {
-      case 'reconnect':
-        runCallback(callbacks.onReconnect)
-
-        break
       case 'connect':
         const { containerId, targetPort } = connectionQueue
 
@@ -58,9 +49,6 @@ export default function useConnectionQueue(callbacks: ConnectionQueueCallbacks, 
   }
 
   return {
-    reconnect: () => setConnectionQueue({
-      type: 'reconnect',
-    }),
     connect: (containerId: string, targetPort: number) => setConnectionQueue({
       type: 'connect',
       containerId,

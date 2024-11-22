@@ -4,8 +4,11 @@ import { ExecResult } from '@docker/extension-api-client-types/dist/v1'
 export default class MultiExecResult implements ExecResult {
   private execResults: ExecResult[]
 
-  constructor() {
+  constructor(execResult?: ExecResult) {
     this.execResults = []
+
+    if (execResult)
+      this.addExecResult(execResult)
   }
 
   addExecResult(execResult: ExecResult) {
