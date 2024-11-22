@@ -11,11 +11,10 @@ export const CompressionLevelRange = {
 interface CompressionLevelProps {
   initValue: number
   reset: boolean
-  onChange?: (compressionLevel: number)=>void
 }
 
 
-export default function CompressionLevel({ initValue, reset, onChange }: CompressionLevelProps) {
+export default function CompressionLevel({ initValue, reset }: CompressionLevelProps) {
   const [compressionLevel, setCompressionLevel] = useState<number>(initValue === undefined ? CompressionLevelRange.default : initValue)
 
   useEffect(() => {
@@ -23,10 +22,6 @@ export default function CompressionLevel({ initValue, reset, onChange }: Compres
 
     setCompressionLevel(CompressionLevelRange.default)
   }, [reset])
-
-  useEffect(() => {
-    if (onChange) onChange(compressionLevel)
-  }, [compressionLevel])
 
   const handleSliderChange = (_: Event, newValue: number | number[]) => {
     setCompressionLevel(newValue as number)
@@ -55,6 +50,7 @@ export default function CompressionLevel({ initValue, reset, onChange }: Compres
           onChange={handleSliderChange}
         />
         <Input
+          name="compressionLevel"
           value={compressionLevel}
           size="small"
           onChange={handleInputChange}

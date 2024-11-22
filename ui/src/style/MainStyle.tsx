@@ -7,6 +7,7 @@ export default function MainStyle() {
     <GlobalStyles styles={{
       html: {
         height: '100%',
+        padding: '15px',
       },
       body: {
         height: '100%',
