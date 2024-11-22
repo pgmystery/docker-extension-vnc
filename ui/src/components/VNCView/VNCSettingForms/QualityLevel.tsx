@@ -11,11 +11,10 @@ export const QualityLevelRange = {
 interface QualityLevelProps {
   initValue: number
   reset: boolean
-  onChange?: (qualityLevel: number)=>void
 }
 
 
-export default function QualityLevel({ reset, onChange, initValue }: QualityLevelProps) {
+export default function QualityLevel({ reset, initValue }: QualityLevelProps) {
   const [qualityLevel, setQualityLevel] = useState<number>(initValue === undefined ? QualityLevelRange.default : initValue)
 
   useEffect(() => {
@@ -23,10 +22,6 @@ export default function QualityLevel({ reset, onChange, initValue }: QualityLeve
 
     setQualityLevel(QualityLevelRange.default)
   }, [reset])
-
-  useEffect(() => {
-    if (onChange) onChange(qualityLevel)
-  }, [qualityLevel])
 
   const handleSliderChange = (_: Event, newValue: number | number[]) => {
     setQualityLevel(newValue as number)
@@ -55,6 +50,7 @@ export default function QualityLevel({ reset, onChange, initValue }: QualityLeve
           onChange={handleSliderChange}
         />
         <Input
+          name="qualityLevel"
           value={qualityLevel}
           size="small"
           onChange={handleInputChange}

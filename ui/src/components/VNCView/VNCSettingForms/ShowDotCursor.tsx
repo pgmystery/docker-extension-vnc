@@ -7,11 +7,10 @@ export const ShowDotCursorDefault = false
 interface ShowDotCursorProps {
   initValue: boolean
   reset: boolean
-  onChange?: (showDotCursor: boolean)=>void
 }
 
 
-export default function ShowDotCursor({ initValue, reset, onChange }: ShowDotCursorProps) {
+export default function ShowDotCursor({ initValue, reset }: ShowDotCursorProps) {
   const [showDotCursor, setShowDotCursor] = useState<boolean>(initValue === undefined ? ShowDotCursorDefault : initValue)
 
   useEffect(() => {
@@ -19,10 +18,6 @@ export default function ShowDotCursor({ initValue, reset, onChange }: ShowDotCur
 
     setShowDotCursor(ShowDotCursorDefault)
   }, [reset])
-
-  useEffect(() => {
-    if (onChange) onChange(showDotCursor)
-  }, [showDotCursor])
 
   function handleCheckboxChange(event: ChangeEvent<HTMLInputElement>) {
     setShowDotCursor(event.target.checked)
@@ -32,7 +27,7 @@ export default function ShowDotCursor({ initValue, reset, onChange }: ShowDotCur
     <FormControl>
       <FormLabel>Show Dot when No Cursor</FormLabel>
       <div>
-        <Checkbox checked={showDotCursor} onChange={handleCheckboxChange} />
+        <Checkbox name="showDotCursor" checked={showDotCursor} onChange={handleCheckboxChange} />
       </div>
     </FormControl>
   )

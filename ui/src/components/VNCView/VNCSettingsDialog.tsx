@@ -9,6 +9,10 @@ import CompressionLevel from './VNCSettingForms/CompressionLevel'
 import ShowDotCursor from './VNCSettingForms/ShowDotCursor'
 
 
+interface VNCSettingsSaveData extends Omit<VNCSettingsData, 'showDotCursor'> {
+  showDotCursor?: 'on'
+}
+
 interface VNCSettingsDialog {
   open: boolean
   close: ()=>void
@@ -18,15 +22,20 @@ interface VNCSettingsDialog {
 
 
 export default function VNCSettingsDialog({ open, close, settingsData, onSettingChange }: VNCSettingsDialog) {
-  const [settings, setSettings] = useState<VNCSettingsData>(settingsData)
   const [reset, setReset] = useState<boolean>(false)
 
   useEffect(() => {
     if (reset) setReset(false)
   }, [reset])
 
-  function save() {
-    onSettingChange(settings)
+  function save(data: VNCSettingsSaveData) {
+    console.log(data)
+
+    onSettingChange({
+      qualityLevel: Number(data.qualityLevel),
+      compressionLevel: Number(data.compressionLevel),
+      showDotCursor: !!data.showDotCursor,
+    })
     close()
   }
 
@@ -36,6 +45,16 @@ export default function VNCSettingsDialog({ open, close, settingsData, onSetting
       onClose={close}
       maxWidth="sm"
       fullWidth={true}
+      PaperProps={{
+        component: 'form',
+        onSubmit: (event: React.FormEvent<HTMLFormElement>) => {
+          event.preventDefault();
+          const formData = new FormData(event.currentTarget)
+          const formJson = Object.fromEntries((formData as any).entries()) as VNCSettingsSaveData
+
+          save(formJson)
+        },
+      }}
     >
       <DialogTitle>VNC Settings</DialogTitle>
       <IconButton
@@ -55,28 +74,16 @@ export default function VNCSettingsDialog({ open, close, settingsData, onSetting
           <QualityLevel
             initValue={settingsData.qualityLevel}
             reset={reset}
-            onChange={qualityLevel => setSettings({
-              ...settingsData,
-              qualityLevel,
-            })}
           />
           <Divider />
           <CompressionLevel
             initValue={settingsData.compressionLevel}
             reset={reset}
-            onChange={compressionLevel => setSettings({
-              ...settingsData,
-              compressionLevel,
-            })}
           />
           <Divider />
           <ShowDotCursor
             initValue={settingsData.showDotCursor}
             reset={reset}
-            onChange={showDotCursor => setSettings({
-              ...settingsData,
-              showDotCursor,
-            })}
           />
           <Divider />
           <DeleteCredentials />
@@ -84,7 +91,7 @@ export default function VNCSettingsDialog({ open, close, settingsData, onSetting
       </DialogContent>
       <DialogActions>
         <Button onClick={() => setReset(true)} color="error">Reset</Button>
-        <Button color="success" onClick={save}>Save & Reconnect</Button>
+        <Button color="success" type="submit">Save & Reconnect</Button>
       </DialogActions>
     </Dialog>
   )
