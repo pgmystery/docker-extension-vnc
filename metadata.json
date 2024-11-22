@@ -2,7 +2,7 @@
   "icon": "docker.svg",
   "ui": {
     "dashboard-tab": {
-      "title": "Vnc",
+      "title": "VNC",
       "src": "index.html",
       "root": "ui"
     }

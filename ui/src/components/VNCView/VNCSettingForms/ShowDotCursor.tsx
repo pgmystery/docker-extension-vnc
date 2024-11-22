@@ -30,7 +30,7 @@ export default function ShowDotCursor({ initValue, reset, onChange }: ShowDotCur
 
   return (
     <FormControl>
-      <FormLabel>Show Dot-Cursor</FormLabel>
+      <FormLabel>Show Dot when No Cursor</FormLabel>
       <div>
         <Checkbox checked={showDotCursor} onChange={handleCheckboxChange} />
       </div>
