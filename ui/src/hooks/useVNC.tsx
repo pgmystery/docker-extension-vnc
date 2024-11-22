@@ -10,6 +10,8 @@ export default function useVNC(ddClient: DockerDesktopClient) {
   useEffect(() => {
     const vnc = new VNC(ddClient.docker)
     vnc.ready.then(() => setVNC(vnc)).catch(e => {
+      console.error(e)
+
       if (e instanceof Error)
         return ddClient.desktopUI.toast.error(e.message)
       else if (isRawExecResult(e))
