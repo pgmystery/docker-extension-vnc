@@ -1,4 +1,4 @@
-import { Autocomplete, FormControl, FormLabel, IconButton, Stack, TextField, Tooltip } from '@mui/material'
+import { Autocomplete, FormControl, IconButton, Stack, TextField, Tooltip } from '@mui/material'
 import React, { useEffect, useMemo, useState } from 'react'
 import { Container } from '../../types/docker/extension'
 import { createDockerDesktopClient } from '@docker/extension-api-client'
@@ -112,7 +112,6 @@ export default function ConnectBar({ disabled, onConnect, onDisconnect, connecte
 
   return (
     <FormControl fullWidth>
-      <FormLabel sx={{marginBottom: '10px'}}>Select a container to connect to it over VNC</FormLabel>
       <Stack
         direction="row"
         spacing={2}
@@ -147,12 +146,17 @@ export default function ConnectBar({ disabled, onConnect, onDisconnect, connecte
         <Autocomplete
           disabled={selectedContainerName === '' || disabled || connected !== undefined}
           options={selectedContainerPorts}
-          renderInput={params => <TextField { ...params } label="Container internal port" />}
+          renderInput={params => <TextField
+            { ...params }
+            label="Container internal port"
+            type="number"
+            slotProps={{ htmlInput: { ...params.inputProps, min: 0, max: 65535 } }}
+          />}
           inputValue={selectedPort}
           onInputChange={(_, value) => handleSelectedContainerPortChanged(value)}
           onChange={(_, value) => handleSelectedContainerPortChanged(value?.toString() || '')}
           freeSolo
-          sx={{ width: 300 }}
+          sx={{ width: '175px' }}
         />
         <ConnectButton
           onConnect={handleConnectClicked}
