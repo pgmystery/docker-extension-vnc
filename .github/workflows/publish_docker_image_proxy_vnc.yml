@@ -43,5 +43,5 @@ jobs:
           context: ./docker/novnc_proxy
           file: ./docker/novnc_proxy/novnc_proxy.Dockerfile
           push: true
-          tags: latest
+          tags: pgmystery/proxy_vnc:latest
           labels: ${{ steps.meta.outputs.labels }}

@@ -43,5 +43,5 @@ jobs:
           context: ./docker/vnc_ubuntu
           file: ./docker/vnc_ubuntu/vnc_ubuntu.Dockerfile
           push: true
-          tags: latest
+          tags: pgmystery/ubuntu_vnc:latest
           labels: ${{ steps.meta.outputs.labels }}
