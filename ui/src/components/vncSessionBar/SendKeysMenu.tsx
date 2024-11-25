@@ -137,7 +137,7 @@ export default function SendKeysMenu({ sendKey, sendCtrlAltDel }: SendKeysMenuPr
           selected={ctrlKeyDown}
         >
           <SendKeysMenuItemToggle
-            label="Ctrl"
+            label="Control"
             icon={<CtrlIcon />}
             selected={ctrlKeyDown}
           />
