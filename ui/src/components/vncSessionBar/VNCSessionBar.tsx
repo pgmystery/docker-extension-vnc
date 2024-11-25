@@ -1,10 +1,13 @@
-import { IconButton, Stack, Tooltip } from '@mui/material'
+import { Box, IconButton, Stack, Tooltip } from '@mui/material'
 import SettingsIcon from '@mui/icons-material/Settings'
 import FullscreenIcon from '@mui/icons-material/Fullscreen'
-import OpenInBrowserIcon from '@mui/icons-material/OpenInBrowser';
+import OpenInBrowserIcon from '@mui/icons-material/OpenInBrowser'
+import SendKeysMenu from './SendKeysMenu'
+import { VncScreenHandle } from 'react-vnc'
 
 
 export interface VNCSessionBarProps {
+  vncScreenRef:  VncScreenHandle | null
   onFullscreenClicked: ()=>void
   onSettingsClicked: ()=>void
   onOpenInBrowserClicked: ()=>void
@@ -12,6 +15,7 @@ export interface VNCSessionBarProps {
 
 
 export default function VNCSessionBar({
+  vncScreenRef,
   onFullscreenClicked,
   onSettingsClicked,
   onOpenInBrowserClicked,
@@ -33,6 +37,11 @@ export default function VNCSessionBar({
           <OpenInBrowserIcon />
         </IconButton>
       </Tooltip>
+      <Box sx={{flexGrow: 1}} />
+      <SendKeysMenu
+        sendKey={vncScreenRef?.sendKey}
+        sendCtrlAltDel={vncScreenRef?.sendCtrlAltDel}
+      />
     </Stack>
   )
 }
