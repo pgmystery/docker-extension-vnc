@@ -128,7 +128,7 @@ export default function VNCView({ url, onCancel, ddUIToast, openBrowserURL }: VN
   }
 
   function reconnect() {
-    const { connect, connected, disconnect } = vncScreenRef.current ?? {}
+    const { connect, connected, disconnect, sendKey, sendCtrlAltDel } = vncScreenRef.current ?? {}
 
     if (connected) {
       disconnect?.()
@@ -140,6 +140,7 @@ export default function VNCView({ url, onCancel, ddUIToast, openBrowserURL }: VN
     <>
       <Stack direction="column" spacing={1} sx={{height: '100%', overflow: 'hidden',}} >
         <VNCSessionBar
+          vncScreenRef={vncScreenRef.current}
           onFullscreenClicked={handleFullscreenClick}
           onSettingsClicked={handleSettingsClick}
           onOpenInBrowserClicked={handleOpenInBrowserClick}
