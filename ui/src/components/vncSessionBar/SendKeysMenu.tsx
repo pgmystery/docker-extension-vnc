@@ -1,4 +1,4 @@
-import { MouseEvent } from 'react'
+import { MouseEvent, ReactNode } from 'react'
 import {
   Avatar,
   Box, Divider,
@@ -12,12 +12,12 @@ import {
 } from '@mui/material'
 import KeyboardHideIcon from '@mui/icons-material/KeyboardHide'
 import { useState } from 'react'
-import ctrlIcon from '../../resources/icons/ctrl.svg'
-import altIcon from '../../resources/icons/alt.svg'
-import windowsIcon from '../../resources/icons/windows.svg'
-import tabIcon from '../../resources/icons/tab.svg'
-import escIcon from '../../resources/icons/esc.svg'
-import ctrlAltDelIcon from '../../resources/icons/ctrlaltdel.svg'
+import CtrlIcon from '../../resources/icons/ctrl.svg?react'
+import AltIcon from '../../resources/icons/alt.svg?react'
+import WindowsIcon from '../../resources/icons/windows.svg?react'
+import TabIcon from '../../resources/icons/tab.svg?react'
+import EscIcon from '../../resources/icons/esc.svg?react'
+import CtrlAltDelIcon from '../../resources/icons/ctrlaltdel.svg?react'
 import { VncScreenHandle } from 'react-vnc'
 import { Check } from '@mui/icons-material'
 
@@ -25,7 +25,7 @@ import { Check } from '@mui/icons-material'
 interface SendKeysMenuProps extends Partial<Pick<VncScreenHandle, 'sendKey' | 'sendCtrlAltDel'>> {}
 interface SendKeysMenuItemToggleProps {
   label: string
-  icon: string
+  icon: ReactNode
   selected: boolean
 }
 
@@ -137,8 +137,8 @@ export default function SendKeysMenu({ sendKey, sendCtrlAltDel }: SendKeysMenuPr
           selected={ctrlKeyDown}
         >
           <SendKeysMenuItemToggle
-            label="Ctrl"
-            icon={ctrlIcon}
+            label="Control"
+            icon={<CtrlIcon />}
             selected={ctrlKeyDown}
           />
         </MenuItem>
@@ -153,7 +153,7 @@ export default function SendKeysMenu({ sendKey, sendCtrlAltDel }: SendKeysMenuPr
         >
           <SendKeysMenuItemToggle
             label="Alt"
-            icon={altIcon}
+            icon={<AltIcon />}
             selected={altKeyDown}
           />
         </MenuItem>
@@ -168,7 +168,7 @@ export default function SendKeysMenu({ sendKey, sendCtrlAltDel }: SendKeysMenuPr
         >
           <SendKeysMenuItemToggle
             label="Windows"
-            icon={windowsIcon}
+            icon={<WindowsIcon />}
             selected={windowsKeyDown}
           />
         </MenuItem>
@@ -178,16 +178,23 @@ export default function SendKeysMenu({ sendKey, sendCtrlAltDel }: SendKeysMenuPr
 
         {/*https://docs.rs/x11-dl/1.0.1/x11_dl/keysym/constant.XK_Tab.html*/}
         <MenuItem onClick={() => sendKeyToVNCView(65289, 'Tab')}>
-          <Avatar src={tabIcon} /> Tab
+          {/*<Avatar src={tabIcon} /> Tab*/}
+          <Avatar>
+            <TabIcon />
+          </Avatar> Tab
         </MenuItem>
 
         {/*https://docs.rs/x11-dl/1.0.1/x11_dl/keysym/constant.XK_Escape.html*/}
         <MenuItem onClick={() => sendKeyToVNCView(65307, 'Escape')}>
-          <Avatar src={escIcon} /> Esc
+          <Avatar>
+            <EscIcon />
+          </Avatar> Escape
         </MenuItem>
 
         <MenuItem onClick={handleClickKeyCtrlAltDel}>
-          <Avatar src={ctrlAltDelIcon} /> Ctrl & Alt & Del
+          <Avatar>
+            <CtrlAltDelIcon />
+          </Avatar> Ctrl & Alt & Del
         </MenuItem>
       </Menu>
     </Box>
@@ -197,7 +204,9 @@ export default function SendKeysMenu({ sendKey, sendCtrlAltDel }: SendKeysMenuPr
 function SendKeysMenuItemToggle({ label, icon, selected }: SendKeysMenuItemToggleProps) {
   return (
     <Stack direction="row" alignContent="center" alignItems="center" sx={{width: '100%'}}>
-      <Avatar src={icon} />
+      <Avatar>
+        { icon }
+      </Avatar>
       <Typography>{ label }</Typography>
       <Box sx={{flexGrow: 1}} />
       {

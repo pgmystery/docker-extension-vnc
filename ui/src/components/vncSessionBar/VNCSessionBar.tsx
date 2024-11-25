@@ -27,11 +27,6 @@ export default function VNCSessionBar({
           <SettingsIcon />
         </IconButton>
       </Tooltip>
-      <Tooltip title="Fullscreen" arrow>
-        <IconButton onClick={onFullscreenClicked}>
-          <FullscreenIcon />
-        </IconButton>
-      </Tooltip>
       <Tooltip title="Open in Browser" arrow>
         <IconButton onClick={onOpenInBrowserClicked}>
           <OpenInBrowserIcon />
@@ -42,6 +37,11 @@ export default function VNCSessionBar({
         sendKey={vncScreenRef?.sendKey}
         sendCtrlAltDel={vncScreenRef?.sendCtrlAltDel}
       />
+      <Tooltip title="Fullscreen" arrow>
+        <IconButton onClick={onFullscreenClicked}>
+          <FullscreenIcon />
+        </IconButton>
+      </Tooltip>
     </Stack>
   )
 }
