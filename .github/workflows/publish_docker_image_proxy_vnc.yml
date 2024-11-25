@@ -41,7 +41,7 @@ jobs:
         uses: docker/build-push-action@v5
         with:
           context: ./docker/novnc_proxy
-          file: ./docker/novnc_proxy.Dockerfile
+          file: ./docker/novnc_proxy/novnc_proxy.Dockerfile
           push: true
           tags: latest
           labels: ${{ steps.meta.outputs.labels }}

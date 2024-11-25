@@ -41,7 +41,7 @@ jobs:
         uses: docker/build-push-action@v5
         with:
           context: ./docker/vnc_ubuntu
-          file: ./docker/vnc_ubuntu.Dockerfile
+          file: ./docker/vnc_ubuntu/vnc_ubuntu.Dockerfile
           push: true
           tags: latest
           labels: ${{ steps.meta.outputs.labels }}
