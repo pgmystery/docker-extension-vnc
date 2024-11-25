@@ -1,3 +1,4 @@
+import { MouseEvent } from 'react'
 import {
   Avatar,
   Box, Divider,
@@ -37,7 +38,7 @@ export default function SendKeysMenu({ sendKey, sendCtrlAltDel }: SendKeysMenuPr
   const [altKeyDown, setAltKeyDown] = useState<boolean>(false)
   const [windowsKeyDown, setWindowsKeyDown] = useState<boolean>(false)
 
-  function handleClick(event: React.MouseEvent<HTMLElement>) {
+  function handleClick(event: MouseEvent<HTMLElement>) {
     setAnchorEl(event.currentTarget)
   }
 

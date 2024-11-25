@@ -128,7 +128,7 @@ export default function VNCView({ url, onCancel, ddUIToast, openBrowserURL }: VN
   }
 
   function reconnect() {
-    const { connect, connected, disconnect, sendKey, sendCtrlAltDel } = vncScreenRef.current ?? {}
+    const { connect, connected, disconnect } = vncScreenRef.current ?? {}
 
     if (connected) {
       disconnect?.()
