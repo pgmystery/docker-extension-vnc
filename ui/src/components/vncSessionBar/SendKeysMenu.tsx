@@ -188,7 +188,7 @@ export default function SendKeysMenu({ sendKey, sendCtrlAltDel }: SendKeysMenuPr
         <MenuItem onClick={() => sendKeyToVNCView(65307, 'Escape')}>
           <Avatar>
             <EscIcon />
-          </Avatar> Esc
+          </Avatar> Escape
         </MenuItem>
 
         <MenuItem onClick={handleClickKeyCtrlAltDel}>
