@@ -1,7 +1,7 @@
 # Use an official Ubuntu base image
 FROM ubuntu:20.04
 
-ENV PASSWORD="password"
+ENV PASSWORD="foobar"
 
 # Avoid warnings by switching to noninteractive for the build process
 ENV DEBIAN_FRONTEND=noninteractive
