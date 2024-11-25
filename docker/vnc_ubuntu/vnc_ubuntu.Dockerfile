@@ -39,3 +39,4 @@ COPY start-vnc.sh start-vnc.sh
 RUN chmod +x start-vnc.sh
 
 ENTRYPOINT ["bash", "./start-vnc.sh"]
+
