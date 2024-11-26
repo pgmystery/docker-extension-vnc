@@ -31,33 +31,28 @@ export default function VNCProxyImagePullDialog({open, onDone, proxy, ddUIToast}
 
   useEffect(() => {
     if (!open) return
+    if (!proxy) return
 
-    async function pullProxyImage() {
-      if (!proxy) return
-
-      try {
-        const onFinish = (exitCode: number) => {
-          setFinished(true)
-          onDone(exitCode === 0)
-        }
-
-        await proxy.pullDockerImage(dispatch, onFinish)
+    try {
+      const onFinish = (exitCode: number) => {
+        setFinished(true)
+        onDone(exitCode === 0)
       }
-      catch (e: any) {
-        console.error(e)
 
-        if (ddUIToast) {
-          if (e instanceof Error)
-            ddUIToast.error(e.message)
-          else if (isRawExecResult(e))
-            ddUIToast.error(e.stderr)
-        }
-
-        onDone(false)
-      }
+      proxy.pullDockerImage(dispatch, onFinish)
     }
+    catch (e: any) {
+      console.error(e)
 
-    pullProxyImage()
+      if (ddUIToast) {
+        if (e instanceof Error)
+          ddUIToast.error(e.message)
+        else if (isRawExecResult(e))
+          ddUIToast.error(e.stderr)
+      }
+
+      onDone(false)
+    }
   }, [open, proxy])
 
   useEffect(() => {

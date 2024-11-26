@@ -225,8 +225,8 @@ export default class Proxy extends DockerContainer {
     return images.length === 1
   }
 
-  async pullDockerImage(addStdout: (stdout: string)=>void, onFinish: (exitCode: number)=>void) {
-    await this.docker.cli.exec("pull", [this.config.proxyDockerImage], {
+  pullDockerImage(addStdout: (stdout: string)=>void, onFinish: (exitCode: number)=>void) {
+    this.docker.cli.exec('pull', [this.config.proxyDockerImage], {
       stream: {
         onOutput(data) {
           if (data.stdout) {
