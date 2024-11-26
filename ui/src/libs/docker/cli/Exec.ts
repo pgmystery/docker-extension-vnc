@@ -10,7 +10,7 @@ export function isRawExecResult(rawExecResult: RawExecResult): rawExecResult is 
 
 
 export default class DockerCliExec {
-  private client: DockerClient
+  protected client: DockerClient
 
   constructor(dockerClient: DockerClient) {
     this.client = dockerClient
