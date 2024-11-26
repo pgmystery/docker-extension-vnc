@@ -1,7 +1,7 @@
 import { Config, loadConfig } from '../../hooks/useConfig'
 import { createDockerDesktopClient } from '@docker/extension-api-client'
 import { Docker } from '@docker/extension-api-client-types/dist/v1'
-import { Container, DockerListContainersFilters } from '../../types/docker/extension'
+import { Container, DockerImage, DockerListContainersFilters } from '../../types/docker/extension'
 import DockerContainer, { MultipleContainersFoundError } from '../docker/Container'
 import { ContainerExtended } from '../../types/docker/cli/inspect'
 import ProxyNetwork from './ProxyNetwork'
@@ -210,5 +210,41 @@ export default class Proxy extends DockerContainer {
     }
 
     return execResult
+  }
+
+  async dockerImageExist(): Promise<boolean> {
+    const images = await this.docker.listImages({
+      filters: {
+        reference: [this.config.proxyDockerImage]
+      }
+    }) as DockerImage[]
+
+    if (images.length > 1)
+      throw new Error(`Found no or multiple docker images with tag "${this.config.proxyDockerImage}"`)
+
+    return images.length === 1
+  }
+
+  async pullDockerImage(addStdout: (stdout: string)=>void, onFinish: (exitCode: number)=>void) {
+    await this.docker.cli.exec("pull", [this.config.proxyDockerImage], {
+      stream: {
+        onOutput(data) {
+          if (data.stdout) {
+            addStdout(data.stdout)
+          }
+
+          if (data.stderr) {
+            throw new Error(data.stderr)
+          }
+        },
+        onError(error) {
+          throw error
+        },
+        onClose(exitCode) {
+          onFinish(exitCode)
+        },
+        splitOutputLines: true,
+      },
+    })
   }
 }

@@ -99,3 +99,16 @@ export interface DockerNetworkInfo extends DockerNetworkLsData{
   Internal: boolean
   Labels: {[key: string]: string}
 }
+
+export interface DockerImage {
+  Id: string
+  ParentId: string
+  RepoTags: string[]
+  RepoDigests: string[]
+  Created: number
+  Size: number
+  SharedSize: number
+  VirtualSize?: number
+  Labels: {[key: string]: string}
+  Containers: number
+}
