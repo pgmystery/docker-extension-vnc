@@ -7,6 +7,7 @@ import VNCView from './components/VNCView/VNCView'
 import { URL } from './libs/vnc/Proxy'
 import useVNC from './hooks/useVNC'
 import { isRawExecResult } from './libs/docker/cli/Exec'
+import VNCProxyImagePullDialog from './components/VNCView/VNCProxyImagePullDialog'
 
 
 export interface ConnectedData {
@@ -24,6 +25,7 @@ export function App() {
     onConnect: handleConnectClicked,
     onDisconnect: handleDisconnectClicked,
   })
+  const [downloadingProxyImage, setDownloadingProxyImage] = useState<{containerId: string, targetPort: number} | null>(null)
 
   useEffect(() => {reconnect()}, [vnc])
 
@@ -66,6 +68,14 @@ export function App() {
   async function handleConnectClicked(containerId: string, targetPort: number) {
     async function connect() {
       if (!vnc) return
+
+      const proxyDockerImageExist = await vnc.proxy.dockerImageExist()
+
+      if (!proxyDockerImageExist)
+        return setDownloadingProxyImage({
+          containerId,
+          targetPort,
+        })
 
       try {
         await vnc.connect(
@@ -161,6 +171,21 @@ export function App() {
         }
 
       </Stack>
+
+      {
+        downloadingProxyImage &&
+        <VNCProxyImagePullDialog
+          open={!!downloadingProxyImage}
+          onDone={successful => {
+            if (successful)
+              connect(downloadingProxyImage?.containerId, downloadingProxyImage?.targetPort)
+
+            setDownloadingProxyImage(null)
+          }}
+          ddUIToast={ddClient.desktopUI.toast}
+          proxy={vnc?.proxy}
+        />
+      }
 
       <Backdrop sx={(theme) => ({ color: '#fff', zIndex: theme.zIndex.drawer + 1 })} open={loading}>
         <CircularProgress />
