@@ -151,7 +151,7 @@ export default function Dashboard({ ddUIToast, connect }: DashboardProps) {
           <OutlinedInput
             inputRef={exampleRunInputRef}
             disabled
-            value={ `docker run --name ubuntu_vnc --pull ${UbuntuVNCDockerImage}` }
+            value={ `docker run --name ubuntu_vnc ${UbuntuVNCDockerImage}` }
             endAdornment={
               <InputAdornment position="end">
                 <Tooltip title="Copy to clipboard">

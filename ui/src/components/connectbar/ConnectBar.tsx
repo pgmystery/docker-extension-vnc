@@ -1,4 +1,4 @@
-import { Autocomplete, FormControl, IconButton, Stack, TextField, Tooltip } from '@mui/material'
+import { Autocomplete, FormControl, FormLabel, IconButton, Stack, TextField, Tooltip } from '@mui/material'
 import React, { useEffect, useMemo, useState } from 'react'
 import { Container } from '../../types/docker/extension'
 import { createDockerDesktopClient } from '@docker/extension-api-client'
@@ -112,6 +112,7 @@ export default function ConnectBar({ disabled, onConnect, onDisconnect, connecte
 
   return (
     <FormControl fullWidth>
+      <FormLabel sx={{marginBottom: '10px'}}>Select a container to connect to it over VNC</FormLabel>
       <Stack
         direction="row"
         spacing={2}
