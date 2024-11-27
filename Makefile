@@ -1,4 +1,4 @@
-IMAGE?=pgmystery/vnc
+IMAGE?=pgmystery/docker-extension-vnc
 TAG?=latest
 
 BUILDER=buildx-multi-arch
