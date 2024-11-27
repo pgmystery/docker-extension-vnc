@@ -1,0 +1,68 @@
+name: Publish Docker extension
+
+on:
+  release:
+    types: [published]
+
+jobs:
+  push_to_registries:
+    name: Push Docker image to multiple registries
+    runs-on: ubuntu-latest
+    permissions:
+      packages: write
+      contents: read
+    steps:
+      - name: Check out the repo
+        uses: actions/checkout@v4
+
+      - name: Log in to Docker Hub
+        uses: docker/login-action@v3
+        with:
+          username: ${{ secrets.DOCKERHUB_USERNAME }}
+          password: ${{ secrets.DOCKERHUB_ACCESS_TOKEN }}
+
+      - name: Log in to the Container registry
+        uses: docker/login-action@v3
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Extract metadata (tags, labels) for Docker
+        id: pre_meta
+        uses: docker/metadata-action@v5
+        with:
+          images: pgmystery/docker-extension-vnc
+
+      - name: Build Docker image
+        uses: docker/build-push-action@v5
+        with:
+          context: .
+          platforms: linux/amd64,linux/arm64
+          push: true
+          tags: ${{ steps.pre_meta.outputs.tags }}
+          labels: ${{ steps.pre_meta.outputs.labels }}
+
+#      - name: Docker Scout Scan
+#        uses: docker/scout-action@v1.5.0
+#        with:
+#          command: quickview,cves
+#          image: local://pgmystery/docker-extension-vnc
+#          exit-on: vulnerability
+#          exit-code: true
+#
+#      - name: Extract metadata (tags, labels) for Docker
+#        id: meta
+#        uses: docker/metadata-action@v5
+#        with:
+#          images: |
+#            pgmystery/docker-extension-vnc
+#            ghcr.io/${{ github.repository }}
+#
+#      - name: Build and push Docker images
+#        uses: docker/build-push-action@v5
+#        with:
+#          context: .
+#          platforms: linux/amd64,linux/arm64
+#          push: true
+#          tags: ${{ steps.meta.outputs.tags }}
