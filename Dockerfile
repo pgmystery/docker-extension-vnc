@@ -30,7 +30,10 @@ LABEL org.opencontainers.image.title="VNC Viewer" \
     org.opencontainers.image.description="Docker Extension for connecting to a VNC Server Container and control it over an built-in view." \
     org.opencontainers.image.vendor="pgmystery" \
     com.docker.desktop.extension.api.version=">= 0.3.4" \
-    com.docker.extension.screenshots="" \
+    com.docker.extension.screenshots="[{\"alt\":\"Webbrowser on a linux desktop\", \"url\":\"https://raw.githubusercontent.com/pgmystery/docker-extension-vnc/refs/heads/main/docs/imgs/screenshot1.png\"},\
+                                       {\"alt\":\"VNC settings\", \"url\":\"https://raw.githubusercontent.com/pgmystery/docker-extension-vnc/refs/heads/main/docs/imgs/screenshot2.png\"},\
+                                       {\"alt\":\"VNC session cretendials\", \"url\":\"https://raw.githubusercontent.com/pgmystery/docker-extension-vnc/refs/heads/main/docs/imgs/screenshot3.png\"},\
+                                       {\"alt\":\"Dashboard\", \"url\":\"https://raw.githubusercontent.com/pgmystery/docker-extension-vnc/refs/heads/main/docs/imgs/screenshot4.png\"}]" \
     com.docker.desktop.extension.icon="https://raw.githubusercontent.com/pgmystery/docker-extension-vnc/refs/heads/main/docker.svg" \
     com.docker.extension.detailed-description="" \
     com.docker.extension.publisher-url="https://github.com/pgmystery/docker-extension-vnc" \
