@@ -12,7 +12,8 @@ ENV USER=root
 RUN apt-get update && apt-get install -y --no-install-recommends \
     xfce4 \
     xfce4-goodies \
-    tightvncserver \
+    tigervnc-common \
+    tigervnc-standalone-server \
     dbus-x11 \
     xfonts-base \
     && apt-get clean && rm -rf /var/lib/apt/lists/* /tmp/* /var/tmp/*
