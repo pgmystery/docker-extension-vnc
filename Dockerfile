@@ -1,26 +1,3 @@
-#FROM golang:1.23-alpine AS builder
-#ENV CGO_ENABLED=0
-#WORKDIR /backend
-#COPY backend/go.* .
-#RUN --mount=type=cache,target=/go/pkg/mod \
-#    --mount=type=cache,target=/root/.cache/go-build \
-#    go mod download
-#COPY backend/. .
-#RUN --mount=type=cache,target=/go/pkg/mod \
-#    --mount=type=cache,target=/root/.cache/go-build \
-#    go build -trimpath -ldflags="-s -w" -o bin/service
-
-#FROM python:3.12 AS backend-builder
-#ENV NOVNC_LISTEN_PORT=6081
-#ENV NOVNC_VERSION="v1.5.0"
-#WORKDIR /backend
-#COPY ./backend ./backend
-#COPY pyproject.toml poetry.lock README.md ./
-#RUN git clone --depth 1 --branch $NOVNC_VERSION https://github.com/novnc/noVNC.git
-#RUN pip install --no-cache-dir --upgrade poetry
-#RUN poetry config virtualenvs.create false
-#RUN poetry install
-
 # BUILD lib react-vnc
 FROM --platform=$BUILDPLATFORM node:22.11-alpine AS lib-react-vnc
 RUN apk add git
@@ -45,29 +22,25 @@ RUN --mount=type=cache,target=/usr/src/app/.npm \
     npm ci
 # install
 COPY ui /ui
-# copy libs
 COPY --from=lib-react-vnc /react-vnc/ui/libs/react-vnc/dist /ui/libs/react-vnc/dist
 RUN npm run build
 
 FROM alpine
-#FROM backend-builder
-LABEL org.opencontainers.image.title="vnc" \
-    org.opencontainers.image.description="VNC extension for docker desktop" \
-    org.opencontainers.image.vendor="" \
-    com.docker.desktop.extension.api.version="0.3.4" \
+LABEL org.opencontainers.image.title="VNC Viewer" \
+    org.opencontainers.image.description="Docker Extension for connecting to a VNC Server Container and control it over an built-in view." \
+    org.opencontainers.image.vendor="pgmystery" \
+    com.docker.desktop.extension.api.version=">= 0.3.4" \
     com.docker.extension.screenshots="" \
-    com.docker.desktop.extension.icon="" \
+    com.docker.desktop.extension.icon="https://raw.githubusercontent.com/pgmystery/docker-extension-vnc/refs/heads/main/docker.svg" \
     com.docker.extension.detailed-description="" \
-    com.docker.extension.publisher-url="" \
-    com.docker.extension.additional-urls="" \
-    com.docker.extension.categories="" \
-    com.docker.extension.changelog=""
+    com.docker.extension.publisher-url="https://github.com/pgmystery/docker-extension-vnc" \
+    com.docker.extension.additional-urls="[{\"title\":\"Documentation\",\"url\":\"https://github.com/pgmystery/docker-extension-vnc/blob/main/README.md\"},\
+                                           {\"title\":\"License\",\"url\":\"https://github.com/pgmystery/docker-extension-vnc/blob/main/LICENSE\"}]" \
+    com.docker.extension.categories="networking" \
+    com.docker.extension.changelog="See full <a href=\"https://github.com/pgmystery/docker-extension-vnc/blob/main/CHANGELOG.md\">change log</a>"
 
 WORKDIR /
 
-#COPY --from=builder /backend/prod.backend.env /backend.env
-#COPY --from=builder /backend/bin/service /
-#COPY docker-compose.yaml .
 COPY metadata.json .
 COPY docker.svg .
 COPY --from=client-builder /ui/build ui
@@ -75,4 +48,3 @@ COPY --from=client-builder /ui/build ui
 RUN mkdir -p /run/guest-services/
 
 CMD /service -socket /run/guest-services/backend.sock
-#CMD uvicorn --root-path ./backend --uds /run/guest-services/backend.sock backend.main:app
