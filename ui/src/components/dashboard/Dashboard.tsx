@@ -178,6 +178,7 @@ export default function Dashboard({ ddUIToast, connect }: DashboardProps) {
         {
           exampleContainer
             ? <Button
+                variant="outlined"
                 sx={{height: '55px'}}
                 endIcon={<DeleteIcon />}
                 color="error"
@@ -185,6 +186,7 @@ export default function Dashboard({ ddUIToast, connect }: DashboardProps) {
                 disabled={started || loading}
               >Delete example container</Button>
             : <Button
+                variant="outlined"
                 sx={{height: '55px'}}
                 endIcon={<SendIcon />}
                 color="success"
