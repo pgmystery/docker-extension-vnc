@@ -7,6 +7,7 @@ import { VNCSettingsData } from './VNCView'
 import CloseIcon from '@mui/icons-material/Close'
 import CompressionLevel from './VNCSettingForms/CompressionLevel'
 import ShowDotCursor from './VNCSettingForms/ShowDotCursor'
+import ViewOnly from './VNCSettingForms/ViewOnly'
 
 
 interface VNCSettingsSaveData extends Omit<VNCSettingsData, 'showDotCursor'> {
@@ -33,6 +34,7 @@ export default function VNCSettingsDialog({ open, close, settingsData, onSetting
       qualityLevel: Number(data.qualityLevel),
       compressionLevel: Number(data.compressionLevel),
       showDotCursor: !!data.showDotCursor,
+      viewOnly: !!data.viewOnly,
     })
     close()
   }
@@ -81,6 +83,11 @@ export default function VNCSettingsDialog({ open, close, settingsData, onSetting
           <Divider />
           <ShowDotCursor
             initValue={settingsData.showDotCursor}
+            reset={reset}
+          />
+          <Divider />
+          <ViewOnly
+            initValue={settingsData.viewOnly}
             reset={reset}
           />
           <Divider />

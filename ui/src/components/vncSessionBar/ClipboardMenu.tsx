@@ -79,6 +79,7 @@ export default function ClipboardMenu({ clipboardText, sendClipboardText }: Clip
         <ListSubheader>Clipboard</ListSubheader>
         <Typography>Edit clipboard content in the textarea below.</Typography>
         <Textarea
+          autoFocus
           value={textareaValue}
           onChange={(e) => setTextareaValue(e.currentTarget.value)}
         />

@@ -24,6 +24,7 @@ export interface VNCCredentials {
 }
 
 export interface VNCSettingsData {
+  viewOnly?: boolean
   qualityLevel: number
   compressionLevel: number
   showDotCursor: boolean
@@ -41,13 +42,13 @@ export default function VNCView({ url, onCancel, ddUIToast, openBrowserURL }: VN
   const [clipboardText, setClipboardText] = useState<string>('')
 
   useEffect(() => {
-    const { connect, connected, disconnect } = vncScreenRef.current ?? {};
+    const { connect, connected, disconnect } = vncScreenRef.current ?? {}
 
     if (connected) {
-      disconnect?.();
+      disconnect?.()
     }
 
-    connect?.();
+    connect?.()
   }, [credentials])
 
   useEffect(() => {
@@ -181,6 +182,7 @@ export default function VNCView({ url, onCancel, ddUIToast, openBrowserURL }: VN
             qualityLevel={settings.qualityLevel}
             compressionLevel={settings.compressionLevel}
             showDotCursor={settings.showDotCursor}
+            viewOnly={settings.viewOnly}
             onClipboard={e => setClipboardText(e?.detail.text || '')}
           />
         </Box>
