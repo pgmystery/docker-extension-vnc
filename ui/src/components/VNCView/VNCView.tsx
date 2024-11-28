@@ -24,6 +24,7 @@ export interface VNCCredentials {
 }
 
 export interface VNCSettingsData {
+  viewOnly?: boolean
   qualityLevel: number
   compressionLevel: number
   showDotCursor: boolean
@@ -38,15 +39,16 @@ export default function VNCView({ url, onCancel, ddUIToast, openBrowserURL }: VN
   const [trySaveCredentials, setTrySaveCredentials] = useState<boolean>(false)
   const [openSettingsDialog, setOpenSettingsDialog] = useState<boolean>(false)
   const [settings, saveSettings] = useVNCSettings()
+  const [clipboardText, setClipboardText] = useState<string>('')
 
   useEffect(() => {
-    const { connect, connected, disconnect } = vncScreenRef.current ?? {};
+    const { connect, connected, disconnect } = vncScreenRef.current ?? {}
 
     if (connected) {
-      disconnect?.();
+      disconnect?.()
     }
 
-    connect?.();
+    connect?.()
   }, [credentials])
 
   useEffect(() => {
@@ -136,6 +138,14 @@ export default function VNCView({ url, onCancel, ddUIToast, openBrowserURL }: VN
     }
   }
 
+  function sendClipboardText(text: string) {
+    const { connected, clipboardPaste } = vncScreenRef.current ?? {}
+
+    if (connected && clipboardPaste) {
+      clipboardPaste(text)
+    }
+  }
+
   return (
     <>
       <Stack direction="column" spacing={1} sx={{height: '100%', overflow: 'hidden',}} >
@@ -144,6 +154,8 @@ export default function VNCView({ url, onCancel, ddUIToast, openBrowserURL }: VN
           onFullscreenClicked={handleFullscreenClick}
           onSettingsClicked={handleSettingsClick}
           onOpenInBrowserClicked={handleOpenInBrowserClick}
+          clipboardText={clipboardText}
+          sendClipboardText={sendClipboardText}
         />
         <Box ref={vncContainerRef} sx={{
           width: '100%',
@@ -170,6 +182,8 @@ export default function VNCView({ url, onCancel, ddUIToast, openBrowserURL }: VN
             qualityLevel={settings.qualityLevel}
             compressionLevel={settings.compressionLevel}
             showDotCursor={settings.showDotCursor}
+            viewOnly={settings.viewOnly}
+            onClipboard={e => setClipboardText(e?.detail.text || '')}
           />
         </Box>
       </Stack>
