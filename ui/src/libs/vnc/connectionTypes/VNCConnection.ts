@@ -29,8 +29,8 @@ export default class VNCConnection {
 
   async reconnect(_: ContainerInfo) {}
 
-  async connect(connectionType: ConnectionType, _?: unknown) {
-    await this.proxy.create(connectionType, this.target, _)
+  connect(connectionType: ConnectionType, _?: unknown) {
+    return this.proxy.create(connectionType, this.target, _)
   }
 
   async disconnect() {

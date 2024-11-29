@@ -54,6 +54,7 @@ export default function ConnectBar({ disabled, onConnect, onDisconnect, connecti
             label="Connection-Type"
             value={connectionType}
             onChange={e => setConnectionType(e.target.value as ConnectionType)}
+            disabled={disabled || connection !== undefined}
             sx={{
               width: '170px',
             }}

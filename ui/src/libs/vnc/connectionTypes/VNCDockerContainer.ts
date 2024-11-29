@@ -63,7 +63,8 @@ export default class VNCDockerContainer extends VNCConnection {
 
   async connect(_: ConnectionType, data: ConnectionDataDockerContainerData) {
     await this.target.connect(data.targetContainerId, data.targetPort)
-    await super.connect(this.type, data)
+
+    return super.connect(this.type, data)
   }
 
   async disconnect() {

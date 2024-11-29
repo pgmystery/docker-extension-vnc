@@ -8,14 +8,13 @@ import useVNC from './hooks/useVNC'
 import { isRawExecResult } from './libs/docker/cli/Exec'
 import VNCProxyImagePullDialog from './components/VNCView/VNCProxyImagePullDialog'
 import Dashboard from './components/dashboard/Dashboard'
-import { ConnectionData } from './libs/vnc/VNC'
+import { ConnectionData, VNCConnectionType } from './libs/vnc/VNC'
 import { ProxyURL } from './libs/vnc/proxies/Proxy'
-import VNCConnection from './libs/vnc/connectionTypes/VNCConnection'
 
 
 export interface ConnectedData {
   url: ProxyURL
-  connection: VNCConnection
+  connection: VNCConnectionType
 }
 
 
@@ -49,9 +48,10 @@ export function App() {
         ddClient.desktopUI.toast.error(e.message)
       else if (isRawExecResult(e))
         ddClient.desktopUI.toast.error(e.stderr)
+
+      await vnc.disconnect()
     }
 
-    await vnc.disconnect()
 
     setLoading(false)
   }
