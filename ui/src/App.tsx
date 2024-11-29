@@ -157,7 +157,7 @@ export function App() {
             setDownloadingProxyImage(null)
           }}
           ddUIToast={ddClient.desktopUI.toast}
-          pullProxyDockerImage={vnc.pullProxyDockerImage}
+          pullProxyDockerImage={(addStdout: (stdout: string)=>void, onFinish: (exitCode: number)=>void) => vnc.pullProxyDockerImage(addStdout, onFinish)}
         />
       }
 
