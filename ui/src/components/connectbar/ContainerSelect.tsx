@@ -1,10 +1,10 @@
 import { Autocomplete, TextField } from '@mui/material'
 import React, { useEffect, useState } from 'react'
-import { Container } from '../../types/docker/extension'
+import { ContainerInfo } from '../../types/docker/extension'
 
 
 export interface ContainerSelectProps {
-  containers: Container[]
+  containers: ContainerInfo[]
   disabled?: boolean
   selectedContainerName: string
   setSelectedContainerName: (name: string)=>void

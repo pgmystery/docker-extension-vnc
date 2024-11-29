@@ -7,13 +7,13 @@ import VNCSettingsDialog from './VNCSettingsDialog'
 import { Toast } from '@docker/extension-api-client-types/dist/v1'
 import VNCViewSkeleton from './VNCViewSkeleton'
 import useVNCSettings from '../../hooks/useVNCSettings'
-import { URL } from '../../libs/vnc/Proxy'
+import { ProxyURL } from '../../libs/vnc/proxies/Proxy'
 
 
 interface VNCViewProps {
   ddUIToast: Toast
   openBrowserURL: (url: string)=>void
-  url?: URL
+  url?: ProxyURL
   onCancel: ()=>void
 }
 

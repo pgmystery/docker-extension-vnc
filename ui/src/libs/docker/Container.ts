@@ -1,4 +1,4 @@
-import { Container as ContainerInfo,  DockerListContainersFilters } from '../../types/docker/extension'
+import { ContainerInfo,  DockerListContainersFilters } from '../../types/docker/extension'
 import { Docker } from '@docker/extension-api-client-types/dist/v1'
 import { createDockerDesktopClient } from '@docker/extension-api-client'
 import { ContainerExtended } from '../../types/docker/cli/inspect'

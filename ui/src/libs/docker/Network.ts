@@ -1,6 +1,6 @@
 import { Docker as DockerClient } from '@docker/extension-api-client-types/dist/v1'
 import DockerCliNetwork from './cli/Network'
-import { Container } from '../../types/docker/extension'
+import { ContainerInfo } from '../../types/docker/extension'
 
 
 export default class Network {
@@ -32,7 +32,7 @@ export default class Network {
       filters: {
         network: [this.name]
       }
-    }) as Promise<Container[]>
+    }) as Promise<ContainerInfo[]>
   }
 
   async remove({force}={force: false}) {
