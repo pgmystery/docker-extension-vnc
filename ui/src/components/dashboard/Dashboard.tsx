@@ -39,10 +39,15 @@ export default function Dashboard({ ddUIToast, connect }: DashboardProps) {
     const exampleContainer = await getExampleContainer(dockerCli)
     setLoading(false)
 
-    if (exampleContainer)
-      return setExampleContainer(exampleContainer)
+    if (exampleContainer) {
+      setExampleContainer(exampleContainer)
+
+      return true
+    }
 
     setExampleContainer(null)
+
+    return false
   }
 
   async function handleRunCmdClick() {
@@ -136,13 +141,17 @@ export default function Dashboard({ ddUIToast, connect }: DashboardProps) {
 
     setLoading(true)
 
+    let exampleContainerExist = await checkIfExampleContainerExist()
+    if (!exampleContainerExist) return
+
     const dockerCli = new DockerCli()
     const execResult = await dockerCli.rm(exampleContainer.Id, {force: true})
 
     if (execResult.stderr)
-      return ddUIToast?.error(execResult.stderr)
+      ddUIToast?.error(execResult.stderr)
 
-    await checkIfExampleContainerExist()
+    exampleContainerExist = await checkIfExampleContainerExist()
+    if (exampleContainerExist) ddUIToast?.error(`An Unknown error appeared while tying to delete the example container`)
   }
 
   return (
