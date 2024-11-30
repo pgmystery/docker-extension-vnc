@@ -8,12 +8,13 @@ import TextStreamOutput from '../utils/TextStreamOutput'
 import { Toast } from '@docker/extension-api-client-types/dist/v1'
 import { isRawExecResult } from '../../libs/docker/cli/Exec'
 import DockerCli from '../../libs/docker/DockerCli'
-import { Container } from '../../types/docker/extension'
+import { ContainerInfo } from '../../types/docker/extension'
+import { ConnectionData } from '../../libs/vnc/VNC'
 
 
 interface DashboardProps {
   ddUIToast?: Toast
-  connect: (containerId: string, targetPort: number)=>void
+  connect: (connectionData: ConnectionData)=>void
 }
 
 const UbuntuVNCDockerImage = 'pgmystery/ubuntu_vnc:latest'
@@ -27,7 +28,7 @@ export default function Dashboard({ ddUIToast, connect }: DashboardProps) {
   const [started, setStarted] = useState<boolean>(false)
   const [pullStdout, dispatch] = useReducer(addPullStdout, [])
   const [pullFinished, setPullFinished] = useState<boolean>(false)
-  const [exampleContainer, setExampleContainer] = useState<Container | null>(null)
+  const [exampleContainer, setExampleContainer] = useState<ContainerInfo | null>(null)
 
   useEffect(() => {
     checkIfExampleContainerExist()
@@ -115,7 +116,13 @@ export default function Dashboard({ ddUIToast, connect }: DashboardProps) {
     if (exampleContainer.State !== 'running')
       return ddUIToast?.error('The example container is not running...')
 
-    connect(exampleContainer.Id, UbuntuVNCDockerImagePort)
+    connect({
+      type: 'container',
+      data: {
+        targetContainerId: exampleContainer.Id,
+        targetPort: UbuntuVNCDockerImagePort,
+      }
+    })
   }
 
   function getExampleContainer(dockerCli: DockerCli) {

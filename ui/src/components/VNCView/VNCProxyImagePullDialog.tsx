@@ -1,6 +1,5 @@
 import { CircularProgress, Dialog, DialogContent, DialogContentText, DialogTitle, Typography } from '@mui/material'
 import { useEffect, useReducer, useRef, useState } from 'react'
-import Proxy from '../../libs/vnc/Proxy'
 import { Toast } from '@docker/extension-api-client-types/dist/v1'
 import { isRawExecResult } from '../../libs/docker/cli/Exec'
 
@@ -8,12 +7,12 @@ import { isRawExecResult } from '../../libs/docker/cli/Exec'
 interface VNCProxyImagePullDialogProps {
   open: boolean,
   onDone: (successful: boolean) => void,
-  proxy?: Proxy,
+  pullProxyDockerImage: (addStdout: (stdout: string)=>void, onFinish: (exitCode: number)=>void)=>void,
   ddUIToast?: Toast
 }
 
 
-export default function VNCProxyImagePullDialog({open, onDone, proxy, ddUIToast}: VNCProxyImagePullDialogProps) {
+export default function VNCProxyImagePullDialog({open, onDone, pullProxyDockerImage, ddUIToast}: VNCProxyImagePullDialogProps) {
   const [stdout, dispatch] = useReducer(addStdout, [])
   const dialogContentElementRef = useRef<HTMLElement>(null)
   const descriptionElementRef = useRef<HTMLElement>(null)
@@ -31,7 +30,6 @@ export default function VNCProxyImagePullDialog({open, onDone, proxy, ddUIToast}
 
   useEffect(() => {
     if (!open) return
-    if (!proxy) return
 
     try {
       const onFinish = (exitCode: number) => {
@@ -39,7 +37,7 @@ export default function VNCProxyImagePullDialog({open, onDone, proxy, ddUIToast}
         onDone(exitCode === 0)
       }
 
-      proxy.pullDockerImage(dispatch, onFinish)
+      pullProxyDockerImage(dispatch, onFinish)
     }
     catch (e: any) {
       console.error(e)
@@ -53,7 +51,7 @@ export default function VNCProxyImagePullDialog({open, onDone, proxy, ddUIToast}
 
       onDone(false)
     }
-  }, [open, proxy])
+  }, [open, pullProxyDockerImage])
 
   useEffect(() => {
     if (!dialogContentElementRef || stdout.length === 0) return

@@ -1,5 +1,5 @@
 import { RequireOnlyOne } from '../../utils'
-import { Container } from '../extension'
+import { ContainerInfo } from '../extension'
 
 
 interface CliInspectOptionFormatKeys {
@@ -24,7 +24,7 @@ export type CliInspectOptions =
   Partial<CliInspectOptionSize> |
   Partial<CliInspectOptionType>
 
-export interface ContainerExtended extends Omit<Container, 'Names' | 'Labels'> {
+export interface ContainerExtended extends Omit<ContainerInfo, 'Names' | 'Labels'> {
   Name: string,
   Config: {
     Hostname: string

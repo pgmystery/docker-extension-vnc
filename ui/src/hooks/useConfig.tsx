@@ -8,6 +8,7 @@ export interface Config {
   proxyContainerLabelContainerId: string
   proxyContainerLabelTargetIp: string
   proxyContainerLabelTargetPort: string
+  proxyContainerLabelConnectionType: string
 }
 
 type EnvVarType = string | undefined
@@ -27,6 +28,7 @@ export function loadConfig(): Config {
   const proxyContainerLabelContainerId = import.meta.env.VITE_VNC_PROXY_CONTAINER_LABEL_CONTAINER_ID as EnvVarType
   const proxyContainerLabelTargetIp = import.meta.env.VITE_VNC_PROXY_CONTAINER_LABEL_TARGET_IP as EnvVarType
   const proxyContainerLabelTargetPort = import.meta.env.VITE_VNC_PROXY_CONTAINER_LABEL_TARGET_PORT as EnvVarType
+  const proxyContainerLabelConnectionType = import.meta.env.VITE_VNC_PROXY_CONTAINER_LABEL_CONNECTION_TYPE as EnvVarType
 
   if (!network)
     throw new Error('the envar "VITE_VNC_CONNECT_DOCKER_NETWORK" is not set')
@@ -49,6 +51,9 @@ export function loadConfig(): Config {
   if (!proxyContainerLabelTargetPort)
     throw new Error('the envar "VITE_VNC_PROXY_CONTAINER_LABEL_TARGET_PORT" is not set')
 
+  if (!proxyContainerLabelConnectionType)
+    throw new Error('the envar "VITE_VNC_PROXY_CONTAINER_LABEL_CONNECTION_TYPE" is not set')
+
   return {
     network,
     proxyDockerImage,
@@ -57,5 +62,6 @@ export function loadConfig(): Config {
     proxyContainerLabelContainerId,
     proxyContainerLabelTargetIp,
     proxyContainerLabelTargetPort,
+    proxyContainerLabelConnectionType,
   }
 }

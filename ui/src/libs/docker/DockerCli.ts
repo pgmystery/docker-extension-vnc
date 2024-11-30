@@ -3,7 +3,7 @@ import { ContainerExtended } from '../../types/docker/cli/inspect'
 import DockerCliNetwork from './cli/Network'
 import DockerCliExec from './cli/Exec'
 import {
-  Container as ContainerInfo,
+  ContainerInfo,
   DockerImage,
   DockerListContainersFilters
 } from '../../types/docker/extension'

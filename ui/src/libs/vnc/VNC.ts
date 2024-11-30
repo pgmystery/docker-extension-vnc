@@ -1,16 +1,24 @@
 import { Docker } from '@docker/extension-api-client-types/dist/v1'
 import { Config, loadConfig } from '../../hooks/useConfig'
 import { createDockerDesktopClient } from '@docker/extension-api-client'
-import Target from './Target'
-import Proxy from './Proxy'
-import ProxyNetwork from './ProxyNetwork'
+import VNCDockerContainer, {
+  ConnectionDataDockerContainer,
+  ConnectionTypeDockerContainer
+} from './connectionTypes/VNCDockerContainer'
+import Proxy from './proxies/Proxy'
+import VNCRemoteHost, { ConnectionDataRemoteHost, ConnectionTypeRemoteHost } from './connectionTypes/VNCRemoteHost'
+import { DockerImage } from '../../types/docker/extension'
+
+
+export type ConnectionType = ConnectionTypeDockerContainer | ConnectionTypeRemoteHost
+export type VNCConnectionType = VNCDockerContainer | VNCRemoteHost
+export type ConnectionData = ConnectionDataDockerContainer | ConnectionDataRemoteHost
 
 
 export default class VNC {
-  public proxy: Proxy
-  public network: ProxyNetwork
-  public target: Target
-  public ready: Promise<void>
+  private readonly docker: Docker
+  private readonly config: Config
+  public connection?: VNCConnectionType
 
   constructor(docker?: Docker, config?: Config) {
     if (!docker)
@@ -19,63 +27,111 @@ export default class VNC {
     if (!config)
       config = loadConfig()
 
-    this.network = new ProxyNetwork(docker, config)
-    this.target = new Target(docker, config)
-    this.proxy = new Proxy(docker, config)
-    this.ready = new Promise((resolve, reject) => {
-      this.proxy.ready.then(() => resolve()).catch(e => reject(e))
-    })
+    this.docker = docker
+    this.config = config
   }
 
   async reconnect() {
-    if (!this.proxy.exist()) return
+    if (this.connection) return
 
-    let targetContainerId: string, targetPort: number
+    const proxy = await this.getExistingProxy()
+    if (!proxy || !proxy.container) return
+
+    this.connection = this.getNewConnection(proxy.getConnectionType())
 
     try {
-      targetContainerId = this.proxy.getTargetContainerId()
-      targetPort = this.proxy.getTargetPort()
-
-      await this.connect(targetContainerId, targetPort, true)
+      await this.connection.reconnect(proxy.container)
     }
     catch (e) {
-      await this.reset()
+      await this.disconnect()
 
       throw e
     }
   }
 
-  async connect(targetContainerId: string, targetPort: number, reconnect: boolean = false) {
-    if (!reconnect)
-      await this.disconnect()
+  async connect(connectionData: ConnectionData) {
+    await this.disconnect()
 
-    await this.target.setNewTargetContainer(targetContainerId)
-
-    const targetIp = this.target.proxyNetworkIp
-    if (!targetIp)
-      throw new Error(
-        `An Error appear while getting the target container with the id "${targetContainerId}" network ip in the network with the name ${this.network.name}`
-      )
-
-    await this.proxy.create(targetContainerId, targetIp, targetPort)
+    await this.newConnection(connectionData)
   }
 
-  disconnect() {
-    return this.reset()
-  }
+  async disconnect() {
+    if (!this.connection) return
 
-  async reset() {
-    // 1. Delete proxy container
-    // 2. Delete proxy network with detach target container
-
-    await this.proxy.delete()
-    await this.target.disconnectFromProxyNetwork()
-    const proxyNetworkExist = await this.network.exist()
-    if (proxyNetworkExist)
-      await this.network.remove({ force: true })
+    await this.connection.disconnect()
+    this.connection = undefined
   }
 
   get connected(): boolean {
-    return this.proxy.exist() && this.target?.exist() || false
+    if (!this.connection) return false
+
+    return this.connection.connected
+  }
+
+  private newConnection(connectionData: ConnectionData) {
+    switch (connectionData.type) {
+      case 'container':
+        this.connection = new VNCDockerContainer(this.docker, this.config)
+
+          return this.connection.connect(connectionData)
+      case 'remote':
+        this.connection = new VNCRemoteHost(this.docker, this.config)
+
+        return this.connection.connect(connectionData)
+    }
+  }
+
+  private getNewConnection(connectionType: ConnectionType) {
+    switch (connectionType) {
+      case 'container':
+        return new VNCDockerContainer(this.docker, this.config)
+      case 'remote':
+        return new VNCRemoteHost(this.docker, this.config)
+    }
+  }
+
+  private async getExistingProxy() {
+    const proxy = new Proxy(this.docker, this.config)
+    const proxyExist = await proxy.get()
+
+    if (!proxyExist || !proxy.exist()) return
+
+    return proxy
+  }
+
+  async dockerProxyImageExist(): Promise<boolean> {
+    const images = await this.docker.listImages({
+      filters: {
+        reference: [this.config.proxyDockerImage]
+      }
+    }) as DockerImage[]
+
+    if (images.length > 1)
+      throw new Error(`Found no or multiple docker images with tag "${this.config.proxyDockerImage}"`)
+
+    return images.length === 1
+  }
+
+  pullProxyDockerImage(addStdout: (stdout: string)=>void, onFinish: (exitCode: number)=>void) {
+    this.docker.cli.exec('pull', [this.config.proxyDockerImage], {
+      stream: {
+        onOutput(data) {
+          if (data.stdout) {
+            addStdout(data.stdout)
+          }
+
+          if (data.stderr) {
+            throw new Error(data.stderr)
+          }
+        },
+        onError(error) {
+          throw error
+        },
+        onClose(exitCode) {
+          onFinish(exitCode)
+        },
+        splitOutputLines: true,
+      },
+    })
   }
 }

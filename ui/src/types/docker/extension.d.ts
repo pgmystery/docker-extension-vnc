@@ -1,4 +1,4 @@
-export interface Container {
+export interface ContainerInfo {
   Id: string
   Names: string[]
   Image: string

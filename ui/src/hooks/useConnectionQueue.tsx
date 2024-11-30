@@ -1,12 +1,12 @@
 import { useEffect, useState } from 'react'
+import { ConnectionData } from '../libs/vnc/VNC'
 
 
 export type ConnectionQueueProps = ConnectionQueueConnect | ConnectionQueueDisconnect
 
 interface ConnectionQueueConnect {
   type: 'connect'
-  containerId: string
-  targetPort: number
+  connectionData: ConnectionData
 }
 
 interface ConnectionQueueDisconnect {
@@ -14,7 +14,7 @@ interface ConnectionQueueDisconnect {
 }
 
 interface ConnectionQueueCallbacks {
-  onConnect: (containerId: string, targetPort: number)=>Promise<(() => Promise<void>) | undefined | void>
+  onConnect: (connectionData: ConnectionData)=>Promise<(() => Promise<void>) | undefined | void>
   onDisconnect: ()=>Promise<(() => Promise<void>) | undefined | void>
 }
 
@@ -27,9 +27,9 @@ export default function useConnectionQueue(callbacks: ConnectionQueueCallbacks, 
 
     switch (connectionQueue.type) {
       case 'connect':
-        const { containerId, targetPort } = connectionQueue
+        const { connectionData } = connectionQueue
 
-        runCallback(callbacks.onConnect, containerId, targetPort)
+        runCallback(callbacks.onConnect, connectionData)
 
         break
       case 'disconnect':
@@ -49,10 +49,9 @@ export default function useConnectionQueue(callbacks: ConnectionQueueCallbacks, 
   }
 
   return {
-    connect: (containerId: string, targetPort: number) => setConnectionQueue({
+    connect: (connectionData: ConnectionData) => setConnectionQueue({
       type: 'connect',
-      containerId,
-      targetPort,
+      connectionData,
     }),
     disconnect: () => setConnectionQueue({
       type: 'disconnect',
