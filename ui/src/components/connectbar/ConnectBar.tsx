@@ -4,10 +4,11 @@ import {
   Select,
   Stack,
 } from '@mui/material'
-import React, { useMemo, useState } from 'react'
+import React, { useEffect, useMemo, useState } from 'react'
 import { createDockerDesktopClient } from '@docker/extension-api-client'
 import DockerContainer from './bars/DockerContainer'
 import { ConnectionData, ConnectionType, VNCConnectionType } from '../../libs/vnc/VNC'
+import RemoteHost from './bars/RemoteHost'
 
 
 export interface ConnectBarProps {
@@ -22,6 +23,10 @@ export default function ConnectBar({ disabled, onConnect, onDisconnect, connecti
   const ddClient = useMemo(createDockerDesktopClient, [])
   const [connectionType, setConnectionType] = useState<ConnectionType>(connection?.type || 'container')
 
+  useEffect(() => {
+    if (connection) setConnectionType(connection.type)
+  }, [connection])
+
   function getSelectionTypeComponent(type: ConnectionType) {
     switch (type) {
       case 'container':
@@ -33,7 +38,12 @@ export default function ConnectBar({ disabled, onConnect, onDisconnect, connecti
           disabled={disabled}
         />
       case 'remote':
-        return <div>REMOTE HOST...</div>
+        return <RemoteHost
+          connection={connection?.type === 'remote' ? connection : undefined}
+          onConnect={onConnect}
+          onDisconnect={onDisconnect}
+          disabled={disabled}
+        />
       default:
         return <div>ERROR</div>
     }

@@ -40,6 +40,10 @@ export default class Proxy extends DockerContainer {
     return this.getLabel(this.config.proxyContainerLabelConnectionType) as ConnectionType
   }
 
+  getTargetIp() {
+    return this.getLabel(this.config.proxyContainerLabelTargetIp)
+  }
+
   getTargetPort(): number {
     return Number(this.getLabel(this.config.proxyContainerLabelTargetPort))
   }

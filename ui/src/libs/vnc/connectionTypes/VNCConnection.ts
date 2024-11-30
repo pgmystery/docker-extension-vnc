@@ -4,7 +4,7 @@ import { Config, loadConfig } from '../../../hooks/useConfig'
 import { createDockerDesktopClient } from '@docker/extension-api-client'
 import Target from '../targets/Target'
 import { ContainerInfo } from '../../../types/docker/extension'
-import { ConnectionType } from '../VNC'
+import { ConnectionData, ConnectionType } from '../VNC'
 
 
 export default class VNCConnection {
@@ -14,7 +14,13 @@ export default class VNCConnection {
   public proxy: Proxy
   public target: Target
 
-  constructor(proxy: Proxy, target: Target, docker?: Docker, config?: Config) {
+  constructor(docker?: Docker, config?: Config, proxy?: Proxy, target?: Target) {
+    if (!proxy)
+      proxy = new Proxy(docker, config)
+
+    if (!target)
+      target = new Target(docker, config)
+
     if (!docker)
       docker = createDockerDesktopClient().docker
 
@@ -27,10 +33,15 @@ export default class VNCConnection {
     this.target = target
   }
 
-  async reconnect(_: ContainerInfo) {}
+  async reconnect(container: ContainerInfo) {
+    const proxyExist = await this.proxy.get(container)
+    if (!proxyExist) return await this.disconnect()
+  }
 
-  connect(connectionType: ConnectionType, _?: unknown) {
-    return this.proxy.create(connectionType, this.target, _)
+  connect(connectionData: ConnectionData) {
+    if (this.proxy.container) return true
+
+    return this.proxy.create(connectionData.type, this.target, connectionData.data)
   }
 
   async disconnect() {

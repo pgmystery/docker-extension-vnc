@@ -6,13 +6,13 @@ import VNCDockerContainer, {
   ConnectionTypeDockerContainer
 } from './connectionTypes/VNCDockerContainer'
 import Proxy from './proxies/Proxy'
-import VNCRemoteHost, { ConnectionTypeRemoteHost } from './connectionTypes/VNCRemoteHost'
+import VNCRemoteHost, { ConnectionDataRemoteHost, ConnectionTypeRemoteHost } from './connectionTypes/VNCRemoteHost'
 import { DockerImage } from '../../types/docker/extension'
 
 
 export type ConnectionType = ConnectionTypeDockerContainer | ConnectionTypeRemoteHost
 export type VNCConnectionType = VNCDockerContainer | VNCRemoteHost
-export type ConnectionData = ConnectionDataDockerContainer
+export type ConnectionData = ConnectionDataDockerContainer | ConnectionDataRemoteHost
 
 
 export default class VNC {
@@ -39,15 +39,20 @@ export default class VNC {
 
     this.connection = this.getNewConnection(proxy.getConnectionType())
 
-    await this.connection.reconnect(proxy.container)
+    try {
+      await this.connection.reconnect(proxy.container)
+    }
+    catch (e) {
+      await this.disconnect()
+
+      throw e
+    }
   }
 
   async connect(connectionData: ConnectionData) {
     await this.disconnect()
 
-    this.connection = this.getNewConnection(connectionData.type)
-
-    await this.connection.connect(connectionData.type, connectionData.data)
+    await this.newConnection(connectionData)
   }
 
   async disconnect() {
@@ -63,19 +68,26 @@ export default class VNC {
     return this.connection.connected
   }
 
-  private getNewConnection(connectionType: ConnectionType) {
-    let connection: VNCConnectionType | undefined
+  private newConnection(connectionData: ConnectionData) {
+    switch (connectionData.type) {
+      case 'container':
+        this.connection = new VNCDockerContainer(this.docker, this.config)
 
+          return this.connection.connect(connectionData)
+      case 'remote':
+        this.connection = new VNCRemoteHost(this.docker, this.config)
+
+        return this.connection.connect(connectionData)
+    }
+  }
+
+  private getNewConnection(connectionType: ConnectionType) {
     switch (connectionType) {
       case 'container':
-        connection = new VNCDockerContainer(this.docker, this.config)
-        break
+        return new VNCDockerContainer(this.docker, this.config)
+      case 'remote':
+        return new VNCRemoteHost(this.docker, this.config)
     }
-
-    if (!connection)
-      throw new Error(`Unknown connection type ${connectionType}`)
-
-    return connection
   }
 
   private async getExistingProxy() {

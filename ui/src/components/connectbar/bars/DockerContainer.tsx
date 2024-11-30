@@ -119,8 +119,8 @@ export default function DockerContainer({ ddClient, disabled, onConnect, onDisco
         direction="row"
         spacing={1}
         sx={{
-          justifyContent: "center",
-          alignItems: "center",
+          justifyContent: 'center',
+          alignItems: 'center',
         }}
       >
         <Tooltip title="Refresh Containerlist" arrow>
@@ -146,7 +146,7 @@ export default function DockerContainer({ ddClient, disabled, onConnect, onDisco
           { ...params }
           label="Container internal port"
           type="number"
-          slotProps={{ htmlInput: { ...params.inputProps, min: 0, max: 65535 } }}
+          slotProps={{ htmlInput: { ...params.inputProps, min: 1, max: 65535 } }}
         />}
         inputValue={selectedPort}
         onInputChange={(_, value) => handleSelectedContainerPortChanged(value)}

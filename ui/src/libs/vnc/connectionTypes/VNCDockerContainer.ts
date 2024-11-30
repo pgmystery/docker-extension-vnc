@@ -6,7 +6,6 @@ import { Config, loadConfig } from '../../../hooks/useConfig'
 import { createDockerDesktopClient } from '@docker/extension-api-client'
 import ProxyDockerContainer from '../proxies/ProxyDockerContainer'
 import { ContainerInfo } from '../../../types/docker/extension'
-import { ConnectionType } from '../VNC'
 
 
 export type ConnectionTypeDockerContainer = 'container'
@@ -36,7 +35,7 @@ export default class VNCDockerContainer extends VNCConnection {
     const proxy = new ProxyDockerContainer(docker, config)
     const target = new TargetDockerContainer(docker, config)
 
-    super(proxy, target, docker, config)
+    super(docker, config, proxy, target)
 
     this.network = new ProxyNetwork(docker, config)
     this.type = 'container'
@@ -46,25 +45,16 @@ export default class VNCDockerContainer extends VNCConnection {
     const proxyExist = await this.proxy.get(container)
     if (!proxyExist) return await this.disconnect()
 
-    let targetContainerId: string, targetPort: number
+    const targetContainerId = this.proxy.getTargetContainerId()
+    const targetPort = this.proxy.getTargetPort()
 
-    try {
-      targetContainerId = this.proxy.getTargetContainerId()
-      targetPort = this.proxy.getTargetPort()
-
-      await this.connect(this.type, {targetContainerId, targetPort})
-    }
-    catch (e) {
-      await this.disconnect()
-
-      throw e
-    }
+    await this.connect({type: this.type, data: {targetContainerId, targetPort}})
   }
 
-  async connect(_: ConnectionType, data: ConnectionDataDockerContainerData) {
+  async connect({ data }: ConnectionDataDockerContainer) {
     await this.target.connect(data.targetContainerId, data.targetPort)
 
-    return super.connect(this.type, data)
+    return super.connect({type: this.type, data})
   }
 
   async disconnect() {
