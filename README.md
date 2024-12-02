@@ -1,7 +1,5 @@
 # Docker extension VNC
 
-[//]: # (https://github.com/marcelo-ochoa/pgadmin4-docker-extension)
-
 A VNC Viewer extension for Docker Desktop.
 
 ## Table of Contents
