@@ -35,7 +35,9 @@ export default class VNCConnection {
 
   async reconnect(container: ContainerExtended) {
     const proxyExist = await this.proxy.get(container)
-    if (!proxyExist) return await this.disconnect()
+
+    if (!proxyExist)
+      return await this.disconnect()
   }
 
   connect(connectionData: ConnectionData) {

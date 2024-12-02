@@ -16,7 +16,6 @@ export class ContainerDeleteError extends Error {}
 
 export default class Proxy extends DockerContainer {
   protected readonly config: Config
-  public containerExtended: ContainerExtended | undefined
 
   constructor(docker?: Docker, config?: Config) {
     if (!docker)
@@ -43,9 +42,10 @@ export default class Proxy extends DockerContainer {
   }
 
   get port(): number | undefined {
-    this.withContainer()
+    if (!this.exist())
+      return
 
-    const internalPort = this.containerExtended?.NetworkSettings.Ports[`${this.config.proxyContainerLocalPort}/tcp`]
+    const internalPort = this.container?.NetworkSettings.Ports[`${this.config.proxyContainerLocalPort}/tcp`]
 
     if (!internalPort)
       return
@@ -80,18 +80,13 @@ export default class Proxy extends DockerContainer {
       return false
     }
 
-    this.containerExtended = await this.inspect()
-
     return true
   }
 
   async update() {
     const gotDockerContainer = await super.get()
-    if (!gotDockerContainer || !this.container) return false
 
-    this.containerExtended = await this.inspect()
-
-    return true
+    return !(!gotDockerContainer || !this.container)
   }
 
   async create(connectionType: ConnectionType, target: Target, _?: unknown) {
@@ -154,7 +149,7 @@ export default class Proxy extends DockerContainer {
   protected getLabel(labelKey: string) {
     this.withContainer()
 
-    const labelValue = this.containerExtended?.Config.Labels[labelKey]
+    const labelValue = this.container?.Config.Labels[labelKey]
 
     if (!labelValue)
       throw new Error(

@@ -14,7 +14,11 @@ export class MultipleContainersFoundError extends Error {
   }
 }
 export class ContainerAlreadyExistError extends Error {}
-export class ContainerDontExistError extends Error {}
+export class ContainerDontExistError extends Error {
+  constructor() {
+    super('Container don\'t exist error')
+  }
+}
 
 
 export default class Container {
@@ -72,23 +76,6 @@ export default class Container {
     this.container = undefined
 
     return rmExecResult
-  }
-
-  async inspect() {
-    if (!this.container) {
-      const containerExist = await this.get()
-
-      if (!containerExist || !this.container) throw new ContainerDontExistError()
-    }
-
-    const execResult = await this.docker.cli.exec('inspect', [
-      '--format','"json"',
-      this.container.Id
-    ])
-
-    if (execResult.stderr) throw new Error(execResult.stderr)
-
-    return execResult.parseJsonObject()[0] as ContainerExtended
   }
 
   exist() {
