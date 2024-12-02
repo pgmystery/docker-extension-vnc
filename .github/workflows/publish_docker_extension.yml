@@ -45,31 +45,6 @@ jobs:
         with:
           context: .
           platforms: linux/amd64,linux/arm64
-#          push: false
           push: true
           tags: ${{ steps.pre_meta.outputs.tags }}
           labels: ${{ steps.pre_meta.outputs.labels }}
-
-#      - name: Docker Scout Scan
-#        uses: docker/scout-action@v1.5.0
-#        with:
-#          command: quickview,cves
-#          image: local://pgmystery/docker-extension-vnc
-#          exit-on: vulnerability
-#          exit-code: true
-#
-#      - name: Extract metadata (tags, labels) for Docker
-#        id: meta
-#        uses: docker/metadata-action@v5
-#        with:
-#          images: |
-#            pgmystery/docker-extension-vnc
-#            ghcr.io/${{ github.repository }}
-#
-#      - name: Build and push Docker images
-#        uses: docker/build-push-action@v5
-#        with:
-#          context: .
-#          platforms: linux/amd64,linux/arm64
-#          push: true
-#          tags: ${{ steps.meta.outputs.tags }}
