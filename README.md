@@ -5,7 +5,7 @@
 A VNC Viewer extension for Docker Desktop.
 
 ## Table of Contents
-- [Desctiption](#description)
+- [Description](#description)
 - [Manual Installation](#manual-installation)
 - [Usage](#usage)
   - [Example Container](#the-example-container)
@@ -18,11 +18,11 @@ This Docker Desktop extension is for connecting to Docker Containers or a Remote
 
 The extension creates a Docker Container as a [proxy](https://hub.docker.com/r/pgmystery/proxy_vnc) for connecting to the target VNC Server and shows the view inside of Docker Desktop.
 
-If the connection is to a Docker Container, then the extension creates a Docker Network and add the proxy and the target container to the Network. Only this way the proxy can access the vnc server container. After disconnect, it deletes the proxy container and removes the vnc server Container from the Network.
+If the connection is to a Docker Container, then the extension creates a Docker Network and adds the proxy and the target container to the Network. Only this way, the proxy can access the VNC server container. After disconnect, it deletes the proxy container and removes the VNC server Container from the Network.
 
 It uses [noVNC](https://github.com/novnc/noVNC) as the JavaScript client package.
 
-It also comes with an example vnc server as a docker container. So you can test things out very easily.
+It also comes with an example VNC Server as a docker container. So you can test things out very easily.
 
 ## Manual Installation
 You can install the extension by using the command:
@@ -48,7 +48,7 @@ This extension support 2 different kind of connections.
 
 #### Docker Container
 1. Select the connection type "Docker Container".
-2. Select the Container from the list (if the container is not showing up, you can also manually insert the container name or id).
+2. Select the Container from the list (if the container is not showing up, you can also manually insert the Container Name or ID).
 3. Enter or select the port on which the vnc server is listening on (it is an internal port, it don't need to be exposed to the host).
 4. Click on "Connect".
 
