@@ -43,8 +43,8 @@ It will also then automatically creates the Container and a connection to the co
 ### Manually
 This extension support 2 different kind of connections.
 
-- Docker Container
-- Remote Host
+- [Docker Container](#docker-container)
+- [Remote Host](#remote-host)
 
 #### Docker Container
 1. Select the connection type "Docker Container".
