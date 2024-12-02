@@ -36,7 +36,7 @@ LABEL org.opencontainers.image.title="VNC Viewer" \
                                        {\"alt\":\"Dashboard\", \"url\":\"https://raw.githubusercontent.com/pgmystery/docker-extension-vnc/refs/heads/main/docs/imgs/screenshot4.png\"},\
                                        {\"alt\":\"Remote Host connection\", \"url\":\"https://raw.githubusercontent.com/pgmystery/docker-extension-vnc/refs/heads/main/docs/imgs/screenshot5.png\"}]" \
     com.docker.desktop.extension.icon="https://raw.githubusercontent.com/pgmystery/docker-extension-vnc/refs/heads/main/docker.svg" \
-    com.docker.extension.detailed-description="" \
+    com.docker.extension.detailed-description="Docker Desktop Extension for connecting to a VNC Server Container or Remote Host and control it over an built-in view." \
     com.docker.extension.publisher-url="https://github.com/pgmystery/docker-extension-vnc" \
     com.docker.extension.additional-urls="[{\"title\":\"Documentation\",\"url\":\"https://github.com/pgmystery/docker-extension-vnc/blob/main/README.md\"},\
                                            {\"title\":\"License\",\"url\":\"https://github.com/pgmystery/docker-extension-vnc/blob/main/LICENSE\"}]" \
