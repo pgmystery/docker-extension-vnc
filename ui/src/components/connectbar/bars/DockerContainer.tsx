@@ -7,6 +7,9 @@ import { DockerDesktopClient } from '@docker/extension-api-client-types/dist/v1'
 import { ContainerInfo } from '../../../types/docker/extension'
 import VNCDockerContainer from '../../../libs/vnc/connectionTypes/VNCDockerContainer'
 import { ConnectionData } from '../../../libs/vnc/VNC'
+import DockerCli from '../../../libs/docker/DockerCli'
+import { ContainerExtended } from '../../../types/docker/cli/inspect'
+import { isRawExecResult } from '../../../libs/docker/cli/Exec'
 
 
 interface DockerContainerProps {
@@ -83,10 +86,40 @@ export default function DockerContainer({ ddClient, disabled, onConnect, onDisco
     return containers.find(container => container.Names[0] == name) || null
   }
 
-  function handleConnectClicked() {
+  async function handleConnectClicked() {
     const selectedContainer = getContainerByName(selectedContainerName)
 
-    if (!selectedContainer) return
+    if (!selectedContainer) {
+      const dockerCli = new DockerCli(ddClient.docker)
+      let container: ContainerExtended | undefined
+
+      try {
+        container = await dockerCli.getContainerFromInspect(selectedContainerName)
+      }
+      catch (e: any) {
+        console.error(e)
+
+        if (e instanceof Error)
+          ddClient.desktopUI.toast.error(e.message)
+        else if (isRawExecResult(e))
+          ddClient.desktopUI.toast.error(e.stderr)
+
+        return
+      }
+
+      if (!container)
+        throw new Error(`Can't find the docker container with the name or id "${selectedContainerName}"`)
+
+      onConnect({
+        type: 'container',
+        data: {
+          targetContainerId: container.Id,
+          targetPort: Number(selectedPort)
+        }
+      })
+
+      return
+    }
 
     onConnect({
       type: 'container',

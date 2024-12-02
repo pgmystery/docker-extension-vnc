@@ -26,22 +26,18 @@ export default class TargetDockerContainer extends Target {
     if (this.dockerContainer?.exist())
       await this.disconnect()
 
-    const filters = {
-      id: [containerId]
-    }
-
-    this.dockerContainer = new DockerContainer(filters, this.docker)
+    this.dockerContainer = new DockerContainer(containerId, this.docker)
     const containerExist = await this.dockerContainer.get()
 
     if (!containerExist || !this.dockerContainer?.exist())
       throw new Error(`Can't find the target container with the id "${containerId}"`)
 
-    if (this.dockerContainer.container?.State !== 'running')
+    if (this.dockerContainer.container?.State.Status !== 'running')
       throw new Error(`Can't connect the container with the id "${containerId}", because the container is not running`)
 
     await this.proxyNetwork.addContainer(containerId)
     await this.dockerContainer.get()
-    const ip = this.dockerContainer.container?.NetworkSettings.Networks[this.proxyNetwork.name].IPAddress
+    const ip = this.dockerContainer.container.NetworkSettings.Networks[this.proxyNetwork.name].IPAddress
 
     if (!ip)
       throw new Error(
@@ -70,7 +66,7 @@ export default class TargetDockerContainer extends Target {
   getContainerName() {
     if (!this.dockerContainer?.exist()) return
 
-    return this.dockerContainer.container?.Names[0]
+    return this.dockerContainer.container?.Name
   }
 
   get connected() {

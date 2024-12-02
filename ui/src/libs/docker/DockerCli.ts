@@ -36,6 +36,27 @@ export default class DockerCli extends DockerCliExec {
     return containers[0]
   }
 
+  async getContainerFromInspect(containerName: string, options: {throwError: boolean} = {throwError: true}) {
+    try {
+      const execResult = await this.exec('inspect', {
+        '--format': '"json"',
+      }, containerName)
+
+      if (execResult.stderr) {
+        if (options.throwError)
+          throw new Error(execResult.stderr)
+        else
+          return
+      }
+
+      return execResult.parseJsonObject()[0] as ContainerExtended
+    }
+    catch (e) {
+      if (options.throwError)
+        throw e
+    }
+  }
+
   async inspect(containerId: string): Promise<ContainerExtended> {
     const execResult = await this.exec('inspect', {
       '--format': '"json"',

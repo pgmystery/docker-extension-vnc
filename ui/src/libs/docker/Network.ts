@@ -1,6 +1,7 @@
 import { Docker as DockerClient } from '@docker/extension-api-client-types/dist/v1'
 import DockerCliNetwork from './cli/Network'
 import { ContainerInfo } from '../../types/docker/extension'
+import { DockerNetworkContainer, DockerNetworkInfo } from '../../types/docker/cli/network'
 
 
 export default class Network {
@@ -26,13 +27,34 @@ export default class Network {
     return dockerCliNetwork.get(this.name)
   }
 
-  containers() {
-    return this.docker.listContainers({
-      all: true,
-      filters: {
-        network: [this.name]
-      }
-    }) as Promise<ContainerInfo[]>
+  async containers(): Promise<DockerNetworkContainer[]> {
+    const containers: DockerNetworkContainer[] = []
+    const networkInfo = await this.inspect()
+
+    if (!networkInfo)
+      return containers
+
+    for (const [containerId, containerNetworkInfo] of Object.entries(networkInfo.Containers)) {
+      containers.push({
+        Id: containerId,
+        ...containerNetworkInfo,
+      })
+    }
+
+    return containers
+  }
+
+  async inspect() {
+    const networkInfoExecResult = await this.docker.cli.exec('network', [
+      'inspect',
+      '--format', '"json"',
+      this.name
+    ])
+
+    if (networkInfoExecResult.stderr)
+      return
+
+    return networkInfoExecResult.parseJsonObject()[0] as DockerNetworkInfo
   }
 
   async remove({force}={force: false}) {

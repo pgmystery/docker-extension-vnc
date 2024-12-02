@@ -1,6 +1,43 @@
 import { RequireOnlyOne } from '../../utils'
 
 
+export interface DockerNetworkInfo {
+  Name: string
+  Id: string
+  Created: string
+  Scope: string
+  Driver: string
+  EnableIPv6: boolean
+  Ipam: {
+    Driver: string
+    Options: {}
+    Config: {
+      Subnet: string
+      Gateway: string
+    }[]
+  }
+  Internal: boolean
+  Attachable: boolean
+  Ingress: boolean
+  ConfigForm: {
+    Network: string
+  }
+  ConfigOnly: boolean
+  Containers: {[key: string]: Omit<DockerNetworkContainer, 'Id'>}
+  Options: {}
+  Labels: {[key: string]: string}
+}
+
+export interface DockerNetworkContainer {
+  Id: string
+  Name: string
+  EndpointID: string
+  MacAddress: string
+  IPv4Address: string
+  IPv6Address: string
+}
+
+
 export interface CliNetworkCreateOptions {
   '--alias'?: string[]
   '--driver-opt'?: string

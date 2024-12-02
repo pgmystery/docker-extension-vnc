@@ -21,18 +21,25 @@ export default class DockerCliExec {
 
     if (options) {
       for (const [cmdOption, cmdOptionValue] of Object.entries(options)) {
-        optionsList.push(cmdOption)
+        if (!cmdOptionValue) {
+          optionsList.push(cmdOption)
 
-        if (!cmdOptionValue) continue
+          continue
+        }
 
         if (Array.isArray(cmdOptionValue)) {
           for (const cmdOptionValueItem of cmdOptionValue) {
             const valueString = this.returnValueAsString(cmdOptionValueItem)
-            if (valueString) optionsList.push(valueString)
+            if (valueString) {
+              optionsList.push(cmdOption)
+              optionsList.push(valueString)
+            }
           }
 
           continue
         }
+
+        optionsList.push(cmdOption)
 
         const valueString = this.returnValueAsString(cmdOptionValue)
         if (valueString) optionsList.push(valueString)
