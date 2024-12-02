@@ -1,107 +1,63 @@
 # Docker extension VNC
 
-This repository defines an example of a Docker extension. The files in this repository have been automatically generated as a result of running `docker extension init`.
+[//]: # (https://github.com/marcelo-ochoa/pgadmin4-docker-extension)
 
-This extension is composed of:
+A VNC Viewer extension for Docker Desktop.
 
-- A [frontend](./ui) app in React that makes a request to the `/hello` endpoint and displays the payload in Docker Desktop.
-- A [backend](./backend) container that runs an API in Go. It exposes the `/hello` endpoint which returns a JSON payload.
+## Table of Contents
+- [Desctiption](#description)
+- [Manual Installation](#manual-installation)
+- [Usage](#usage)
+  - [Example Container](#the-example-container)
+  - [Manually](#manually)
+    - [Docker Container](#docker-container)
+    - [Remote Host](#remote-host)
 
-> You can build your Docker Extension using your fav tech stack:
->
-> - Frontend: React, Angular, Vue, Svelte, etc.
->   Basically, any frontend framework you can bundle in an `index.html` file with CSS, and JS assets.
-> - Backend (optional): anything that can run in a container.
+## Description
+This Docker Desktop extension is for connecting to Docker Containers or a Remote Host which have a [VNC](https://en.wikipedia.org/wiki/VNC) Server running.
 
-<details>
-  <summary>Looking for more templates?</summary>
+The extension creates a Docker Container as a [proxy](https://hub.docker.com/r/pgmystery/proxy_vnc) for connecting to the target VNC Server and shows the view inside of Docker Desktop.
 
-1. [React + NodeJS](https://github.com/benja-M-1/node-backend-extension).
-2. [React + .NET 6 WebAPI](https://github.com/felipecruz91/dotnet-api-docker-extension).
+If the connection is to a Docker Container, then the extension creates a Docker Network and add the proxy and the target container to the Network. Only this way the proxy can access the vnc server container. After disconnect, it deletes the proxy container and removes the vnc server Container from the Network.
 
-Request one or submit yours [here](https://github.com/docker/extensions-sdk/issues).
+It uses [noVNC](https://github.com/novnc/noVNC) as the JavaScript client package.
 
-</details>
+It also comes with an example vnc server as a docker container. So you can test things out very easily.
 
-## Local development
-
-You can use `docker` to build, install and push your extension. Also, we provide an opinionated [Makefile](Makefile) that could be convenient for you. There isn't a strong preference of using one over the other, so just use the one you're most comfortable with.
-
-To build the extension, use `make build-extension` **or**:
+## Manual Installation
+You can install the extension by using the command:
 
 ```shell
-  docker buildx build -t pgmystery/docker-extension-vnc:latest . --load
+docker extension install pgmystery/docker-extension-vnc:1.0.0
 ```
 
-To install the extension, use `make install-extension` **or**:
+## Usage
 
-```shell
-  docker extension install pgmystery/docker-extension-vnc:latest
-```
+### The example Container
+You can right start by seeing the possibility of this extension if you just click the button "Try example container".
+It will download an [example Docker Image](https://hub.docker.com/r/pgmystery/ubuntu_vnc) with a vnc server and a Desktop installed.
+It will also then automatically creates the Container and a connection to the container in the extension will be accomplished.
 
-> If you want to automate this command, use the `-f` or `--force` flag to accept the warning message.
+![screenshot4.png](docs/imgs/screenshot4.png)
 
-To preview the extension in Docker Desktop, open Docker Dashboard once the installation is complete. The left-hand menu displays a new tab with the name of your extension. You can also use `docker extension ls` to see that the extension has been installed successfully.
+### Manually
+This extension support 2 different kind of connections.
 
-### Frontend development
+- Docker Container
+- Remote Host
 
-During the development of the frontend part, it's helpful to use hot reloading to test your changes without rebuilding your entire extension. To do this, you can configure Docker Desktop to load your UI from a development server.
-Assuming your app runs on the default port, start your UI app and then run:
+#### Docker Container
+1. Select the connection type "Docker Container".
+2. Select the Container from the list (if the container is not showing up, you can also manually insert the container name or id).
+3. Enter or select the port on which the vnc server is listening on (it is an internal port, it don't need to be exposed to the host).
+4. Click on "Connect".
 
-```shell
-  cd ui
-  npm install
-  npm run dev
-```
+![screenshot1.png](docs/imgs/screenshot1.png)
 
-This starts a development server that listens on port `3000`.
+#### Remote Host
+1. Select the connection type "Remote Host".
+2. Enter the IP of the Host you have access to.
+3. Type in the port of the VNC Server on the Remote Host.
+4. Click on "Connect".
 
-You can now tell Docker Desktop to use this as the frontend source. In another terminal run:
-
-```shell
-  docker extension dev ui-source pgmystery/docker-extension-vnc:latest http://localhost:3000
-```
-
-In order to open the Chrome Dev Tools for your extension when you click on the extension tab, run:
-
-```shell
-  docker extension dev debug pgmystery/docker-extension-vnc:latest
-```
-
-Each subsequent click on the extension tab will also open Chrome Dev Tools. To stop this behaviour, run:
-
-```shell
-  docker extension dev reset pgmystery/docker-extension-vnc:latest
-```
-
-### Backend development (optional)
-
-This example defines an API in Go that is deployed as a backend container when the extension is installed. This backend could be implemented in any language, as it runs inside a container. The extension frameworks provides connectivity from the extension UI to a socket that the backend has to connect to on the server side.
-
-Note that an extension doesn't necessarily need a backend container, but in this example we include one for teaching purposes.
-
-Whenever you make changes in the [backend](./backend) source code, you will need to compile them and re-deploy a new version of your backend container.
-Use the `docker extension update` command to remove and re-install the extension automatically:
-
-```shell
-docker extension update pgmystery/docker-extension-vnc:latest
-```
-
-> If you want to automate this command, use the `-f` or `--force` flag to accept the warning message.
-
-> Extension containers are hidden from the Docker Dashboard by default. You can change this in Settings > Extensions > Show Docker Extensions system containers.
-
-### Clean up
-
-To remove the extension:
-
-```shell
-docker extension rm pgmystery/docker-extension-vnc:latest
-```
-
-## What's next?
-
-- To learn more about how to build your extension refer to the Extension SDK docs at https://docs.docker.com/desktop/extensions-sdk/.
-- To publish your extension in the Marketplace visit https://www.docker.com/products/extensions/submissions/.
-- To report issues and feedback visit https://github.com/docker/extensions-sdk/issues.
-- To look for other ideas of new extensions, or propose new ideas of extensions you would like to see, visit https://github.com/docker/extension-ideas/discussions.
+![screenshot5.png](docs/imgs/screenshot5.png)
