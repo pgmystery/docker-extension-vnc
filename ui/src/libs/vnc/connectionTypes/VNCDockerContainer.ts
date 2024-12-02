@@ -5,7 +5,7 @@ import { Docker } from '@docker/extension-api-client-types/dist/v1'
 import { Config, loadConfig } from '../../../hooks/useConfig'
 import { createDockerDesktopClient } from '@docker/extension-api-client'
 import ProxyDockerContainer from '../proxies/ProxyDockerContainer'
-import { ContainerInfo } from '../../../types/docker/extension'
+import { ContainerExtended } from '../../../types/docker/cli/inspect'
 
 
 export type ConnectionTypeDockerContainer = 'container'
@@ -41,7 +41,7 @@ export default class VNCDockerContainer extends VNCConnection {
     this.type = 'container'
   }
 
-  async reconnect(container: ContainerInfo) {
+  async reconnect(container: ContainerExtended) {
     const proxyExist = await this.proxy.get(container)
     if (!proxyExist) return await this.disconnect()
 

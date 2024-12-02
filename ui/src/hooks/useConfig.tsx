@@ -3,6 +3,7 @@ import { useState } from 'react'
 export interface Config {
   network: string
   proxyDockerImage: string
+  proxyContainerName: string
   proxyContainerLabelKey: string
   proxyContainerLocalPort: number
   proxyContainerLabelContainerId: string
@@ -23,6 +24,7 @@ export default function useConfig() {
 export function loadConfig(): Config {
   const network = import.meta.env.VITE_VNC_CONNECT_DOCKER_NETWORK as EnvVarType
   const proxyDockerImage = import.meta.env.VITE_VNC_PROXY_DOCKER_IMAGE as EnvVarType
+  const proxyContainerName = import.meta.env.VITE_VNC_PROXY_CONTAINER_NAME as EnvVarType
   const proxyContainerLabelKey = import.meta.env.VITE_VNC_PROXY_CONTAINER_LABEL_KEY as EnvVarType
   const proxyContainerLocalPort = Number(import.meta.env.VITE_VNC_PROXY_CONTAINER_LOCAL_PORT as EnvVarType)
   const proxyContainerLabelContainerId = import.meta.env.VITE_VNC_PROXY_CONTAINER_LABEL_CONTAINER_ID as EnvVarType
@@ -35,6 +37,9 @@ export function loadConfig(): Config {
 
   if (!proxyDockerImage)
     throw new Error('the envar "VITE_VNC_PROXY_DOCKER_IMAGE" is not set')
+
+  if (!proxyContainerName)
+    throw new Error('the envar "VITE_VNC_PROXY_CONTAINER_NAME" is not set')
 
   if (!proxyContainerLabelKey)
     throw new Error('the envar "VITE_VNC_PROXY_CONTAINER_LABEL_KEY" is not set')
@@ -57,6 +62,7 @@ export function loadConfig(): Config {
   return {
     network,
     proxyDockerImage,
+    proxyContainerName,
     proxyContainerLabelKey,
     proxyContainerLocalPort,
     proxyContainerLabelContainerId,

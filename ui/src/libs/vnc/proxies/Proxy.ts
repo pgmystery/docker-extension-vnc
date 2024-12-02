@@ -1,8 +1,7 @@
 import { Config, loadConfig } from '../../../hooks/useConfig'
 import { createDockerDesktopClient } from '@docker/extension-api-client'
 import { Docker } from '@docker/extension-api-client-types/dist/v1'
-import { ContainerInfo, DockerListContainersFilters } from '../../../types/docker/extension'
-import DockerContainer, { MultipleContainersFoundError } from '../../docker/Container'
+import DockerContainer from '../../docker/Container'
 import { ContainerExtended } from '../../../types/docker/cli/inspect'
 import MultiExecResult from '../../docker/MultiExecResult'
 import { ConnectionType } from '../VNC'
@@ -17,7 +16,6 @@ export class ContainerDeleteError extends Error {}
 
 export default class Proxy extends DockerContainer {
   protected readonly config: Config
-  public containerExtended: ContainerExtended | undefined
 
   constructor(docker?: Docker, config?: Config) {
     if (!docker)
@@ -26,12 +24,7 @@ export default class Proxy extends DockerContainer {
     if (!config)
       config = loadConfig()
 
-    const proxyContainerFilter: DockerListContainersFilters = {
-      label: [
-        config.proxyContainerLabelKey,
-      ],
-    }
-    super(proxyContainerFilter, docker)
+    super(config.proxyContainerName, docker)
 
     this.config = config
   }
@@ -48,20 +41,31 @@ export default class Proxy extends DockerContainer {
     return Number(this.getLabel(this.config.proxyContainerLabelTargetPort))
   }
 
-  get port(): number {
-    this.withContainer()
+  get port(): number | undefined {
+    if (!this.exist())
+      return
 
-    return Number(this.containerExtended?.NetworkSettings.Ports[`${this.config.proxyContainerLocalPort}/tcp`][0].HostPort)
+    const internalPort = this.container?.NetworkSettings.Ports[`${this.config.proxyContainerLocalPort}/tcp`]
+
+    if (!internalPort)
+      return
+
+    return Number(internalPort[0].HostPort)
   }
 
   get url(): ProxyURL {
+    const port = this.port
+
+    if (!port)
+      throw new Error('Can\'t get the proxy container external port')
+
     return {
-      ws: `ws://localhost:${this.port}/websockify`,
-      browser: `http://localhost:${this.port}/vnc.html`
+      ws: `ws://localhost:${port}/websockify`,
+      browser: `http://localhost:${port}/vnc.html`
     }
   }
 
-  async get(container?: ContainerInfo) {
+  async get(container?: ContainerExtended) {
     if (!container) {
       const gotDockerContainer = await super.get()
       if (!gotDockerContainer || !this.container) return false
@@ -70,24 +74,19 @@ export default class Proxy extends DockerContainer {
       this.container = container
     }
 
-    if (this.container.State !== 'running') {
+    if (this.container.State.Status !== 'running') {
       await this.delete()
 
       return false
     }
-
-    this.containerExtended = await this.inspect()
 
     return true
   }
 
   async update() {
     const gotDockerContainer = await super.get()
-    if (!gotDockerContainer || !this.container) return false
 
-    this.containerExtended = await this.inspect()
-
-    return true
+    return !(!gotDockerContainer || !this.container)
   }
 
   async create(connectionType: ConnectionType, target: Target, _?: unknown) {
@@ -106,6 +105,7 @@ export default class Proxy extends DockerContainer {
     const targetPort = target.connection.port
     const {
       proxyContainerLabelKey,
+      proxyContainerName,
       proxyContainerLabelTargetIp,
       proxyContainerLabelTargetPort,
       proxyContainerLabelConnectionType,
@@ -119,6 +119,7 @@ export default class Proxy extends DockerContainer {
     const createExecResult = await this.createContainer(this.config.proxyDockerImage, [
       ...args,
       '--detach',
+      '--name', proxyContainerName,
       '--label', labelIdentify,
       '--label', labelTargetIp,
       '--label', labelTargetPort,
@@ -137,34 +138,10 @@ export default class Proxy extends DockerContainer {
     if (execResult.stderr)
       throw new Error(execResult.stderr)
 
-    try {
-      const gotContainer = await this.get()
+    const gotContainer = await this.get()
 
-      if (gotContainer) throw new ContainerDeleteError('Can\' delete the proxy container')
-    }
-    catch (e) {
-      if (e instanceof MultipleContainersFoundError) {
-        const multiExecResult = new MultiExecResult(execResult)
-
-        const proxyContainers = await this.docker.listContainers({
-          all: true,
-          filters: this.filters
-        }) as ContainerInfo[]
-
-        const deleteProxyContainersExecResult = await this.docker.cli.exec('rm', [
-          '--force',
-          ...proxyContainers.map(container => container.Id)
-        ])
-        if (deleteProxyContainersExecResult.stderr)
-          throw new ContainerDeleteError(deleteProxyContainersExecResult.stderr)
-
-        multiExecResult.addExecResult(deleteProxyContainersExecResult)
-
-        return multiExecResult
-      }
-
-      throw e
-    }
+    if (gotContainer)
+      throw new ContainerDeleteError('Can\' delete the proxy container')
 
     return execResult
   }
@@ -172,7 +149,7 @@ export default class Proxy extends DockerContainer {
   protected getLabel(labelKey: string) {
     this.withContainer()
 
-    const labelValue = this.containerExtended?.Config.Labels[labelKey]
+    const labelValue = this.container?.Config.Labels[labelKey]
 
     if (!labelValue)
       throw new Error(

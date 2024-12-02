@@ -8,8 +8,8 @@ import TextStreamOutput from '../utils/TextStreamOutput'
 import { Toast } from '@docker/extension-api-client-types/dist/v1'
 import { isRawExecResult } from '../../libs/docker/cli/Exec'
 import DockerCli from '../../libs/docker/DockerCli'
-import { ContainerInfo } from '../../types/docker/extension'
 import { ConnectionData } from '../../libs/vnc/VNC'
+import { ContainerExtended } from '../../types/docker/cli/inspect'
 
 
 interface DashboardProps {
@@ -17,6 +17,7 @@ interface DashboardProps {
   connect: (connectionData: ConnectionData)=>void
 }
 
+const UbuntuVNCDockerContainerName = 'ubuntu_vnc'
 const UbuntuVNCDockerImage = 'pgmystery/ubuntu_vnc:latest'
 const UbuntuVNCDockerImageLabel = 'pgmystery.vnc.extension.example'
 const UbuntuVNCDockerImagePort = 5901
@@ -28,7 +29,7 @@ export default function Dashboard({ ddUIToast, connect }: DashboardProps) {
   const [started, setStarted] = useState<boolean>(false)
   const [pullStdout, dispatch] = useReducer(addPullStdout, [])
   const [pullFinished, setPullFinished] = useState<boolean>(false)
-  const [exampleContainer, setExampleContainer] = useState<ContainerInfo | null>(null)
+  const [exampleContainer, setExampleContainer] = useState<ContainerExtended | null>(null)
 
   useEffect(() => {
     checkIfExampleContainerExist()
@@ -93,8 +94,10 @@ export default function Dashboard({ ddUIToast, connect }: DashboardProps) {
   async function runExampleContainer(dockerCli: DockerCli) {
     const execResult = await dockerCli.run(UbuntuVNCDockerImage, {
       '--detach': null,
-      '--name': 'ubuntu_vnc',
-      '--label': `${UbuntuVNCDockerImageLabel}=""`
+      '--name': UbuntuVNCDockerContainerName,
+      '--label': [
+        `${UbuntuVNCDockerImageLabel}=""`,
+      ],
     })
 
     if (execResult.stderr) {
@@ -118,7 +121,7 @@ export default function Dashboard({ ddUIToast, connect }: DashboardProps) {
 
     setExampleContainer(exampleContainer)
 
-    if (exampleContainer.State !== 'running')
+    if (exampleContainer.State.Status !== 'running')
       return ddUIToast?.error('The example container is not running...')
 
     connect({
@@ -131,9 +134,7 @@ export default function Dashboard({ ddUIToast, connect }: DashboardProps) {
   }
 
   function getExampleContainer(dockerCli: DockerCli) {
-    return dockerCli.getContainer({
-      label: [UbuntuVNCDockerImageLabel],
-    })
+    return dockerCli.getContainerFromInspect(UbuntuVNCDockerContainerName, {throwError: false})
   }
 
   async function handleDeleteExampleContainerClick() {
@@ -143,6 +144,7 @@ export default function Dashboard({ ddUIToast, connect }: DashboardProps) {
 
     let exampleContainerExist = await checkIfExampleContainerExist()
     if (!exampleContainerExist) return
+    setLoading(true)
 
     const dockerCli = new DockerCli()
     const execResult = await dockerCli.rm(exampleContainer.Id, {force: true})
@@ -152,6 +154,8 @@ export default function Dashboard({ ddUIToast, connect }: DashboardProps) {
 
     exampleContainerExist = await checkIfExampleContainerExist()
     if (exampleContainerExist) ddUIToast?.error(`An Unknown error appeared while tying to delete the example container`)
+
+    setLoading(false)
   }
 
   return (
@@ -167,7 +171,7 @@ export default function Dashboard({ ddUIToast, connect }: DashboardProps) {
           <OutlinedInput
             inputRef={exampleRunInputRef}
             disabled
-            value={ `docker run --name ubuntu_vnc ${UbuntuVNCDockerImage}` }
+            value={ `docker run --name ${UbuntuVNCDockerContainerName} ${UbuntuVNCDockerImage}` }
             endAdornment={
               <InputAdornment position="end">
                 <Tooltip title="Copy to clipboard">
@@ -189,7 +193,17 @@ export default function Dashboard({ ddUIToast, connect }: DashboardProps) {
             textAlign: 'left',
             marginLeft: '14px',
             marginRight: '14px',
-          }}>vnc connect password = foobar</Typography>
+          }}>VNC connect Password = foobar</Typography>
+          <Typography sx={{
+            textAlign: 'left',
+            marginLeft: '14px',
+            marginRight: '14px',
+          }}>Docker Container Name = ubuntu_vnc</Typography>
+          <Typography sx={{
+            textAlign: 'left',
+            marginLeft: '14px',
+            marginRight: '14px',
+          }}>VNC Port = 5901</Typography>
         </FormControl>
         {
           exampleContainer

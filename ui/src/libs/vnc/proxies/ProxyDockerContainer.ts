@@ -4,10 +4,10 @@ import { Docker } from '@docker/extension-api-client-types/dist/v1'
 import { Config } from '../../../hooks/useConfig'
 import DockerContainer from '../../docker/Container'
 import TargetDockerContainer from '../targets/TargetDockerContainer'
-import { ContainerInfo } from '../../../types/docker/extension'
 import { ConnectionType } from '../VNC'
 import { ConnectionDataDockerContainerData } from '../connectionTypes/VNCDockerContainer'
 import MultiExecResult from '../../docker/MultiExecResult'
+import { ContainerExtended } from '../../../types/docker/cli/inspect'
 
 export default class ProxyDockerContainer extends Proxy {
   private readonly proxyNetwork: ProxyNetwork
@@ -18,11 +18,12 @@ export default class ProxyDockerContainer extends Proxy {
     this.proxyNetwork = new ProxyNetwork(docker, config)
   }
 
-  async get(container?: ContainerInfo) {
+  async get(container?: ContainerExtended) {
     const gotDockerContainer = await super.get(container)
     if (!gotDockerContainer || !this.container) return false
 
     const isInNetwork = await this.proxyNetwork.hasContainer(this.container.Id)
+
     if (!isInNetwork) {
       await this.delete()
 
@@ -52,9 +53,7 @@ export default class ProxyDockerContainer extends Proxy {
       if (!isInNetwork)
         await this.delete()
 
-      const targetContainer = new DockerContainer({
-        id: [targetContainerId]
-      }, this.docker)
+      const targetContainer = new DockerContainer(targetContainerId, this.docker)
       const targetContainerExist = await targetContainer.get()
       if (!targetContainerExist || !targetContainer.container)
         throw new Error(`Target container with the id "${targetContainerId}" don't exist`)

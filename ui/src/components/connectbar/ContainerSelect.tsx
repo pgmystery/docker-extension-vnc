@@ -20,9 +20,10 @@ export default function ContainerSelect({ containers, disabled, selectedContaine
 
   return (
     <Autocomplete
+      freeSolo
       disabled={disabled}
       options={containerNames}
-      renderInput={params => <TextField { ...params } label="Docker Container" />}
+      renderInput={params => <TextField { ...params } label="Docker Container Name/ID" />}
       inputValue={selectedContainerName}
       onInputChange={(_, value) => setSelectedContainerName(value)}
       sx={{ width: 300 }}

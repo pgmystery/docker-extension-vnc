@@ -2,7 +2,7 @@ import VNCConnection from './VNCConnection'
 import { Config, loadConfig } from '../../../hooks/useConfig'
 import { Docker } from '@docker/extension-api-client-types/dist/v1'
 import { createDockerDesktopClient } from '@docker/extension-api-client'
-import { ContainerInfo } from '../../../types/docker/extension'
+import { ContainerExtended } from '../../../types/docker/cli/inspect'
 
 
 export type ConnectionTypeRemoteHost = 'remote'
@@ -30,7 +30,7 @@ export default class VNCRemoteHost extends VNCConnection {
     this.type = 'remote'
   }
 
-  async reconnect(container: ContainerInfo) {
+  async reconnect(container: ContainerExtended) {
     await super.reconnect(container)
 
     const targetIp = this.proxy.getTargetIp()

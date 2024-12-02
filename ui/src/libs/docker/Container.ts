@@ -1,4 +1,4 @@
-import { ContainerInfo,  DockerListContainersFilters } from '../../types/docker/extension'
+import { ContainerInfo } from '../../types/docker/extension'
 import { Docker } from '@docker/extension-api-client-types/dist/v1'
 import { createDockerDesktopClient } from '@docker/extension-api-client'
 import { ContainerExtended } from '../../types/docker/cli/inspect'
@@ -14,37 +14,46 @@ export class MultipleContainersFoundError extends Error {
   }
 }
 export class ContainerAlreadyExistError extends Error {}
-export class ContainerDontExistError extends Error {}
+export class ContainerDontExistError extends Error {
+  constructor() {
+    super('Container don\'t exist error')
+  }
+}
 
 
 export default class Container {
   protected docker: Docker
-  protected filters: DockerListContainersFilters
-  public container: ContainerInfo | undefined
+  protected name: string
+  public container: ContainerExtended | undefined
 
-  constructor(filters: DockerListContainersFilters={}, docker?: Docker) {
+  constructor(containerName: string, docker?: Docker) {
     if (!docker)
       docker = createDockerDesktopClient().docker
 
     this.docker = docker
-    this.filters = filters
+    this.name = containerName
   }
 
   async get() {
     this.container = undefined
 
-    const containers = await this.docker.listContainers({
-      all: true,
-      filters: this.filters,
-    }) as ContainerInfo[]
+    try {
+      const execResult = await this.docker.cli.exec('inspect', [
+        '--format', '"json"',
+        this.name
+      ])
 
-    if (containers.length > 1) throw new MultipleContainersFoundError(containers)
+      if (execResult.stderr) {
+        return false
+      }
 
-    if (containers.length === 0) return false
+      this.container = execResult.parseJsonObject()[0] as ContainerExtended
 
-    this.container = containers[0]
-
-    return true
+      return true
+    }
+    catch (_) {
+      return false
+    }
   }
 
   protected async createContainer(dockerImage: string, args: string[] = [], cmds: string[] = []) {
@@ -67,23 +76,6 @@ export default class Container {
     this.container = undefined
 
     return rmExecResult
-  }
-
-  async inspect() {
-    if (!this.container) {
-      const containerExist = await this.get()
-
-      if (!containerExist || !this.container) throw new ContainerDontExistError()
-    }
-
-    const execResult = await this.docker.cli.exec('inspect', [
-      '--format','"json"',
-      this.container.Id
-    ])
-
-    if (execResult.stderr) throw new Error(execResult.stderr)
-
-    return execResult.parseJsonObject()[0] as ContainerExtended
   }
 
   exist() {
