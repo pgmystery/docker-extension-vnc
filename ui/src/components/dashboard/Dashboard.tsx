@@ -10,11 +10,13 @@ import { isRawExecResult } from '../../libs/docker/cli/Exec'
 import DockerCli from '../../libs/docker/DockerCli'
 import { ConnectionData } from '../../libs/vnc/VNC'
 import { ContainerExtended } from '../../types/docker/cli/inspect'
+import { VNCCredentials } from '../VNCView/VNCView'
+import useConfig from '../../hooks/useConfig'
 
 
 interface DashboardProps {
   ddUIToast?: Toast
-  connect: (connectionData: ConnectionData)=>void
+  connect: (connectionData: ConnectionData, credentials?: VNCCredentials)=>void
 }
 
 const UbuntuVNCDockerContainerName = 'ubuntu_vnc'
@@ -30,6 +32,7 @@ export default function Dashboard({ ddUIToast, connect }: DashboardProps) {
   const [pullStdout, dispatch] = useReducer(addPullStdout, [])
   const [pullFinished, setPullFinished] = useState<boolean>(false)
   const [exampleContainer, setExampleContainer] = useState<ContainerExtended | null>(null)
+  const [{ proxyContainerPassword }] = useConfig()
 
   useEffect(() => {
     checkIfExampleContainerExist()
@@ -130,6 +133,9 @@ export default function Dashboard({ ddUIToast, connect }: DashboardProps) {
         targetContainerId: exampleContainer.Id,
         targetPort: UbuntuVNCDockerImagePort,
       }
+    }, {
+      password: proxyContainerPassword,
+      saveCredentials: true,
     })
   }
 
@@ -193,7 +199,7 @@ export default function Dashboard({ ddUIToast, connect }: DashboardProps) {
             textAlign: 'left',
             marginLeft: '14px',
             marginRight: '14px',
-          }}>VNC connect Password = foobar</Typography>
+          }}>VNC connect Password = { proxyContainerPassword }</Typography>
           <Typography sx={{
             textAlign: 'left',
             marginLeft: '14px',

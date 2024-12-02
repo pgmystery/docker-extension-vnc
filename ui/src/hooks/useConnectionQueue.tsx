@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react'
 import { ConnectionData } from '../libs/vnc/VNC'
+import { VNCCredentials } from '../components/VNCView/VNCView'
 
 
 export type ConnectionQueueProps = ConnectionQueueConnect | ConnectionQueueDisconnect
@@ -7,6 +8,7 @@ export type ConnectionQueueProps = ConnectionQueueConnect | ConnectionQueueDisco
 interface ConnectionQueueConnect {
   type: 'connect'
   connectionData: ConnectionData
+  credentials?: VNCCredentials
 }
 
 interface ConnectionQueueDisconnect {
@@ -14,7 +16,7 @@ interface ConnectionQueueDisconnect {
 }
 
 interface ConnectionQueueCallbacks {
-  onConnect: (connectionData: ConnectionData)=>Promise<(() => Promise<void>) | undefined | void>
+  onConnect: (connectionData: ConnectionData, credentials?: VNCCredentials)=>Promise<(() => Promise<void>) | undefined | void>
   onDisconnect: ()=>Promise<(() => Promise<void>) | undefined | void>
 }
 
@@ -27,9 +29,9 @@ export default function useConnectionQueue(callbacks: ConnectionQueueCallbacks, 
 
     switch (connectionQueue.type) {
       case 'connect':
-        const { connectionData } = connectionQueue
+        const { connectionData, credentials } = connectionQueue
 
-        runCallback(callbacks.onConnect, connectionData)
+        runCallback(callbacks.onConnect, connectionData, credentials)
 
         break
       case 'disconnect':
@@ -49,9 +51,10 @@ export default function useConnectionQueue(callbacks: ConnectionQueueCallbacks, 
   }
 
   return {
-    connect: (connectionData: ConnectionData) => setConnectionQueue({
+    connect: (connectionData: ConnectionData, credentials?: VNCCredentials) => setConnectionQueue({
       type: 'connect',
       connectionData,
+      credentials,
     }),
     disconnect: () => setConnectionQueue({
       type: 'disconnect',
