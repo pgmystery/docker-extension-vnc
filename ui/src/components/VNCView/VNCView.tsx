@@ -15,6 +15,7 @@ interface VNCViewProps {
   openBrowserURL: (url: string)=>void
   url?: ProxyURL
   onCancel: ()=>void
+  credentials?: VNCCredentials
 }
 
 export interface VNCCredentials {
@@ -31,10 +32,10 @@ export interface VNCSettingsData {
 }
 
 
-export default function VNCView({ url, onCancel, ddUIToast, openBrowserURL }: VNCViewProps) {
+export default function VNCView({ url, onCancel, ddUIToast, openBrowserURL, credentials }: VNCViewProps) {
   const vncContainerRef = useRef<HTMLDivElement>(null)
   const vncScreenRef = useRef<React.ElementRef<typeof VncScreen>>(null)
-  const [credentials, setCredentials] = useState<VNCCredentials>({saveCredentials: false})
+  const [currentCredentials, setCurrentCredentials] = useState<VNCCredentials>({saveCredentials: false})
   const [needsCredentials, setNeedsCredentials] = useState<boolean>(false)
   const [trySaveCredentials, setTrySaveCredentials] = useState<boolean>(false)
   const [openSettingsDialog, setOpenSettingsDialog] = useState<boolean>(false)
@@ -49,11 +50,16 @@ export default function VNCView({ url, onCancel, ddUIToast, openBrowserURL }: VN
     }
 
     connect?.()
-  }, [credentials])
+  }, [currentCredentials])
 
   useEffect(() => {
     reconnect()
   }, [settings])
+
+  useEffect(() => {
+    if (credentials)
+      handleCredentialDialogSubmit(credentials)
+  }, [credentials])
 
   function handleCredentialRequest() {
     if (trySaveCredentials) {
@@ -73,7 +79,7 @@ export default function VNCView({ url, onCancel, ddUIToast, openBrowserURL }: VN
     }
 
     setTrySaveCredentials(true)
-    setCredentials(JSON.parse(savedCredentialsJSON))
+    setCurrentCredentials(JSON.parse(savedCredentialsJSON))
   }
 
   function cancelCredentialDialog() {
@@ -92,7 +98,7 @@ export default function VNCView({ url, onCancel, ddUIToast, openBrowserURL }: VN
       localStorage.removeItem('credentials')
     }
 
-    setCredentials(credentials)
+    setCurrentCredentials(credentials)
     setNeedsCredentials(false)
   }
 
@@ -176,7 +182,7 @@ export default function VNCView({ url, onCancel, ddUIToast, openBrowserURL }: VN
             onCredentialsRequired={handleCredentialRequest}
             onSecurityFailure={handleSecurityFailure}
             rfbOptions={{
-              credentials,
+              credentials: currentCredentials,
             }}
             loadingUI={<VNCViewSkeleton />}
             qualityLevel={settings.qualityLevel}

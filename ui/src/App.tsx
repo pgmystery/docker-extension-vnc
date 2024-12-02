@@ -3,7 +3,7 @@ import { createDockerDesktopClient } from '@docker/extension-api-client'
 import { Backdrop, CircularProgress, Divider, Stack } from '@mui/material'
 import ConnectBar from './components/connectbar/ConnectBar'
 import useConnectionQueue from './hooks/useConnectionQueue'
-import VNCView from './components/VNCView/VNCView'
+import VNCView, { VNCCredentials } from './components/VNCView/VNCView'
 import useVNC from './hooks/useVNC'
 import { isRawExecResult } from './libs/docker/cli/Exec'
 import VNCProxyImagePullDialog from './components/VNCView/VNCProxyImagePullDialog'
@@ -15,6 +15,7 @@ import { ProxyURL } from './libs/vnc/proxies/Proxy'
 export interface ConnectedData {
   url: ProxyURL
   connection: VNCConnectionType
+  credentials?: VNCCredentials
 }
 
 
@@ -56,7 +57,7 @@ export function App() {
     setLoading(false)
   }
 
-  async function handleConnectClicked(connectionData: ConnectionData) {
+  async function handleConnectClicked(connectionData: ConnectionData, credentials?: VNCCredentials) {
     async function connect() {
       const proxyDockerImageExist = await vnc.dockerProxyImageExist()
 
@@ -83,6 +84,7 @@ export function App() {
       setConnectedData({
         url: vnc.connection?.proxy.url,
         connection: vnc.connection,
+        credentials,
       })
     }
 
@@ -138,6 +140,7 @@ export function App() {
               />
             : <VNCView
                 url={connectedData.url}
+                credentials={connectedData.credentials}
                 onCancel={disconnect}
                 ddUIToast={ddClient.desktopUI.toast}
                 openBrowserURL={ddClient.host.openExternal}

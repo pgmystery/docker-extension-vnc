@@ -10,11 +10,12 @@ export interface Config {
   proxyContainerLabelTargetIp: string
   proxyContainerLabelTargetPort: string
   proxyContainerLabelConnectionType: string
+  proxyContainerPassword: string
 }
 
 type EnvVarType = string | undefined
 
-export default function useConfig() {
+export default function useConfig(): [Config, ()=>void] {
   const [config, setConfig] = useState<Config>(loadConfig())
   const reloadConfig = () => setConfig(loadConfig())
 
@@ -31,6 +32,7 @@ export function loadConfig(): Config {
   const proxyContainerLabelTargetIp = import.meta.env.VITE_VNC_PROXY_CONTAINER_LABEL_TARGET_IP as EnvVarType
   const proxyContainerLabelTargetPort = import.meta.env.VITE_VNC_PROXY_CONTAINER_LABEL_TARGET_PORT as EnvVarType
   const proxyContainerLabelConnectionType = import.meta.env.VITE_VNC_PROXY_CONTAINER_LABEL_CONNECTION_TYPE as EnvVarType
+  const proxyContainerPassword = import.meta.env.VITE_VNC_PROXY_CONTAINER_PASSWORD as EnvVarType
 
   if (!network)
     throw new Error('the envar "VITE_VNC_CONNECT_DOCKER_NETWORK" is not set')
@@ -59,6 +61,9 @@ export function loadConfig(): Config {
   if (!proxyContainerLabelConnectionType)
     throw new Error('the envar "VITE_VNC_PROXY_CONTAINER_LABEL_CONNECTION_TYPE" is not set')
 
+  if (!proxyContainerPassword)
+    throw new Error('the envar "VITE_VNC_PROXY_CONTAINER_PASSWORD" is not set')
+
   return {
     network,
     proxyDockerImage,
@@ -69,5 +74,6 @@ export function loadConfig(): Config {
     proxyContainerLabelTargetIp,
     proxyContainerLabelTargetPort,
     proxyContainerLabelConnectionType,
+    proxyContainerPassword,
   }
 }
