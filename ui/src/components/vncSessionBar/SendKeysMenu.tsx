@@ -100,30 +100,30 @@ export default function SendKeysMenu({ sendKey, sendCtrlAltDel }: SendKeysMenuPr
             sx: {
               overflow: 'visible',
               filter: 'drop-shadow(0px 2px 8px rgba(0,0,0,0.32))',
-              // mt: 1.5,
+              mt: 1.5,
               '& .MuiAvatar-root': {
                 width: 32,
                 height: 32,
                 ml: -0.5,
                 mr: 1,
               },
-              // '&::before': {
-              //   content: '""',
-              //   display: 'block',
-              //   position: 'absolute',
-              //   top: 0,
-              //   right: 14,
-              //   width: 10,
-              //   height: 10,
-              //   bgcolor: 'background.paper',
-              //   transform: 'translateY(-50%) rotate(45deg)',
-              //   zIndex: 0,
-              // },
+              '&::before': {
+                content: '""',
+                display: 'block',
+                position: 'absolute',
+                top: 0,
+                left: 14,
+                width: 10,
+                height: 10,
+                bgcolor: 'background.paper',
+                transform: 'translateY(-50%) rotate(45deg)',
+                zIndex: 0,
+              },
             },
           },
         }}
-        transformOrigin={{ horizontal: 'right', vertical: 'top' }}
-        anchorOrigin={{ horizontal: 'right', vertical: 'bottom' }}
+        transformOrigin={{ horizontal: 'left', vertical: 'top' }}
+        anchorOrigin={{ horizontal: 'left', vertical: 'bottom' }}
       >
         <ListSubheader>Toggle keys</ListSubheader>
 
@@ -177,7 +177,6 @@ export default function SendKeysMenu({ sendKey, sendCtrlAltDel }: SendKeysMenuPr
 
         {/*https://docs.rs/x11-dl/1.0.1/x11_dl/keysym/constant.XK_Tab.html*/}
         <MenuItem onClick={() => sendKeyToVNCView(65289, 'Tab')}>
-          {/*<Avatar src={tabIcon} /> Tab*/}
           <Avatar>
             <TabIcon />
           </Avatar> Tab

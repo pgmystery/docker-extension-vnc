@@ -8,6 +8,7 @@ import { Toast } from '@docker/extension-api-client-types/dist/v1'
 import VNCViewSkeleton from './VNCViewSkeleton'
 import useVNCSettings from '../../hooks/useVNCSettings'
 import { ProxyURL } from '../../libs/vnc/proxies/Proxy'
+import { MachineCommand } from '../vncSessionBar/SendMachineCommandsMenu'
 
 
 interface VNCViewProps {
@@ -41,6 +42,7 @@ export default function VNCView({ url, onCancel, ddUIToast, openBrowserURL, cred
   const [openSettingsDialog, setOpenSettingsDialog] = useState<boolean>(false)
   const [settings, saveSettings] = useVNCSettings()
   const [clipboardText, setClipboardText] = useState<string>('')
+  const [havePowerCapability, setHavePowerCapability] = useState<boolean>(false)
 
   useEffect(() => {
     const { connect, connected, disconnect } = vncScreenRef.current ?? {}
@@ -60,6 +62,17 @@ export default function VNCView({ url, onCancel, ddUIToast, openBrowserURL, cred
     if (credentials)
       handleCredentialDialogSubmit(credentials)
   }, [credentials])
+
+  useEffect(() => {
+    const { getCapabilities } = vncScreenRef.current ?? {}
+
+    if (!getCapabilities)
+      return setHavePowerCapability(false)
+
+    const capabilities = getCapabilities()
+
+    setHavePowerCapability(capabilities?.power || false)
+  }, [vncContainerRef.current])
 
   function handleCredentialRequest() {
     if (trySaveCredentials) {
@@ -152,6 +165,31 @@ export default function VNCView({ url, onCancel, ddUIToast, openBrowserURL, cred
     }
   }
 
+  function sendMachineCommand(command: MachineCommand) {
+    switch (command) {
+      case 'reboot':
+        const { machineReboot } = vncScreenRef.current ?? {}
+        if (!machineReboot) return
+
+        machineReboot()
+        break
+
+      case 'shutdown':
+        const { machineShutdown } = vncScreenRef.current ?? {}
+        if (!machineShutdown) return
+
+        machineShutdown()
+        break
+
+      case 'reset':
+        const { machineReset } = vncScreenRef.current ?? {}
+        if (!machineReset) return
+
+        machineReset()
+        break
+    }
+  }
+
   return (
     <>
       <Stack direction="column" spacing={1} sx={{height: '100%', overflow: 'hidden',}} >
@@ -162,6 +200,8 @@ export default function VNCView({ url, onCancel, ddUIToast, openBrowserURL, cred
           onOpenInBrowserClicked={handleOpenInBrowserClick}
           clipboardText={clipboardText}
           sendClipboardText={sendClipboardText}
+          sendMachineCommand={sendMachineCommand}
+          havePowerCapability={havePowerCapability}
         />
         <Box ref={vncContainerRef} sx={{
           width: '100%',
@@ -190,6 +230,13 @@ export default function VNCView({ url, onCancel, ddUIToast, openBrowserURL, cred
             showDotCursor={settings.showDotCursor}
             viewOnly={settings.viewOnly}
             onClipboard={e => setClipboardText(e?.detail.text || '')}
+            onCapabilities={(e?: { detail: { capabilities: any } }) => {
+              setHavePowerCapability(false)
+
+              if (e?.detail.capabilities.hasOwnProperty('power')) {
+                setHavePowerCapability(e?.detail.capabilities.power || false)
+              }
+            }}
           />
         </Box>
       </Stack>
