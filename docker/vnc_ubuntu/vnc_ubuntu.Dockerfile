@@ -29,8 +29,11 @@ RUN touch /root/.Xauthority
 # Set display resolution (change as needed)
 ENV RESOLUTION=1920x1080
 
+# Set port of VNC Server
+ENV PORT=5901
+
 # Expose VNC port
-EXPOSE 5901
+EXPOSE $PORT
 
 # Set the working directory in the container
 WORKDIR /app
