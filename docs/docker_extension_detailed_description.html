@@ -1,0 +1,54 @@
+<h1 id="docker-extension-vnc">Docker extension VNC</h1>
+<p>A VNC Viewer extension for Docker Desktop.</p>
+<h2 id="table-of-contents">Table of Contents</h2>
+<ul>
+  <li><a href="#description">Description</a></li>
+  <li><a href="#manual-installation">Manual Installation</a></li>
+  <li><a href="#usage">Usage</a><ul>
+    <li><a href="#the-example-container">Example Container</a></li>
+    <li><a href="#manually">Manually</a><ul>
+      <li><a href="#docker-container">Docker Container</a></li>
+      <li><a href="#remote-host">Remote Host</a></li>
+    </ul>
+    </li>
+  </ul>
+  </li>
+</ul>
+<h2 id="description">Description</h2>
+<p>This Docker Desktop extension is for connecting to Docker Containers or a Remote Host which have a <a href="https://en.wikipedia.org/wiki/VNC">VNC</a> Server running.</p>
+<p>The extension creates a Docker Container as a <a href="https://hub.docker.com/r/pgmystery/proxy_vnc">proxy</a> for connecting to the target VNC Server and shows the view inside of Docker Desktop.</p>
+<p>If the connection is to a Docker Container, then the extension creates a Docker Network and adds the proxy and the target container to the Network. Only this way, the proxy can access the VNC server container. After disconnect, it deletes the proxy container and removes the VNC server Container from the Network.</p>
+<p>It uses <a href="https://github.com/novnc/noVNC">noVNC</a> as the JavaScript client package.</p>
+<p>It also comes with an example VNC Server as a docker container. So you can test things out very easily.</p>
+<h2 id="manual-installation">Manual Installation</h2>
+<p>You can install the extension by using the command:</p>
+<pre><code class="lang-shell">docker <span class="hljs-keyword">extension</span> install pgmystery/docker-<span class="hljs-keyword">extension</span>-vnc:<span class="hljs-number">1.0</span>.<span class="hljs-number">0</span>
+</code></pre>
+<h2 id="usage">Usage</h2>
+<h3 id="the-example-container">The example Container</h3>
+<p>You can right start by seeing the possibility of this extension if you just click the button &quot;Try example container&quot;.
+  It will download an <a href="https://hub.docker.com/r/pgmystery/ubuntu_vnc">example Docker Image</a> with a vnc server and a Desktop installed.
+  It will also then automatically creates the Container and a connection to the container in the extension will be accomplished.</p>
+<p><img src="https://raw.githubusercontent.com/pgmystery/docker-extension-vnc/refs/heads/main/docs/imgs/screenshot4.png" alt="Dashboard"></p>
+<h3 id="manually">Manually</h3>
+<p>This extension support 2 different kind of connections.</p>
+<ul>
+  <li><a href="#docker-container">Docker Container</a></li>
+  <li><a href="#remote-host">Remote Host</a></li>
+</ul>
+<h4 id="docker-container">Docker Container</h4>
+<ol>
+  <li>Select the connection type &quot;Docker Container&quot;.</li>
+  <li>Select the Container from the list (if the container is not showing up, you can also manually insert the Container Name or ID).</li>
+  <li>Enter or select the port on which the vnc server is listening on (it is an internal port, it don&#39;t need to be exposed to the host).</li>
+  <li>Click on &quot;Connect&quot;.</li>
+</ol>
+<p><img src="https://raw.githubusercontent.com/pgmystery/docker-extension-vnc/refs/heads/main/docs/imgs/screenshot1.png" alt="Webbrowser on a linux desktop"></p>
+<h4 id="remote-host">Remote Host</h4>
+<ol>
+  <li>Select the connection type &quot;Remote Host&quot;.</li>
+  <li>Enter the IP of the Host you have access to.</li>
+  <li>Type in the port of the VNC Server on the Remote Host.</li>
+  <li>Click on &quot;Connect&quot;.</li>
+</ol>
+<p><img src="https://raw.githubusercontent.com/pgmystery/docker-extension-vnc/refs/heads/main/docs/imgs/screenshot5.png" alt="Remote Host connection"></p>

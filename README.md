@@ -36,7 +36,7 @@ You can right start by seeing the possibility of this extension if you just clic
 It will download an [example Docker Image](https://hub.docker.com/r/pgmystery/ubuntu_vnc) with a vnc server and a Desktop installed.
 It will also then automatically creates the Container and a connection to the container in the extension will be accomplished.
 
-![screenshot4.png](docs/imgs/screenshot4.png)
+![Dashboard](docs/imgs/screenshot4.png")
 
 ### Manually
 This extension support 2 different kind of connections.
@@ -50,7 +50,7 @@ This extension support 2 different kind of connections.
 3. Enter or select the port on which the vnc server is listening on (it is an internal port, it don't need to be exposed to the host).
 4. Click on "Connect".
 
-![screenshot1.png](docs/imgs/screenshot1.png)
+![Webbrowser on a linux desktop](docs/imgs/screenshot1.png)
 
 #### Remote Host
 1. Select the connection type "Remote Host".
@@ -58,4 +58,4 @@ This extension support 2 different kind of connections.
 3. Type in the port of the VNC Server on the Remote Host.
 4. Click on "Connect".
 
-![screenshot5.png](docs/imgs/screenshot5.png)
+![Remote Host connection](docs/imgs/screenshot5.png)
