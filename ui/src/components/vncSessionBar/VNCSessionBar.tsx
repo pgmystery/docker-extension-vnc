@@ -5,6 +5,7 @@ import OpenInBrowserIcon from '@mui/icons-material/OpenInBrowser'
 import SendKeysMenu from './SendKeysMenu'
 import { VncScreenHandle } from 'react-vnc'
 import ClipboardMenu from './ClipboardMenu'
+import SendMachineCommandsMenu, { MachineCommand } from './SendMachineCommandsMenu'
 
 
 export interface VNCSessionBarProps {
@@ -14,6 +15,8 @@ export interface VNCSessionBarProps {
   onOpenInBrowserClicked: ()=>void
   clipboardText: string
   sendClipboardText?: (text: string)=>void
+  sendMachineCommand: (command: MachineCommand)=>void
+  havePowerCapability: boolean
 }
 
 
@@ -24,6 +27,8 @@ export default function VNCSessionBar({
   onOpenInBrowserClicked,
   clipboardText,
   sendClipboardText,
+  sendMachineCommand,
+  havePowerCapability,
 }: VNCSessionBarProps) {
   return (
     <Stack direction="row" spacing={1}>
@@ -37,6 +42,7 @@ export default function VNCSessionBar({
         sendCtrlAltDel={vncScreenRef?.sendCtrlAltDel}
       />
       <ClipboardMenu clipboardText={clipboardText} sendClipboardText={sendClipboardText} />
+      { havePowerCapability && <SendMachineCommandsMenu sendMachineCommand={sendMachineCommand} /> }
 
       <Box sx={{flexGrow: 1}} />
 

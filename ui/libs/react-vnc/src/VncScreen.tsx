@@ -73,6 +73,7 @@ export type VncScreenHandle = {
     machineReboot: () => void;
     machineReset: () => void;
     clipboardPaste: (text: string) => void;
+    getCapabilities: () => RFB["capabilities"] | undefined
     rfb: RFB | null;
     eventListeners: EventListeners;
 };
@@ -308,6 +309,11 @@ const VncScreen: React.ForwardRefRenderFunction<VncScreenHandle, Props> = (props
         rfb?.clipboardPasteFrom(text);
     };
 
+    const getCapabilities = () => {
+      const rgb = getRfb();
+      return rgb?.capabilities;
+    }
+
     useImperativeHandle(ref, () => ({
         connect,
         disconnect,
@@ -321,6 +327,7 @@ const VncScreen: React.ForwardRefRenderFunction<VncScreenHandle, Props> = (props
         machineReboot,
         machineReset,
         clipboardPaste,
+        getCapabilities,
         rfb: rfb.current,
         eventListeners: eventListeners.current,
     }));
