@@ -36,7 +36,7 @@ You can right start by seeing the possibility of this extension if you just clic
 It will download an [example Docker Image](https://hub.docker.com/r/pgmystery/ubuntu_vnc) with a vnc server and a Desktop installed.
 It will also then automatically creates the Container and a connection to the container in the extension will be accomplished.
 
-![Dashboard](docs/imgs/screenshot4.png")
+![Dashboard](docs/imgs/screenshot4.png)
 
 ### Manually
 This extension support 2 different kind of connections.
