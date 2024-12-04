@@ -6,7 +6,6 @@ import (
 	"gorm.io/gorm"
 	"gorm.io/gorm/logger"
 	"log"
-	"os"
 	"vnc/model"
 	"vnc/model/connections"
 )
@@ -34,8 +33,7 @@ func Connect() {
 		Logger: logger.Default.LogMode(logger.Info),
 	})
 	if err != nil {
-		log.Fatal("Failed to connect to database. \n", err)
-		os.Exit(2)
+		panic(err)
 	}
 
 	log.Println("[DATABASE]: Connected")
