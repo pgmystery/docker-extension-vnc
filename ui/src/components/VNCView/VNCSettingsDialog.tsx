@@ -1,7 +1,7 @@
 import { Dialog, DialogActions, DialogContent, DialogTitle, Divider, IconButton, Stack } from '@mui/material'
 import Button from '@mui/material/Button'
 import QualityLevel from './VNCSettingForms/QualityLevel'
-import { useEffect, useState } from 'react'
+import { FormEvent, useEffect, useState } from 'react'
 import DeleteCredentials from './VNCSettingForms/DeleteCredentials'
 import { VNCSettingsData } from './VNCView'
 import CloseIcon from '@mui/icons-material/Close'
@@ -47,7 +47,7 @@ export default function VNCSettingsDialog({ open, close, settingsData, onSetting
       fullWidth={true}
       PaperProps={{
         component: 'form',
-        onSubmit: (event: React.FormEvent<HTMLFormElement>) => {
+        onSubmit: (event: FormEvent<HTMLFormElement>) => {
           event.preventDefault();
           const formData = new FormData(event.currentTarget)
           const formJson = Object.fromEntries((formData as any).entries()) as VNCSettingsSaveData

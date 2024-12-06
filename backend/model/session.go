@@ -7,10 +7,11 @@ import (
 
 type Session struct {
 	gorm.Model
-	Id          uuid.UUID           `gorm:"type:uuid;primary_key;" json:"id"`
-	Name        string              `gorm:"type:varchar(255);unique;" json:"name"`
-	Credentials *SessionCredentials `gorm:"default:null" json:"credentials,omitempty"`
-	Connection  uuid.UUID           `gorm:"type:uuid;" json:"connection"`
+	ID             uuid.UUID          `gorm:"type:uuid;primary_key;" json:"id"`
+	Name           string             `gorm:"type:varchar(255);unique;" json:"name"`
+	Credentials    SessionCredentials `gorm:"default:null" json:"credentials,omitempty"`
+	ConnectionType string             `gorm:"type:varchar(255);" json:"connectionType"`
+	Connection     uuid.UUID          `gorm:"type:uuid;"`
 }
 
 type SessionCredentials struct {
@@ -22,14 +23,12 @@ type SessionCredentials struct {
 }
 
 func (session *Session) BeforeCreate(_ *gorm.DB) (err error) {
-	// UUID version 4
-	session.Id = uuid.New()
+	session.ID = uuid.New()
 
 	return
 }
 
 func (credentials *SessionCredentials) BeforeCreate(_ *gorm.DB) (err error) {
-	// UUID version 4
 	credentials.ID = uuid.New()
 
 	return

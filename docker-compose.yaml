@@ -1,3 +1,26 @@
 services:
+  db:
+    image: postgres:17-alpine
+    hostname: db
+    environment:
+      POSTGRES_DB: vnc
+      POSTGRES_USER: vnc
+      POSTGRES_PASSWORD: vnc
+    networks:
+      - vnc-backend
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready", "-d", "vnc"]
+      interval: 10s
+      timeout: 3s
+      retries: 3
+
   vnc:
     image: ${DESKTOP_PLUGIN_IMAGE}
+    depends_on:
+      db:
+        condition: service_healthy
+    networks:
+      - vnc-backend
+
+networks:
+  vnc-backend:

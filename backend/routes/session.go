@@ -4,7 +4,6 @@ import (
 	"github.com/gofiber/fiber/v2"
 	"github.com/google/uuid"
 	"vnc/crud"
-	"vnc/model"
 )
 
 func SessionRouter(apiRouter fiber.Router) {
@@ -21,7 +20,7 @@ func getSessions(ctx *fiber.Ctx) error {
 	sessions := crud.GetSessions()
 
 	if len(sessions) == 0 {
-		return ctx.SendStatus(404)
+		return ctx.Status(200).JSON([]crud.ResponseSessionList{})
 	}
 
 	return ctx.Status(200).JSON(sessions)
@@ -39,14 +38,14 @@ func getSession(ctx *fiber.Ctx) error {
 }
 
 func createSession(ctx *fiber.Ctx) error {
-	session := new(model.Session)
+	requestSession := new(crud.RequestCreateSession)
 
-	err := ctx.BodyParser(session)
+	err := ctx.BodyParser(requestSession)
 	if err != nil {
 		return ctx.Status(500).JSON(err)
 	}
 
-	err = crud.CreateSession(session)
+	session, err := crud.CreateSession(requestSession)
 	if err != nil {
 		return ctx.Status(500).JSON(err)
 	}

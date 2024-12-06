@@ -8,5 +8,6 @@ import (
 func createAPIs(app *fiber.App) {
 	apiRouter := app.Group("/api")
 
+	APIRoutes.SettingsRouter(apiRouter)
 	APIRoutes.SessionRouter(apiRouter)
 }

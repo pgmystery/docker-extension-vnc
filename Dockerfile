@@ -1,3 +1,16 @@
+# BUILD BACKEND
+FROM golang:1.23-alpine AS builder
+ENV CGO_ENABLED=0
+WORKDIR /backend
+COPY backend/go.* .
+RUN --mount=type=cache,target=/go/pkg/mod \
+    --mount=type=cache,target=/root/.cache/go-build \
+    go mod download
+COPY backend/. .
+RUN --mount=type=cache,target=/go/pkg/mod \
+    --mount=type=cache,target=/root/.cache/go-build \
+    go build -trimpath -ldflags="-s -w" -o bin/service
+
 # BUILD lib react-vnc
 FROM --platform=$BUILDPLATFORM node:22.11-alpine AS lib-react-vnc
 RUN apk add git
@@ -45,10 +58,11 @@ LABEL org.opencontainers.image.title="VNC Viewer" \
 
 WORKDIR /
 
+COPY backend/prod.backend.env ./backend.env
+COPY --from=builder /backend/bin/service /
+COPY docker-compose.yaml .
 COPY metadata.json .
 COPY docker.svg .
 COPY --from=client-builder /ui/build ui
-
-RUN mkdir -p /run/guest-services/
 
 CMD /service -socket /run/guest-services/backend.sock

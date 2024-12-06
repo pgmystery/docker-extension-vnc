@@ -1,7 +1,7 @@
 import React, { useEffect, useMemo, useState } from 'react'
 import { createDockerDesktopClient } from '@docker/extension-api-client'
 import { Backdrop, CircularProgress, Divider, Stack } from '@mui/material'
-import ConnectBar from './components/connectbar/ConnectBar'
+// import ConnectBar from './components/connectbar/ConnectBar'
 import useConnectionQueue from './hooks/useConnectionQueue'
 import VNCView, { VNCCredentials } from './components/VNCView/VNCView'
 import useVNC from './hooks/useVNC'
@@ -10,6 +10,7 @@ import VNCProxyImagePullDialog from './components/VNCView/VNCProxyImagePullDialo
 import Dashboard from './components/dashboard/Dashboard'
 import { ConnectionData, VNCConnectionType } from './libs/vnc/VNC'
 import { ProxyURL } from './libs/vnc/proxies/Proxy'
+import ConnectBar from './components/sessionsbar/ConnectBar'
 
 
 export interface ConnectedData {
@@ -125,10 +126,10 @@ export function App() {
       }}>
 
         <ConnectBar
-          onConnect={connect}
-          onDisconnect={disconnect}
-          disabled={loading}
-          connection={vnc?.connection}
+          // onConnect={connect}
+          // onDisconnect={disconnect}
+          // disabled={loading}
+          // connection={vnc?.connection}
         />
         <Divider />
 
