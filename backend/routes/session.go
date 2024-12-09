@@ -27,8 +27,16 @@ func getSessions(ctx *fiber.Ctx) error {
 }
 
 func getSession(ctx *fiber.Ctx) error {
-	id := ctx.Params("id")
-	session := crud.GetSession(id)
+	idString := ctx.Params("id")
+	id, err := uuid.Parse(idString)
+	if err != nil {
+		return ctx.Status(500).JSON(err)
+	}
+
+	session, err := crud.GetSession(id)
+	if err != nil {
+		return ctx.Status(500).JSON(err)
+	}
 
 	if session.Id == uuid.Nil {
 		return ctx.SendStatus(404)
@@ -54,10 +62,14 @@ func createSession(ctx *fiber.Ctx) error {
 }
 
 func updateSession(ctx *fiber.Ctx) error {
-	id := ctx.Params("id")
+	idString := ctx.Params("id")
+	id, err := uuid.Parse(idString)
+	if err != nil {
+		return ctx.Status(500).JSON(err)
+	}
 	sessionUpdate := new(crud.SessionUpdate)
 
-	err := ctx.BodyParser(sessionUpdate)
+	err = ctx.BodyParser(sessionUpdate)
 	if err != nil {
 		return ctx.Status(500).JSON(err)
 	}
@@ -71,9 +83,13 @@ func updateSession(ctx *fiber.Ctx) error {
 }
 
 func deleteSession(ctx *fiber.Ctx) error {
-	id := ctx.Params("id")
+	idString := ctx.Params("id")
+	id, err := uuid.Parse(idString)
+	if err != nil {
+		return ctx.Status(500).JSON(err)
+	}
 
-	err := crud.DeleteSession(id)
+	err = crud.DeleteSession(id)
 	if err != nil {
 		return ctx.Status(500).JSON(err)
 	}

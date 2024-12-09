@@ -16,6 +16,10 @@ export interface SessionCreateData {
   credentials?: SessionCredentials
 }
 
+export interface SessionUpdateData extends SessionCreateData {
+  id: string
+}
+
 
 export default class Session extends BackendRoute {
   constructor(backendAPI: HttpService) {
@@ -34,8 +38,8 @@ export default class Session extends BackendRoute {
     return this.post<SessionData>('', data)
   }
 
-  edit(sessionId: string, data: SessionCreateData) {
-    return this.post<SessionData>('/' + sessionId, data)
+  update(data: SessionUpdateData) {
+    return this.post<SessionData>('/' + data.id, data)
   }
 
   remove(sessionId: string) {

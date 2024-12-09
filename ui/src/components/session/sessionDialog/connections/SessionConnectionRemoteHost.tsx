@@ -48,33 +48,29 @@ export default function SessionConnectionRemoteHost ({ connectionData, setSubmit
   }, [remoteHost, remotePort])
 
   return (
-    <>
-      <FormGroup>
-        <Stack spacing={1}>
-          <TextField
-            name="connection.data.host"
-            label="Remote Host IP/NAME"
-            disabled={connectionData !== undefined}
-            value={remoteHost}
-            onChange={event => setRemoteHost(event.target.value)}
-            autoFocus
-            required
-          />
-          <TextField
-            name="connection.data.port"
-            label="Remote Host PORT"
-            disabled={connectionData !== undefined}
-            type="number"
-            slotProps={{ htmlInput: { min: 1, max: 65535 } }}
-            value={remotePort}
-            onChange={event => setRemotePort(Number(event.target.value))}
-            sx={{
-              width: '200px',
-            }}
-            required
-          />
-        </Stack>
-      </FormGroup>
-    </>
+    <FormGroup>
+      <Stack spacing={1}>
+        <TextField
+          name="connection.data.host"
+          label="Remote Host IP/NAME"
+          value={remoteHost}
+          onChange={event => setRemoteHost(event.target.value)}
+          autoFocus
+          required
+        />
+        <TextField
+          name="connection.data.port"
+          label="Remote Host PORT"
+          type="number"
+          slotProps={{ htmlInput: { min: 1, max: 65535 } }}
+          value={remotePort}
+          onChange={event => setRemotePort(Number(event.target.value))}
+          sx={{
+            width: '200px',
+          }}
+          required
+        />
+      </Stack>
+    </FormGroup>
   )
 }

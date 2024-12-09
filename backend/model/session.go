@@ -9,17 +9,21 @@ type Session struct {
 	gorm.Model
 	ID               uuid.UUID           `gorm:"type:uuid;primary_key;" json:"id"`
 	Name             string              `gorm:"type:varchar(255);not null;unique;" json:"name"`
-	Credentials      *SessionCredentials `gorm:"default:null" json:"credentials,omitempty"`
+	Credentials      *SessionCredentials `gorm:"default:null;foreignKey:SessionID" json:"credentials,omitempty"`
 	ConnectionType   string              `gorm:"type:varchar(255);not null;" json:"connectionType"`
 	ConnectionDataId uuid.UUID           `gorm:"type:uuid;"`
 }
 
 type SessionCredentials struct {
 	gorm.Model
-	ID        uuid.UUID `gorm:"type:uuid;primary_key;"`
-	Username  string    `gorm:"type:varchar(255);" json:"username"`
-	Password  string    `gorm:"type:varchar(255);" json:"password"`
-	SessionId uuid.UUID `gorm:"type:uuid;"`
+	ID uuid.UUID `gorm:"type:uuid;primary_key;"`
+	SessionCredentialData
+	SessionID uuid.UUID
+}
+
+type SessionCredentialData struct {
+	Username string `gorm:"type:varchar(255);" json:"username"`
+	Password string `gorm:"type:varchar(255);" json:"password"`
 }
 
 func (session *Session) BeforeCreate(_ *gorm.DB) (err error) {

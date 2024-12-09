@@ -12,7 +12,7 @@ import { FormEvent, ReactNode, useEffect, useState } from 'react'
 import Button from '@mui/material/Button'
 import SessionDialogConnection from './SessionDialogConnection'
 import { Session } from '../../../types/session'
-import SessionDialogCredentials from './SessionDialogCredentials'
+import SessionDialogCredentials, { serializeCredentials } from './SessionDialogCredentials'
 import { SessionCreateData } from '../../../api/routes/session'
 import { serializeConnectionDataRemoteHost } from './connections/SessionConnectionRemoteHost'
 import { serializeConnectionDataDockerContainer } from './connections/SessionConnectionDockerContainer'
@@ -44,7 +44,6 @@ export function serializeConnectionData<T extends {}>(formData: FormData, setDat
 
 
 export default function SessionDialog({ open, close, title, session, submitButtonText, onSubmit, children }: SessionDialogProps) {
-  console.log('SESSION_DIALOG', session)
   const [sessionName, setSessionName] = useState<string>(session?.name || '')
   const [connectionTypeReady, setConnectionTypeReady] = useState<boolean>(false)
 
@@ -75,6 +74,15 @@ export default function SessionDialog({ open, close, title, session, submitButto
                 previousValue.connection = {
                   type: itemValue,
                 }
+              }
+
+              return previousValue
+            }
+
+            else if (itemGroup.startsWith('credentials')) {
+              if (itemGroup === 'credentials' && itemValue === 'on') {
+                // @ts-ignore
+                previousValue.credentials = serializeCredentials(formData)
               }
 
               return previousValue

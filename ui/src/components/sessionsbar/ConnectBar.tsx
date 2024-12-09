@@ -4,7 +4,7 @@ import AddIcon from '@mui/icons-material/Add'
 import EditIcon from '@mui/icons-material/Edit'
 import Button from '@mui/material/Button'
 import SessionDialog from '../session/sessionDialog/SessionDialog'
-import { SessionCreateData, SessionList } from '../../api/routes/session'
+import { SessionCreateData, SessionList, SessionUpdateData } from '../../api/routes/session'
 import { createDockerDesktopClient } from '@docker/extension-api-client'
 import Backend from '../../api/Backend'
 import SessionSelect from '../session/SessionSelect'
@@ -36,8 +36,18 @@ export default function ConnectBar() {
   async function sendCreateSessionData(sessionData: SessionCreateData) {
     if (!backend) return
 
-    console.log('CREATE SESSION', sessionData)
+    console.log('CREATE SESSION DATA', sessionData)
     const session = await backend.session.create(sessionData)
+
+    await refreshSessions()
+    setSelectedSessionName(session.name)
+  }
+
+  async function sendUpdateSessionData(sessionData: SessionUpdateData) {
+    if (!backend) return
+
+    console.log('UPDATE SESSION DATA', sessionData)
+    const session = await backend.session.update(sessionData)
 
     await refreshSessions()
     setSelectedSessionName(session.name)
@@ -91,7 +101,7 @@ export default function ConnectBar() {
         submitButtonText="Edit Session"
         sessionId={editSessionId}
         close={() => setEditSessionId(undefined)}
-        onSubmit={()=>{}}
+        onSubmit={sendUpdateSessionData}
         backend={backend}
       />
 

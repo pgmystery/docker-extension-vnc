@@ -21,7 +21,6 @@ export default function SessionDialogConnection({ connection, setSubmitReady }: 
   useEffect(() => {
     if (!connection) return
 
-    console.log('connection.type', connection.type)
     setConnectionType(connection.type)
   }, [connection])
 

@@ -49,7 +49,9 @@ export default function SessionConnectionDockerContainer({ ddClient, connectionD
   }, [])
 
   useEffect(() => {
-    setSelectedPort(connectionData?.port.toString() || '')
+    setSelectedPort('')
+    if (selectedContainerName === connectionData?.container)
+      setSelectedPort(connectionData?.port.toString() || '')
 
     const selectedContainer = getContainerByName(selectedContainerName)
 
@@ -106,18 +108,6 @@ export default function SessionConnectionDockerContainer({ ddClient, connectionD
     return containers.find(container => container.Names[0] == name) || null
   }
 
-  function handleSelectedContainerNameChanged(name: string) {
-    if (connectionData) return
-
-    setSelectedContainerName(name)
-  }
-
-  function handleSelectedContainerPortChanged(port: string) {
-    if (connectionData) return
-
-    setSelectedPort(port)
-  }
-
   return (
     <FormGroup>
       <Stack spacing={1}>
@@ -132,7 +122,7 @@ export default function SessionConnectionDockerContainer({ ddClient, connectionD
           <ContainerSelect
             containers={containers}
             selectedContainerName={selectedContainerName}
-            setSelectedContainerName={handleSelectedContainerNameChanged}
+            setSelectedContainerName={setSelectedContainerName}
           />
           <Tooltip title="Refresh Containerlist" arrow>
             <IconButton
@@ -154,8 +144,8 @@ export default function SessionConnectionDockerContainer({ ddClient, connectionD
             slotProps={{ htmlInput: { ...params.inputProps, min: 1, max: 65535 } }}
           />}
           inputValue={selectedPort}
-          onInputChange={(_, value) => handleSelectedContainerPortChanged(value)}
-          onChange={(_, value) => handleSelectedContainerPortChanged(value?.toString() || '')}
+          onInputChange={(_, value) => setSelectedPort(value)}
+          onChange={(_, value) => setSelectedPort(value?.toString() || '')}
           freeSolo
           sx={{
             width: '200px',

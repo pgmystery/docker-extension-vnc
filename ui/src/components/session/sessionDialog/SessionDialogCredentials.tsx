@@ -8,6 +8,35 @@ interface SessionDialogCredentialsProps{
 }
 
 
+export function serializeCredentials(formData: FormData): SessionCredentials {
+  const credentials: SessionCredentials = {
+    username: '',
+    password: '',
+  }
+
+  return Array.from(formData).reduce((previousValue, currentValue) => {
+    const [itemGroup, itemValue] = currentValue
+    const itemNames = itemGroup.split('.')
+
+    if (itemNames[0] === 'credentials') {
+      switch (itemNames[1]) {
+        case 'username':
+          previousValue.username = itemValue.toString()
+
+          break
+
+        case 'password':
+          previousValue.password = itemValue.toString()
+
+          break
+      }
+    }
+
+    return previousValue
+  }, credentials)
+}
+
+
 export default function SessionDialogCredentials({ credentials }: SessionDialogCredentialsProps) {
   console.log('credentials', credentials)
   const [credentialsChecked, setCredentialsChecked] = useState<boolean>(!!credentials)
@@ -36,7 +65,7 @@ export default function SessionDialogCredentials({ credentials }: SessionDialogC
         />} label="Save Credentials" />
         <TextField
           disabled={!credentialsChecked}
-          name="username"
+          name="credentials.username"
           label="Username"
           fullWidth
           value={username}
@@ -44,7 +73,7 @@ export default function SessionDialogCredentials({ credentials }: SessionDialogC
         />
         <TextField
           disabled={!credentialsChecked}
-          name="password"
+          name="credentials.password"
           label="Password"
           type="password"
           fullWidth
