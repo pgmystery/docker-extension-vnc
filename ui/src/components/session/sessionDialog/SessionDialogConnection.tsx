@@ -1,6 +1,6 @@
 import { FormControl, FormLabel, MenuItem, Select, Stack } from '@mui/material'
-import { ConnectionType, VNCConnectionType } from '../../../libs/vnc/VNC'
-import React, { useMemo, useState } from 'react'
+import { ConnectionData, ConnectionType } from '../../../libs/vnc/VNC'
+import React, { useEffect, useMemo, useState } from 'react'
 import { createDockerDesktopClient } from '@docker/extension-api-client'
 import SessionConnectionDockerContainer, {
   ConnectionDataDockerContainer
@@ -9,28 +9,33 @@ import SessionConnectionRemoteHost, { ConnectionDataRemoteHost } from './connect
 
 
 interface SessionDialogConnectionProps {
-  connection?: VNCConnectionType
+  connection?: ConnectionData
   setSubmitReady: (state: boolean)=>void
 }
-
-export type ConnectionData = ConnectionDataRemoteHost | ConnectionDataDockerContainer
 
 
 export default function SessionDialogConnection({ connection, setSubmitReady }: SessionDialogConnectionProps) {
   const ddClient = useMemo(createDockerDesktopClient, [])
   const [connectionType, setConnectionType] = useState<ConnectionType>(connection?.type || 'container')
 
+  useEffect(() => {
+    if (!connection) return
+
+    console.log('connection.type', connection.type)
+    setConnectionType(connection.type)
+  }, [connection])
+
   function getSelectionTypeComponent(type: ConnectionType) {
     switch (type) {
       case 'container':
         return <SessionConnectionDockerContainer
           ddClient={ddClient}
-          connection={connection?.type === 'container' ? connection : undefined}
+          connectionData={ connection?.type === 'container' ? connection.data as ConnectionDataDockerContainer : undefined}
           setSubmitReady={setSubmitReady}
         />
       case 'remote':
         return <SessionConnectionRemoteHost
-          connection={connection?.type === 'remote' ? connection : undefined}
+          connectionData={ connection?.type === 'remote' ? connection.data as ConnectionDataRemoteHost : undefined}
           setSubmitReady={setSubmitReady}
         />
       default:
@@ -43,7 +48,7 @@ export default function SessionDialogConnection({ connection, setSubmitReady }: 
       <Stack spacing={1}>
         <FormLabel required>Connection-Type</FormLabel>
         <Select
-          name="connectionType"
+          name="connection.type"
           value={connectionType}
           onChange={e => setConnectionType(e.target.value as ConnectionType)}
           sx={{

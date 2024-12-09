@@ -6,11 +6,12 @@ import (
 )
 
 type ConfigDB struct {
-	Host     string `env:"DB_HOST" envDefault:"localhost"`
-	Port     int    `env:"DB_PORT" envDefault:"5432"`
-	Name     string `env:"DB_NAME" envDefault:"vnc"`
-	User     string `env:"DB_USER" envDefault:"vnc"`
-	Password string `env:"DB_PASSWORD" envDefault:"vnc"`
+	Name string `env:"DB_NAME" envDefault:"vnc"`
+	//Host     string `env:"DB_HOST" envDefault:"localhost"`
+	//Port     int    `env:"DB_PORT" envDefault:"5432"`
+	//Name     string `env:"DB_NAME" envDefault:"vnc"`
+	//User     string `env:"DB_USER" envDefault:"vnc"`
+	//Password string `env:"DB_PASSWORD" envDefault:"vnc"`
 }
 
 func loadConfig() (*ConfigDB, error) {

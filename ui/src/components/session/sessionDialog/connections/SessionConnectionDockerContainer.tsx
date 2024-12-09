@@ -2,7 +2,6 @@ import { Autocomplete, FormGroup, IconButton, Stack, TextField, Tooltip } from '
 import RefreshIcon from '@mui/icons-material/Refresh'
 import React, { useEffect, useState } from 'react'
 import { DockerDesktopClient } from '@docker/extension-api-client-types/dist/v1'
-import VNCDockerContainer from '../../../../libs/vnc/connectionTypes/VNCDockerContainer'
 import { ContainerInfo } from '../../../../types/docker/extension'
 import ContainerSelect from '../../../connectbar/ContainerSelect'
 import { serializeConnectionData } from '../SessionDialog'
@@ -10,7 +9,7 @@ import { serializeConnectionData } from '../SessionDialog'
 
 interface DockerContainerProps {
   ddClient: DockerDesktopClient
-  connection?: VNCDockerContainer
+  connectionData?: ConnectionDataDockerContainer
   setSubmitReady: (state: boolean)=>void
 }
 
@@ -38,7 +37,7 @@ export function serializeConnectionDataDockerContainer(formData: FormData): Conn
 }
 
 
-export default function SessionConnectionDockerContainer({ ddClient, connection, setSubmitReady }: DockerContainerProps) {
+export default function SessionConnectionDockerContainer({ ddClient, connectionData, setSubmitReady }: DockerContainerProps) {
   const [containers, setContainers] = useState<ContainerInfo[]>([])
   const [selectedContainerName, setSelectedContainerName] = useState<string>('')
   const [selectedContainerPorts, setSelectedContainerPorts] = useState<string[]>([])
@@ -50,7 +49,7 @@ export default function SessionConnectionDockerContainer({ ddClient, connection,
   }, [])
 
   useEffect(() => {
-    setSelectedPort(connection?.target.connection?.port.toString() || '')
+    setSelectedPort(connectionData?.port.toString() || '')
 
     const selectedContainer = getContainerByName(selectedContainerName)
 
@@ -62,14 +61,14 @@ export default function SessionConnectionDockerContainer({ ddClient, connection,
   }, [selectedContainerName, selectedPort])
 
   useEffect(() => {
-    if (!connection || !connection.target.connection) {
+    if (!connectionData) {
       setRunningContainersState()
 
       return
     }
 
-    const targetContainerName = connection.target.getContainerName()
-    const targetPort = connection.target.connection.port.toString()
+    const targetContainerName = connectionData.container
+    const targetPort = connectionData.port.toString()
 
     if (selectedContainerName !== targetContainerName)
       setSelectedContainerName(targetContainerName || '')
@@ -77,7 +76,7 @@ export default function SessionConnectionDockerContainer({ ddClient, connection,
     const portString = targetPort.toString()
     if (selectedPort !== portString)
       setSelectedPort(portString)
-  }, [connection])
+  }, [connectionData])
 
   async function setRunningContainersState() {
     const containers = await ddClient.docker.listContainers({
@@ -88,10 +87,10 @@ export default function SessionConnectionDockerContainer({ ddClient, connection,
 
     setContainers(containers)
 
-    if (!connection || !connection.target.connection) return
+    if (!connectionData) return
 
-    const targetContainerName = connection.target.getContainerName() || ''
-    const targetPort = connection.target.connection.port
+    const targetContainerName = connectionData.container || ''
+    const targetPort = connectionData.port
 
     containers.forEach(container => {
       if (container.Names.includes(targetContainerName)) {
@@ -108,13 +107,13 @@ export default function SessionConnectionDockerContainer({ ddClient, connection,
   }
 
   function handleSelectedContainerNameChanged(name: string) {
-    if (connection) return
+    if (connectionData) return
 
     setSelectedContainerName(name)
   }
 
   function handleSelectedContainerPortChanged(port: string) {
-    if (connection) return
+    if (connectionData) return
 
     setSelectedPort(port)
   }
@@ -132,7 +131,6 @@ export default function SessionConnectionDockerContainer({ ddClient, connection,
         >
           <ContainerSelect
             containers={containers}
-            disabled={connection !== undefined}
             selectedContainerName={selectedContainerName}
             setSelectedContainerName={handleSelectedContainerNameChanged}
           />
@@ -140,20 +138,19 @@ export default function SessionConnectionDockerContainer({ ddClient, connection,
             <IconButton
               size="small"
               onClick={setRunningContainersState}
-              disabled={connection !== undefined}
             >
               <RefreshIcon />
             </IconButton>
           </Tooltip>
         </Stack>
         <Autocomplete
-          disabled={selectedContainerName === '' || connection !== undefined}
+          disabled={selectedContainerName === ''}
           options={selectedContainerPorts}
           renderInput={params => <TextField
             { ...params }
             label="Container internal port*"
             type="number"
-            name="connectionData.port"
+            name="connection.data.port"
             slotProps={{ htmlInput: { ...params.inputProps, min: 1, max: 65535 } }}
           />}
           inputValue={selectedPort}

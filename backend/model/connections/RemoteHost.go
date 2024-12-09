@@ -8,8 +8,8 @@ import (
 type RemoteHost struct {
 	gorm.Model
 	ID   uuid.UUID `gorm:"type:uuid;primary_key;" json:"id"`
-	Host string    `gorm:"type:varchar(255);" json:"host"`
-	Port uint      `json:"port"`
+	Host string    `gorm:"type:varchar(255);not null;" json:"host"`
+	Port uint      `gorm:"not null;" json:"port"`
 }
 
 func (remoteHost *RemoteHost) BeforeCreate(_ *gorm.DB) (err error) {

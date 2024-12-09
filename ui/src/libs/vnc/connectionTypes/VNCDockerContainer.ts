@@ -14,8 +14,8 @@ export interface ConnectionDataDockerContainer {
   data: ConnectionDataDockerContainerData
 }
 export interface ConnectionDataDockerContainerData {
-  targetContainerId: string
-  targetPort: number
+  container: string
+  port: number
 }
 
 
@@ -48,11 +48,11 @@ export default class VNCDockerContainer extends VNCConnection {
     const targetContainerId = this.proxy.getTargetContainerId()
     const targetPort = this.proxy.getTargetPort()
 
-    await this.connect({type: this.type, data: {targetContainerId, targetPort}})
+    await this.connect({type: this.type, data: {container: targetContainerId, port: targetPort}})
   }
 
   async connect({ data }: ConnectionDataDockerContainer) {
-    await this.target.connect(data.targetContainerId, data.targetPort)
+    await this.target.connect(data.container, data.port)
 
     return super.connect({type: this.type, data})
   }

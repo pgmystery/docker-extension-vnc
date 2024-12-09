@@ -10,10 +10,14 @@ import (
 )
 
 type RequestCreateSession struct {
-	Name           string                   `json:"name"`
-	ConnectionType string                   `json:"connectionType"`
-	Credentials    model.SessionCredentials `json:"credentials,omitempty"`
-	ConnectionData json.RawMessage          `json:"connectionData"`
+	Name        string                         `json:"name"`
+	Connection  RequestCreateSessionConnection `json:"connection"`
+	Credentials model.SessionCredentials       `json:"credentials,omitempty"`
+}
+
+type RequestCreateSessionConnection struct {
+	Type string          `json:"type"`
+	Data json.RawMessage `json:"data"`
 }
 
 type RequestCreateSessionRemoteHost struct {
@@ -32,11 +36,15 @@ type ResponseSessionList struct {
 }
 
 type ResponseSession struct {
-	Id             uuid.UUID                `json:"id"`
-	Name           string                   `json:"name"`
-	Credentials    model.SessionCredentials `json:"credentials,omitempty"`
-	ConnectionType string                   `json:"connectionType"`
-	ConnectionData interface{}              `json:"connectionData"`
+	Id          uuid.UUID                 `json:"id"`
+	Name        string                    `json:"name"`
+	Connection  ResponseSessionConnection `json:"connection"`
+	Credentials *model.SessionCredentials `json:"credentials,omitempty"`
+}
+
+type ResponseSessionConnection struct {
+	Type string      `json:"type"`
+	Data interface{} `json:"data"`
 }
 
 type SessionUpdate struct {
@@ -71,14 +79,14 @@ func GetSession(id string) ResponseSession {
 	switch session.ConnectionType {
 	case "remote":
 		var connectionDataRemoteHost connections.RemoteHost
-		db.Find(&connectionDataRemoteHost, "id = ?", session.Connection)
+		db.Find(&connectionDataRemoteHost, "id = ?", session.ConnectionDataId)
 
 		connectionData = connectionDataRemoteHost
 
 		break
 	case "container":
 		var connectionDataDockerContainer connections.DockerContainer
-		db.Find(&connectionDataDockerContainer, "id = ?", session.Connection)
+		db.Find(&connectionDataDockerContainer, "id = ?", session.ConnectionDataId)
 
 		connectionData = connectionDataDockerContainer
 
@@ -86,11 +94,13 @@ func GetSession(id string) ResponseSession {
 	}
 
 	return ResponseSession{
-		Id:             session.ID,
-		Name:           session.Name,
-		Credentials:    session.Credentials,
-		ConnectionType: session.ConnectionType,
-		ConnectionData: connectionData,
+		Id:   session.ID,
+		Name: session.Name,
+		Connection: ResponseSessionConnection{
+			Type: session.ConnectionType,
+			Data: connectionData,
+		},
+		Credentials: session.Credentials,
 	}
 }
 
@@ -98,10 +108,10 @@ func CreateSession(requestSession *RequestCreateSession) (*model.Session, error)
 	db := database.DB
 
 	var sessionConnectionId uuid.UUID
-	switch requestSession.ConnectionType {
+	switch requestSession.Connection.Type {
 	case "remote":
 		var connectionSession connections.RemoteHost
-		err := json.Unmarshal(requestSession.ConnectionData, &connectionSession)
+		err := json.Unmarshal(requestSession.Connection.Data, &connectionSession)
 
 		if err != nil {
 			return nil, err
@@ -118,7 +128,7 @@ func CreateSession(requestSession *RequestCreateSession) (*model.Session, error)
 		break
 	case "container":
 		var connectionSession connections.DockerContainer
-		err := json.Unmarshal(requestSession.ConnectionData, &connectionSession)
+		err := json.Unmarshal(requestSession.Connection.Data, &connectionSession)
 
 		if err != nil {
 			return nil, err
@@ -138,10 +148,10 @@ func CreateSession(requestSession *RequestCreateSession) (*model.Session, error)
 	}
 
 	session := model.Session{
-		Name:           requestSession.Name,
-		Credentials:    requestSession.Credentials,
-		ConnectionType: requestSession.ConnectionType,
-		Connection:     sessionConnectionId,
+		Name:             requestSession.Name,
+		Credentials:      &requestSession.Credentials,
+		ConnectionType:   requestSession.Connection.Type,
+		ConnectionDataId: sessionConnectionId,
 	}
 
 	return &session, db.Create(&session).Error
@@ -158,7 +168,7 @@ func UpdateSession(id string, sessionUpdate *SessionUpdate) (*ResponseSession, e
 	session.Name = sessionUpdate.Name
 
 	if sessionUpdate.Credentials != nil {
-		session.Credentials = *sessionUpdate.Credentials
+		session.Credentials = sessionUpdate.Credentials
 	}
 
 	db.Save(&session)
@@ -191,7 +201,7 @@ func DeleteSession(id string) error {
 	case "remote":
 		var connectionDataRemoteHost connections.RemoteHost
 
-		db.Find(&connectionDataRemoteHost, "id = ?", session.Connection)
+		db.Find(&connectionDataRemoteHost, "id = ?", session.ConnectionDataId)
 
 		if connectionDataRemoteHost.ID != uuid.Nil {
 			err := db.Delete(&connectionDataRemoteHost, "id = ?", connectionDataRemoteHost.ID).Error
@@ -205,7 +215,7 @@ func DeleteSession(id string) error {
 	case "container":
 		var connectionDataDockerContainer connections.DockerContainer
 
-		db.Find(&connectionDataDockerContainer, "id = ?", session.Connection)
+		db.Find(&connectionDataDockerContainer, "id = ?", session.ConnectionDataId)
 
 		if connectionDataDockerContainer.ID != uuid.Nil {
 			err := db.Delete(&connectionDataDockerContainer, "id = ?", connectionDataDockerContainer.ID).Error

@@ -8,7 +8,7 @@ import {
   Stack,
   TextField
 } from '@mui/material'
-import { FormEvent, ReactNode, useState } from 'react'
+import { FormEvent, ReactNode, useEffect, useState } from 'react'
 import Button from '@mui/material/Button'
 import SessionDialogConnection from './SessionDialogConnection'
 import { Session } from '../../../types/session'
@@ -18,7 +18,7 @@ import { serializeConnectionDataRemoteHost } from './connections/SessionConnecti
 import { serializeConnectionDataDockerContainer } from './connections/SessionConnectionDockerContainer'
 
 
-interface SessionDialogProps {
+export interface SessionDialogProps {
   open: boolean
   close: ()=>void
   title: string
@@ -34,8 +34,8 @@ export function serializeConnectionData<T extends {}>(formData: FormData, setDat
     const [itemGroup, itemValue] = currentValue
     const itemNames = itemGroup.split('.')
 
-    if (itemNames[0] === 'connectionData') {
-      previousValue = setData(previousValue, itemNames[1], itemValue)
+    if (itemNames[0] === 'connection' && itemNames[1] === 'data') {
+      previousValue = setData(previousValue, itemNames[2], itemValue)
     }
 
     return previousValue
@@ -44,8 +44,15 @@ export function serializeConnectionData<T extends {}>(formData: FormData, setDat
 
 
 export default function SessionDialog({ open, close, title, session, submitButtonText, onSubmit, children }: SessionDialogProps) {
+  console.log('SESSION_DIALOG', session)
   const [sessionName, setSessionName] = useState<string>(session?.name || '')
   const [connectionTypeReady, setConnectionTypeReady] = useState<boolean>(false)
+
+  useEffect(() => {
+    if (!session) return
+
+    setSessionName(session.name)
+  }, [session])
 
   return (
     <Dialog
@@ -62,27 +69,31 @@ export default function SessionDialog({ open, close, title, session, submitButto
           const formJson = Array.from(formData).reduce((previousValue, currentValue) => {
             const [itemGroup, itemValue] = currentValue
 
-            if (itemGroup.startsWith('connectionData'))
+            if (itemGroup.startsWith('connection')) {
+              if (itemGroup === 'connection.type') {
+                // @ts-ignore
+                previousValue.connection = {
+                  type: itemValue,
+                }
+              }
+
               return previousValue
+            }
 
             // @ts-ignore
             previousValue[itemGroup] = itemValue
 
             return previousValue
-          }, {
-            connectionData: null
-          } as unknown) as Partial<SessionCreateData>
+          }, {} as unknown) as Partial<SessionCreateData>
 
-          switch (formJson.connectionType) {
+          switch (formJson.connection?.type) {
             case 'remote':
-              formJson.connectionData = serializeConnectionDataRemoteHost(formData)
+              formJson.connection.data = serializeConnectionDataRemoteHost(formData)
               break
             case 'container':
-              formJson.connectionData = serializeConnectionDataDockerContainer(formData)
+              formJson.connection.data = serializeConnectionDataDockerContainer(formData)
               break
           }
-
-          console.log(formJson)
 
           onSubmit(formJson as SessionCreateData)
           close()
@@ -108,9 +119,12 @@ export default function SessionDialog({ open, close, title, session, submitButto
           <Divider />
           <SessionDialogConnection
             setSubmitReady={setConnectionTypeReady}
+            connection={session?.connection}
           />
           <Divider />
-          <SessionDialogCredentials />
+          <SessionDialogCredentials
+            credentials={session?.credentials}
+          />
           { children }
         </Stack>
       </DialogContent>

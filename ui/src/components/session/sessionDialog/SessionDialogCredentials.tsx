@@ -1,5 +1,5 @@
 import { Checkbox, FormControl, FormControlLabel, FormGroup, FormLabel, TextField } from '@mui/material'
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import { SessionCredentials } from '../../../types/session'
 
 
@@ -9,7 +9,20 @@ interface SessionDialogCredentialsProps{
 
 
 export default function SessionDialogCredentials({ credentials }: SessionDialogCredentialsProps) {
+  console.log('credentials', credentials)
   const [credentialsChecked, setCredentialsChecked] = useState<boolean>(!!credentials)
+  const [username, setUsername] = useState<string>(credentials?.username || '')
+  const [password, setPassword] = useState<string>(credentials?.password || '')
+
+  useEffect(() => {
+    if (!credentials) return
+
+    if (credentials.username)
+      setUsername(credentials.username)
+
+    if (credentials.password)
+      setPassword(credentials.password)
+  }, [credentials])
 
   return (
     <FormControl>
@@ -26,6 +39,8 @@ export default function SessionDialogCredentials({ credentials }: SessionDialogC
           name="username"
           label="Username"
           fullWidth
+          value={username}
+          onChange={e => setUsername(e.target.value)}
         />
         <TextField
           disabled={!credentialsChecked}
@@ -33,6 +48,8 @@ export default function SessionDialogCredentials({ credentials }: SessionDialogC
           label="Password"
           type="password"
           fullWidth
+          value={password}
+          onChange={e => setPassword(e.target.value)}
         />
       </FormGroup>
     </FormControl>

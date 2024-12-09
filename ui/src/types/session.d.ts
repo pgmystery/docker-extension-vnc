@@ -1,12 +1,11 @@
-import { ConnectionData, ConnectionType } from '../libs/vnc/VNC'
+import { ConnectionData } from '../libs/vnc/VNC'
 
 
 export interface Session {
   id: string
   name: string
   credentials?: SessionCredentials
-  connectionType: ConnectionType
-  connectionData: Pick<ConnectionData, 'data'>
+  connection: ConnectionData
 }
 
 interface SessionCredentials {

@@ -1,7 +1,6 @@
 import BackendRoute from '../BackendRoute'
 import { HttpService } from '@docker/extension-api-client-types/dist/v1'
-import { ConnectionType } from '../../libs/vnc/VNC'
-import { ConnectionData } from '../../components/session/sessionDialog/SessionDialogConnection'
+import { ConnectionData } from '../../libs/vnc/VNC'
 import { SessionCredentials } from '../../types/session'
 import { Session as SessionData } from '../../types/session'
 
@@ -13,8 +12,7 @@ export type SessionList = {
 
 export interface SessionCreateData {
   name: string
-  connectionType: ConnectionType
-  connectionData: ConnectionData
+  connection: ConnectionData
   credentials?: SessionCredentials
 }
 

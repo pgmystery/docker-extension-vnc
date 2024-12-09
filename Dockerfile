@@ -1,7 +1,8 @@
 # BUILD BACKEND
 FROM golang:1.23-alpine AS builder
-ENV CGO_ENABLED=0
+ENV CGO_ENABLED=1
 WORKDIR /backend
+RUN apk add --no-cache gcc musl-dev
 COPY backend/go.* .
 RUN --mount=type=cache,target=/go/pkg/mod \
     --mount=type=cache,target=/root/.cache/go-build \

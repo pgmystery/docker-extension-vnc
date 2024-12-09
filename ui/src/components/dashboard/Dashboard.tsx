@@ -130,8 +130,8 @@ export default function Dashboard({ ddUIToast, connect }: DashboardProps) {
     connect({
       type: 'container',
       data: {
-        targetContainerId: exampleContainer.Id,
-        targetPort: UbuntuVNCDockerImagePort,
+        container: exampleContainer.Id,
+        port: UbuntuVNCDockerImagePort,
       }
     }, {
       password: proxyContainerPassword,

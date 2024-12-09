@@ -24,7 +24,7 @@ export default function ContainerSelect({ containers, disabled, selectedContaine
       freeSolo
       disabled={disabled}
       options={containerNames}
-      renderInput={params => <TextField { ...params } label="Docker Container Name/ID*" name="connectionData.container" />}
+      renderInput={params => <TextField { ...params } label="Docker Container Name/ID*" name="connection.data.container" />}
       inputValue={selectedContainerName}
       onInputChange={(_, value) => setSelectedContainerName(value)}
     />

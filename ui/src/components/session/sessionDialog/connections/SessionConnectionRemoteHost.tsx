@@ -1,11 +1,10 @@
 import { FormGroup, Stack, TextField } from '@mui/material'
 import React, { useEffect, useState } from 'react'
-import VNCRemoteHost from '../../../../libs/vnc/connectionTypes/VNCRemoteHost'
 import { serializeConnectionData } from '../SessionDialog'
 
 
 interface RemoteHostProps {
-  connection?: VNCRemoteHost
+  connectionData?: ConnectionDataRemoteHost
   setSubmitReady: (state: boolean)=>void
 }
 
@@ -33,9 +32,16 @@ export function serializeConnectionDataRemoteHost(formData: FormData): Connectio
 }
 
 
-export default function SessionConnectionRemoteHost ({ connection, setSubmitReady }: RemoteHostProps) {
-  const [remoteHost, setRemoteHost] = useState<string>(connection?.target.connection?.ip || '')
-  const [remotePort, setRemotePort] = useState<number>(connection?.target.connection?.port || 5900)
+export default function SessionConnectionRemoteHost ({ connectionData, setSubmitReady }: RemoteHostProps) {
+  const [remoteHost, setRemoteHost] = useState<string>(connectionData?.host || '')
+  const [remotePort, setRemotePort] = useState<number>(connectionData?.port || 5900)
+
+  useEffect(() => {
+    if (!connectionData) return
+
+    setRemoteHost(connectionData.host)
+    setRemotePort(connectionData.port)
+  }, [connectionData])
 
   useEffect(() => {
     setSubmitReady(remoteHost !== '' && !!remotePort)
@@ -46,18 +52,18 @@ export default function SessionConnectionRemoteHost ({ connection, setSubmitRead
       <FormGroup>
         <Stack spacing={1}>
           <TextField
-            name="connectionData.host"
+            name="connection.data.host"
             label="Remote Host IP/NAME"
-            disabled={connection !== undefined}
+            disabled={connectionData !== undefined}
             value={remoteHost}
             onChange={event => setRemoteHost(event.target.value)}
             autoFocus
             required
           />
           <TextField
-            name="connectionData.port"
+            name="connection.data.port"
             label="Remote Host PORT"
-            disabled={connection !== undefined}
+            disabled={connectionData !== undefined}
             type="number"
             slotProps={{ htmlInput: { min: 1, max: 65535 } }}
             value={remotePort}
