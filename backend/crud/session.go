@@ -78,6 +78,9 @@ func getSessionModel(id uuid.UUID) (*model.Session, error) {
 	if err != nil {
 		return nil, err
 	}
+	if session.ID == uuid.Nil {
+		return nil, errors.New("session not found")
+	}
 
 	return &session, nil
 }
@@ -160,7 +163,7 @@ func UpdateSession(id uuid.UUID, sessionUpdate *SessionUpdate) (*ResponseSession
 
 	// delete old credentials
 	if oldSession.Credentials != nil {
-		err = db.Delete(&oldSession.Credentials).Error
+		err = db.Unscoped().Delete(&oldSession.Credentials).Error
 		if err != nil {
 			return nil, err
 		}
@@ -184,31 +187,31 @@ func UpdateSession(id uuid.UUID, sessionUpdate *SessionUpdate) (*ResponseSession
 
 func DeleteSession(id uuid.UUID) error {
 	db := database.DB
-	var session model.Session
 
-	db.Find(&session, "id = ?", id).Preload("Credentials")
-
-	if session.ID == uuid.Nil {
-		return errors.New("session not found")
-	}
-
-	// Delete Credentials
-	var credentials model.SessionCredentials
-	db.Find(&credentials, "id = ?", session.Credentials.ID)
-	if credentials.ID != uuid.Nil {
-		err := db.Delete(&credentials, "id = ?", credentials.ID).Error
-		if err != nil {
-			return err
-		}
-	}
-
-	// Delete Connection
-	err := deleteConnection(session.ConnectionType, session.ConnectionDataId)
+	session, err := getSessionModel(id)
 	if err != nil {
 		return err
 	}
 
-	return db.Delete(&session, "id = ?", id).Error
+	// Delete Credentials
+	if session.Credentials != nil {
+		var credentials model.SessionCredentials
+		db.Find(&credentials, "id = ?", session.Credentials.ID)
+		if credentials.ID != uuid.Nil {
+			err = db.Unscoped().Delete(&credentials, "id = ?", credentials.ID).Error
+			if err != nil {
+				return err
+			}
+		}
+	}
+
+	// Delete Connection
+	err = deleteConnection(session.ConnectionType, session.ConnectionDataId)
+	if err != nil {
+		return err
+	}
+
+	return db.Unscoped().Delete(&session, "id = ?", id).Error
 }
 
 func getConnection(connectionType string, connectionId uuid.UUID) (interface{}, error) {
@@ -294,7 +297,7 @@ func deleteConnection(connectionType string, connectionId uuid.UUID) error {
 		db.Find(&connectionDataRemoteHost, "id = ?", connectionId)
 
 		if connectionDataRemoteHost.ID != uuid.Nil {
-			err := db.Delete(&connectionDataRemoteHost, "id = ?", connectionDataRemoteHost.ID).Error
+			err := db.Unscoped().Delete(&connectionDataRemoteHost, "id = ?", connectionDataRemoteHost.ID).Error
 
 			if err != nil {
 				return err
@@ -308,7 +311,7 @@ func deleteConnection(connectionType string, connectionId uuid.UUID) error {
 		db.Find(&connectionDataDockerContainer, "id = ?", connectionId)
 
 		if connectionDataDockerContainer.ID != uuid.Nil {
-			err := db.Delete(&connectionDataDockerContainer, "id = ?", connectionDataDockerContainer.ID).Error
+			err := db.Unscoped().Delete(&connectionDataDockerContainer, "id = ?", connectionDataDockerContainer.ID).Error
 
 			if err != nil {
 				return err

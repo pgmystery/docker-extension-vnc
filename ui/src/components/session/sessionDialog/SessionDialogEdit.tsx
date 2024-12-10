@@ -6,6 +6,7 @@ import Backend from '../../../api/Backend'
 import { Session } from '../../../types/session'
 import Button from '@mui/material/Button'
 import { SessionCreateData, SessionUpdateData } from '../../../api/routes/session'
+import SessionDialogDelete from './SessionDialogDelete'
 
 
 interface SessionDialogEditProps extends Omit<SessionDialogProps, 'open' | 'onSubmit'> {
@@ -17,6 +18,8 @@ interface SessionDialogEditProps extends Omit<SessionDialogProps, 'open' | 'onSu
 
 export default function SessionDialogEdit({ sessionId, backend, close, onSubmit, ...props }: SessionDialogEditProps) {
   const [currentSession, setCurrentSession] = useState<Session | undefined>()
+  const [deleteConfirm, setDeleteConfirm] = useState<boolean>(false)
+
   console.log('currentSession', currentSession)
 
   useEffect(() => {
@@ -41,7 +44,16 @@ export default function SessionDialogEdit({ sessionId, backend, close, onSubmit,
   }
 
   function handleDeleteSessionClick() {
+    setDeleteConfirm(true)
+  }
 
+  async function sendDeleteSession() {
+    if (!currentSession || !backend) return
+
+    console.log('DELETE SESSION', currentSession.name)
+    await backend.session.remove(currentSession.id)  // TODO: handle error (toast)
+
+    onClose()
   }
 
   return (
@@ -57,6 +69,12 @@ export default function SessionDialogEdit({ sessionId, backend, close, onSubmit,
         <Button color="error" onClick={handleDeleteSessionClick} sx={{width: '200px'}} endIcon={<DeleteIcon />}>
           Delete Session
         </Button>
+        <SessionDialogDelete
+          onClose={() => setDeleteConfirm(false)}
+          open={deleteConfirm}
+          sessionName={currentSession?.name || ''}
+          onDelete={sendDeleteSession}
+        />
       </FormControl>
     </SessionDialog>
   )
