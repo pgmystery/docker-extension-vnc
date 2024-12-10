@@ -59,7 +59,7 @@ export default function VNCCredentialsDialog({ open, onClose, onSubmit }: VNCCre
             type="password"
             fullWidth
           />
-          <FormControlLabel control={<Checkbox name="saveCredentials" />} label="Save credentials in local-storage (not encrypted)" />
+          <FormControlLabel control={<Checkbox name="saveCredentials" />} label="Save credentials (not encrypted)" />
         </Stack>
       </DialogContent>
       <DialogActions>
