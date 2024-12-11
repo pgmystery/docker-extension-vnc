@@ -88,11 +88,8 @@ export function App() {
       }
 
       setLoading(false)
-      console.log('VNC_CONNECTED', vnc.connected)
-      console.log('VNC_CONNECTION', vnc.connection)
       if (!vnc.connected || !vnc.connection) return
 
-      console.log('SET CONNECTED DATA')
       setConnectedData({
         sessionName: vnc.connection.proxy.getSessionName(),
         url: vnc.connection.proxy.url,
