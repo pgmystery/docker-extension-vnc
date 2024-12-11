@@ -170,6 +170,7 @@ export default function DockerContainer({ ddClient, disabled, onConnect, onDisco
           disabled={disabled || connection !== undefined}
           selectedContainerName={selectedContainerName}
           setSelectedContainerName={handleSelectedContainerNameChanged}
+          dockerClient={ddClient.docker}
         />
       </Stack>
       <Autocomplete
