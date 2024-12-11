@@ -37,7 +37,7 @@ export default class ProxyDockerContainer extends Proxy {
     return this.getLabel(this.config.proxyContainerLabelContainerId)
   }
 
-  async create(_: ConnectionType, target: TargetDockerContainer, data: ConnectionDataDockerContainerData) {
+  async create(sessionName: string, _: ConnectionType, target: TargetDockerContainer, data: ConnectionDataDockerContainerData) {
     if (!target.connected || !target.connection) return false
     await this.get()
 
@@ -77,7 +77,7 @@ export default class ProxyDockerContainer extends Proxy {
     } = this.config
     const labelTargetContainerId = `${proxyContainerLabelContainerId}=${container}`
 
-    await this.createContainerFromTarget('container', target, [
+    await this.createContainerFromTarget(sessionName, 'container', target, [
       '--label', labelTargetContainerId,
       '--network', this.config.network,
     ])

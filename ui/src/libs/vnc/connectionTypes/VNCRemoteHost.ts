@@ -35,14 +35,15 @@ export default class VNCRemoteHost extends VNCConnection {
 
     const targetIp = this.proxy.getTargetIp()
     const targetPort = this.proxy.getTargetPort()
+    const sessionName = this.proxy.getSessionName()
 
-    await this.connect({type: this.type, data: {host: targetIp, port: targetPort}})
+    await this.connect(sessionName, {type: this.type, data: {host: targetIp, port: targetPort}})
   }
 
-  async connect({ data }: ConnectionDataRemoteHost) {
+  async connect(sessionName: string, { data }: ConnectionDataRemoteHost) {
     const { host, port } = data
     await this.target.connect(host, port)
 
-    return super.connect({type: this.type, data})
+    return super.connect(sessionName, {type: this.type, data})
   }
 }

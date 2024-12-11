@@ -1,7 +1,7 @@
 import React, { useEffect, useRef, useState } from 'react'
 import { VncScreen } from 'react-vnc'
 import { Box, Stack } from '@mui/material'
-import VNCCredentialsDialog from './VNCCredentialsDialog'
+import VNCCredentialsDialog, { VNCCredentialsDialogData } from './VNCCredentialsDialog'
 import VNCSessionBar from '../vncSessionBar/VNCSessionBar'
 import VNCSettingsDialog from './VNCSettingsDialog'
 import { Toast } from '@docker/extension-api-client-types/dist/v1'
@@ -9,21 +9,21 @@ import VNCViewSkeleton from './VNCViewSkeleton'
 import useVNCSettings from '../../hooks/useVNCSettings'
 import { ProxyURL } from '../../libs/vnc/proxies/Proxy'
 import { MachineCommand } from '../vncSessionBar/SendMachineCommandsMenu'
+import { SessionCredentials } from '../../types/session'
+import { SessionStore } from '../../stores/sessionStore'
 
 
 interface VNCViewProps {
+  sessionName: string
   ddUIToast: Toast
   openBrowserURL: (url: string)=>void
   url?: ProxyURL
   onCancel: ()=>void
   credentials?: VNCCredentials
+  sessionStore: SessionStore
 }
 
-export interface VNCCredentials {
-  username?: string
-  password?: string
-  saveCredentials: boolean
-}
+export type VNCCredentials = Partial<SessionCredentials>
 
 export interface VNCSettingsData {
   viewOnly?: boolean
@@ -33,10 +33,10 @@ export interface VNCSettingsData {
 }
 
 
-export default function VNCView({ url, onCancel, ddUIToast, openBrowserURL, credentials }: VNCViewProps) {
+export default function VNCView({ sessionName, url, onCancel, ddUIToast, openBrowserURL, credentials, sessionStore }: VNCViewProps) {
   const vncContainerRef = useRef<HTMLDivElement>(null)
   const vncScreenRef = useRef<React.ElementRef<typeof VncScreen>>(null)
-  const [currentCredentials, setCurrentCredentials] = useState<VNCCredentials>({saveCredentials: false})
+  const [currentCredentials, setCurrentCredentials] = useState<VNCCredentials>({})
   const [needsCredentials, setNeedsCredentials] = useState<boolean>(false)
   const [trySaveCredentials, setTrySaveCredentials] = useState<boolean>(false)
   const [openSettingsDialog, setOpenSettingsDialog] = useState<boolean>(false)
@@ -60,7 +60,10 @@ export default function VNCView({ url, onCancel, ddUIToast, openBrowserURL, cred
 
   useEffect(() => {
     if (credentials)
-      handleCredentialDialogSubmit(credentials)
+      handleCredentialDialogSubmit({
+        ...credentials,
+        save: false,
+      })
   }, [credentials])
 
   useEffect(() => {
@@ -100,15 +103,32 @@ export default function VNCView({ url, onCancel, ddUIToast, openBrowserURL, cred
     onCancel()
   }
 
-  function handleCredentialDialogSubmit(credentials: VNCCredentials) {
-    if (credentials.saveCredentials) {
-      localStorage.setItem('credentials', JSON.stringify({
-        username: credentials.username,
-        password: credentials.password,
-      }))
-    }
-    else {
-      localStorage.removeItem('credentials')
+  async function handleCredentialDialogSubmit(credentials: VNCCredentialsDialogData) {
+    if (credentials.save) {
+      const session = await sessionStore.getSessionByName(sessionName)
+      if (!session) {
+        const errorMessage = `Can't find session "${session}"`
+
+        ddUIToast.error(errorMessage)
+
+        throw new Error(errorMessage)
+      }
+
+      try {
+        await sessionStore.update({
+          ...session,
+          credentials: {
+            username: credentials.username || '',
+            password: credentials.password || '',
+          }
+        })
+      }
+      catch (e: any) {
+        console.error(e)
+
+        if (e instanceof Object && e.hasOwnProperty('message'))
+          ddUIToast.error(e.message)
+      }
     }
 
     setCurrentCredentials(credentials)

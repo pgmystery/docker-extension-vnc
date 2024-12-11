@@ -69,6 +69,12 @@ export default class TargetDockerContainer extends Target {
     return this.dockerContainer.container?.Name
   }
 
+  getContainerId() {
+    if (!this.dockerContainer?.exist()) return
+
+    return this.dockerContainer.container?.Id
+  }
+
   get connected() {
     return this.dockerContainer?.exist() || false
   }

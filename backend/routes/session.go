@@ -30,12 +30,12 @@ func getSession(ctx *fiber.Ctx) error {
 	idString := ctx.Params("id")
 	id, err := uuid.Parse(idString)
 	if err != nil {
-		return ctx.Status(500).JSON(err)
+		return fiber.NewError(fiber.StatusBadRequest, err.Error())
 	}
 
 	session, err := crud.GetSession(id)
 	if err != nil {
-		return ctx.Status(500).JSON(err)
+		return fiber.NewError(fiber.StatusInternalServerError, err.Error())
 	}
 
 	if session.Id == uuid.Nil {
@@ -50,12 +50,12 @@ func createSession(ctx *fiber.Ctx) error {
 
 	err := ctx.BodyParser(requestSession)
 	if err != nil {
-		return ctx.Status(500).JSON(err)
+		return fiber.NewError(fiber.StatusBadRequest, err.Error())
 	}
 
 	session, err := crud.CreateSession(requestSession)
 	if err != nil {
-		return ctx.Status(500).JSON(err)
+		return fiber.NewError(fiber.StatusInternalServerError, err.Error())
 	}
 
 	return ctx.Status(201).JSON(session)
@@ -65,18 +65,18 @@ func updateSession(ctx *fiber.Ctx) error {
 	idString := ctx.Params("id")
 	id, err := uuid.Parse(idString)
 	if err != nil {
-		return ctx.Status(500).JSON(err)
+		return fiber.NewError(fiber.StatusBadRequest, err.Error())
 	}
 	sessionUpdate := new(crud.SessionUpdate)
 
 	err = ctx.BodyParser(sessionUpdate)
 	if err != nil {
-		return ctx.Status(500).JSON(err)
+		return fiber.NewError(fiber.StatusBadRequest, err.Error())
 	}
 
 	session, err := crud.UpdateSession(id, sessionUpdate)
 	if err != nil {
-		return ctx.Status(500).JSON(err)
+		return fiber.NewError(fiber.StatusInternalServerError, err.Error())
 	}
 
 	return ctx.Status(200).JSON(session)
@@ -86,12 +86,12 @@ func deleteSession(ctx *fiber.Ctx) error {
 	idString := ctx.Params("id")
 	id, err := uuid.Parse(idString)
 	if err != nil {
-		return ctx.Status(500).JSON(err)
+		return fiber.NewError(fiber.StatusBadRequest, err.Error())
 	}
 
 	err = crud.DeleteSession(id)
 	if err != nil {
-		return ctx.Status(500).JSON(err)
+		return fiber.NewError(fiber.StatusInternalServerError, err.Error())
 	}
 
 	return ctx.SendStatus(200)

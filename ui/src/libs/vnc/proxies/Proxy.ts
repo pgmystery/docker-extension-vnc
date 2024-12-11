@@ -29,6 +29,10 @@ export default class Proxy extends DockerContainer {
     this.config = config
   }
 
+  getSessionName(): string {
+    return this.getLabel(this.config.proxyContainerLabelSessionName)
+  }
+
   getConnectionType(): ConnectionType {
     return this.getLabel(this.config.proxyContainerLabelConnectionType) as ConnectionType
   }
@@ -89,16 +93,16 @@ export default class Proxy extends DockerContainer {
     return !(!gotDockerContainer || !this.container)
   }
 
-  async create(connectionType: ConnectionType, target: Target, _?: unknown) {
+  async create(sessionName: string, connectionType: ConnectionType, target: Target, _?: unknown) {
     if (!target.connected || !target.connection) return false
     await this.get()
 
-    await this.createContainerFromTarget(connectionType, target)
+    await this.createContainerFromTarget(sessionName, connectionType, target)
 
     return this.get()
   }
 
-  protected async createContainerFromTarget(connectionType: ConnectionType, target: Target, args: string[] = []) {
+  protected async createContainerFromTarget(sessionName: string, connectionType: ConnectionType, target: Target, args: string[] = []) {
     if (!target.connected || !target.connection) return
 
     const targetIp = target.connection.ip
@@ -109,9 +113,11 @@ export default class Proxy extends DockerContainer {
       proxyContainerLabelTargetIp,
       proxyContainerLabelTargetPort,
       proxyContainerLabelConnectionType,
+      proxyContainerLabelSessionName,
     } = this.config
 
     const labelIdentify = `${proxyContainerLabelKey}=""`
+    const labelSessionName = `${proxyContainerLabelSessionName}="${sessionName}"`
     const labelTargetIp = `${proxyContainerLabelTargetIp}=${targetIp}`
     const labelTargetPort = `${proxyContainerLabelTargetPort}=${targetPort}`
     const labelConnectionType = `${proxyContainerLabelConnectionType}=${connectionType}`
@@ -120,6 +126,7 @@ export default class Proxy extends DockerContainer {
       ...args,
       '--detach',
       '--name', proxyContainerName,
+      '--label', labelSessionName,
       '--label', labelIdentify,
       '--label', labelTargetIp,
       '--label', labelTargetPort,

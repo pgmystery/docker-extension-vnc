@@ -11,9 +11,8 @@ import {
 import { FormEvent, ReactNode, useEffect, useState } from 'react'
 import Button from '@mui/material/Button'
 import SessionDialogConnection from './SessionDialogConnection'
-import { Session } from '../../../types/session'
+import { Session, SessionCreateData } from '../../../types/session'
 import SessionDialogCredentials, { serializeCredentials } from './SessionDialogCredentials'
-import { SessionCreateData } from '../../../api/routes/session'
 import { serializeConnectionDataRemoteHost } from './connections/SessionConnectionRemoteHost'
 import { serializeConnectionDataDockerContainer } from './connections/SessionConnectionDockerContainer'
 

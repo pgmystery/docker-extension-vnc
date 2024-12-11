@@ -38,7 +38,6 @@ export function serializeCredentials(formData: FormData): SessionCredentials {
 
 
 export default function SessionDialogCredentials({ credentials }: SessionDialogCredentialsProps) {
-  console.log('credentials', credentials)
   const [credentialsChecked, setCredentialsChecked] = useState<boolean>(!!credentials)
   const [username, setUsername] = useState<string>(credentials?.username || '')
   const [password, setPassword] = useState<string>(credentials?.password || '')

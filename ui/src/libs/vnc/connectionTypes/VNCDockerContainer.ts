@@ -47,14 +47,25 @@ export default class VNCDockerContainer extends VNCConnection {
 
     const targetContainerId = this.proxy.getTargetContainerId()
     const targetPort = this.proxy.getTargetPort()
+    const sessionName = this.proxy.getSessionName()
 
-    await this.connect({type: this.type, data: {container: targetContainerId, port: targetPort}})
+    await this.connect(sessionName, {type: this.type, data: {container: targetContainerId, port: targetPort}})
   }
 
-  async connect({ data }: ConnectionDataDockerContainer) {
+  async connect(sessionName: string, { data }: ConnectionDataDockerContainer) {
     await this.target.connect(data.container, data.port)
+    const targetContainerId = this.target.getContainerId()
 
-    return super.connect({type: this.type, data})
+    if (!targetContainerId)
+      throw new Error(`Can't get target container "${data.container}" ID`)
+
+    return super.connect(sessionName, {
+      type: this.type,
+      data: {
+        container: targetContainerId,
+        port: data.port
+      },
+    })
   }
 
   async disconnect() {

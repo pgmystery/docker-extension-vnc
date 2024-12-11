@@ -1,6 +1,6 @@
-import { SessionList } from '../../api/routes/session'
 import { Autocomplete, TextField } from '@mui/material'
 import React from 'react'
+import { SessionList } from '../../types/session'
 
 
 interface SessionSelectProps {

@@ -1,56 +1,82 @@
-import React, { useEffect, useMemo, useState } from 'react'
+import React, { useEffect, useState, useSyncExternalStore } from 'react'
 import { Backdrop, Box, CircularProgress, IconButton, Stack } from '@mui/material'
 import AddIcon from '@mui/icons-material/Add'
 import EditIcon from '@mui/icons-material/Edit'
-import Button from '@mui/material/Button'
 import SessionDialog from '../session/sessionDialog/SessionDialog'
-import { SessionCreateData, SessionList, SessionUpdateData } from '../../api/routes/session'
-import { createDockerDesktopClient } from '@docker/extension-api-client'
-import Backend from '../../api/Backend'
 import SessionSelect from '../session/SessionSelect'
 import SessionDialogEdit from '../session/sessionDialog/SessionDialogEdit'
+import { Session, SessionCreateData, SessionItem, SessionUpdateData } from '../../types/session'
+import { SessionStore } from '../../stores/sessionStore'
+import { Toast } from '@docker/extension-api-client-types/dist/v1'
+import ConnectButton from '../connectbar/ConnectButton'
 
 
-export default function ConnectBar() {
+interface ConnectBarProps {
+  sessionStore: SessionStore
+  onConnect: (session: Session)=>void
+  onDisconnect: ()=>void
+  connected: boolean
+  ddUIToast: Toast
+}
+
+
+export default function ConnectBar({ connected, sessionStore, ddUIToast, onConnect, onDisconnect }: ConnectBarProps) {
   const [loading, setLoading] = useState<boolean>(true)
-  const ddClient = useMemo(createDockerDesktopClient, [])
-  const backend = useMemo(() => ddClient.extension.vm?.service && new Backend(ddClient.extension.vm), [ddClient])
-  const [sessions, setSessions] = useState<SessionList>([])
+  const sessions = useSyncExternalStore(sessionStore.subscribe, sessionStore.getSnapshot)
   const [selectedSessionName, setSelectedSessionName] = useState<string>('')
   const [newSessionDialogOpen, setNewSessionDialogOpen] = useState<boolean>(false)
-  const [editSessionId, setEditSessionId] = useState<string | undefined>()
+  const [editSession, setEditSession] = useState<SessionItem | undefined>()
 
   useEffect(() => {
-    if (!backend) return
-
-    refreshSessions().finally(() => setLoading(false))
-  }, [backend])
-
-  async function refreshSessions() {
-    if (!backend) return
-
-    const sessions = await backend.session.getAll()
-    setSessions(sessions)
-  }
+    sessionStore.refresh().finally(() => setLoading(false))
+  }, [])
 
   async function sendCreateSessionData(sessionData: SessionCreateData) {
-    if (!backend) return
+    try {
+      await sessionStore.add(sessionData)
+    }
+    catch (e: any) {
+      console.error(e)
 
-    console.log('CREATE SESSION DATA', sessionData)
-    const session = await backend.session.create(sessionData)
+      if (e instanceof Object && e.hasOwnProperty('message'))
+        ddUIToast.error(e.message)
 
-    await refreshSessions()
-    setSelectedSessionName(session.name)
+      return
+    }
+
+    setSelectedSessionName(sessionData.name)
   }
 
   async function sendUpdateSessionData(sessionData: SessionUpdateData) {
-    if (!backend) return
+    try {
+      await sessionStore.update(sessionData)
+    }
+    catch (e: any) {
+      console.error(e)
 
-    console.log('UPDATE SESSION DATA', sessionData)
-    const session = await backend.session.update(sessionData)
+      if (e instanceof Object && e.hasOwnProperty('message'))
+        ddUIToast.error(e.message)
 
-    await refreshSessions()
-    setSelectedSessionName(session.name)
+      return
+    }
+
+    setSelectedSessionName(sessionData.name)
+  }
+
+  async function sendDeleteSession(sessionId: string) {
+    try {
+      await sessionStore.delete(sessionId)
+    }
+    catch (e: any) {
+      console.error(e)
+
+      if (e instanceof Object && e.hasOwnProperty('message'))
+        ddUIToast.error(e.message)
+
+      return
+    }
+
+    setSelectedSessionName('')
   }
 
   function getSelectedSession() {
@@ -59,33 +85,48 @@ export default function ConnectBar() {
 
   async function handleEditSessionClick() {
     const selectedSession = getSelectedSession()
-    if (!backend || !selectedSession) return
+    if (!selectedSession) return
 
-    setEditSessionId(selectedSession.id)
+    setEditSession(selectedSession)
+  }
+
+  async function handleConnectClick() {
+    if (!selectedSessionName) return
+
+    const sessionItem = sessions.find(session => session.name === selectedSessionName)
+
+    if (!sessionItem) return
+
+    const session = await sessionItem.getInfo()
+    onConnect(session)
   }
 
   return (
     <>
       <Stack direction="row" spacing={ 2 }>
-        <IconButton color="success" onClick={() => setNewSessionDialogOpen(true)}>
+        <IconButton disabled={connected} color="success" onClick={() => setNewSessionDialogOpen(true)}>
           <AddIcon/>
         </IconButton>
         <SessionSelect
+          disabled={connected}
           sessions={sessions}
           selectedSessionName={selectedSessionName}
           setSelectedSessionName={setSelectedSessionName}
         />
-        <IconButton disabled={selectedSessionName === ''} onClick={handleEditSessionClick}>
+        <IconButton disabled={selectedSessionName === '' || connected} onClick={handleEditSessionClick}>
           <EditIcon/>
         </IconButton>
         <Box sx={ {flexGrow: 1} }/>
-        <Button
-          color="success"
-          sx={ {
+        <ConnectButton
+          onConnect={handleConnectClick}
+          onDisconnect={onDisconnect}
+          connected={connected}
+          connectButtonDisabled={selectedSessionName === '' || loading || connected}
+          disconnectButtonDisabled={!connected}
+          sx={{
             minWidth: '180px',
-          } }
-          disabled={selectedSessionName === '' || loading}
-        >Connect</Button>
+          }}
+        />
       </Stack>
 
       <SessionDialog
@@ -99,10 +140,10 @@ export default function ConnectBar() {
       <SessionDialogEdit
         title="Edit Session"
         submitButtonText="Edit Session"
-        sessionId={editSessionId}
-        close={() => setEditSessionId(undefined)}
+        editSession={editSession}
+        close={() => setEditSession(undefined)}
         onSubmit={sendUpdateSessionData}
-        backend={backend}
+        onDelete={sendDeleteSession}
       />
 
       <Backdrop sx={(theme) => ({ color: '#fff', zIndex: theme.zIndex.drawer + 1 })} open={loading}>

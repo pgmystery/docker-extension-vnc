@@ -40,10 +40,10 @@ export default class VNCConnection {
       return await this.disconnect()
   }
 
-  connect(connectionData: ConnectionData) {
+  connect(sessionName: string, connectionData: ConnectionData) {
     if (this.proxy.container) return true
 
-    return this.proxy.create(connectionData.type, this.target, connectionData.data)
+    return this.proxy.create(sessionName, connectionData.type, this.target, connectionData.data)
   }
 
   async disconnect() {
