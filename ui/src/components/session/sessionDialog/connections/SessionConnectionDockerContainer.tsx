@@ -39,7 +39,7 @@ export function serializeConnectionDataDockerContainer(formData: FormData): Conn
 
 export default function SessionConnectionDockerContainer({ ddClient, connectionData, setSubmitReady }: DockerContainerProps) {
   const [containers, setContainers] = useState<ContainerInfo[]>([])
-  const [selectedContainerName, setSelectedContainerName] = useState<string>('')
+  const [selectedContainerName, setSelectedContainerName] = useState<string>(connectionData?.container || '')
   const [selectedContainerPorts, setSelectedContainerPorts] = useState<string[]>([])
   const [selectedPort, setSelectedPort] = useState<string>('')
 
@@ -123,6 +123,7 @@ export default function SessionConnectionDockerContainer({ ddClient, connectionD
             containers={containers}
             selectedContainerName={selectedContainerName}
             setSelectedContainerName={setSelectedContainerName}
+            dockerClient={ddClient.docker}
           />
           <Tooltip title="Refresh Containerlist" arrow>
             <IconButton

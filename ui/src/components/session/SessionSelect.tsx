@@ -1,5 +1,5 @@
 import { Autocomplete, TextField } from '@mui/material'
-import React from 'react'
+import React, { useEffect, useState } from 'react'
 import { SessionList } from '../../types/session'
 
 
@@ -8,12 +8,27 @@ interface SessionSelectProps {
   disabled?: boolean
   selectedSessionName: string
   setSelectedSessionName: (name: string)=>void
+  changeSelection: string | null
 }
 
 
-export default function SessionSelect({ sessions, disabled, selectedSessionName, setSelectedSessionName }: SessionSelectProps) {
+export default function SessionSelect({
+  sessions,
+  disabled,
+  selectedSessionName,
+  setSelectedSessionName,
+  changeSelection,
+}: SessionSelectProps) {
+  const [value, setValue] = useState<string | null>(null)
+
+  useEffect(() => {
+    setValue(changeSelection)
+  }, [changeSelection])
+
   return (
     <Autocomplete
+      value={value}
+      onChange={(_, value) => setValue(value)}
       disabled={disabled}
       options={ sessions.map(session => session.name) }
       renderInput={ params => <TextField { ...params } label="Sessions"/> }

@@ -26,6 +26,7 @@ export default function ConnectBar({ connected, sessionStore, ddUIToast, onConne
   const [selectedSessionName, setSelectedSessionName] = useState<string>('')
   const [newSessionDialogOpen, setNewSessionDialogOpen] = useState<boolean>(false)
   const [editSession, setEditSession] = useState<SessionItem | undefined>()
+  const [changeSession, setChangeSession] = useState<string | null>(null)
 
   useEffect(() => {
     sessionStore.refresh().finally(() => setLoading(false))
@@ -45,6 +46,7 @@ export default function ConnectBar({ connected, sessionStore, ddUIToast, onConne
     }
 
     setSelectedSessionName(sessionData.name)
+    setChangeSession(sessionData.name)
   }
 
   async function sendUpdateSessionData(sessionData: SessionUpdateData) {
@@ -61,6 +63,7 @@ export default function ConnectBar({ connected, sessionStore, ddUIToast, onConne
     }
 
     setSelectedSessionName(sessionData.name)
+    setChangeSession(sessionData.name)
   }
 
   async function sendDeleteSession(sessionId: string) {
@@ -77,6 +80,7 @@ export default function ConnectBar({ connected, sessionStore, ddUIToast, onConne
     }
 
     setSelectedSessionName('')
+    setChangeSession(null)
   }
 
   function getSelectedSession() {
@@ -112,6 +116,7 @@ export default function ConnectBar({ connected, sessionStore, ddUIToast, onConne
           sessions={sessions}
           selectedSessionName={selectedSessionName}
           setSelectedSessionName={setSelectedSessionName}
+          changeSelection={changeSession}
         />
         <IconButton disabled={selectedSessionName === '' || connected} onClick={handleEditSessionClick}>
           <EditIcon/>
