@@ -1,5 +1,5 @@
 import React, { useEffect, useState, useSyncExternalStore } from 'react'
-import { Backdrop, Box, CircularProgress, IconButton, Stack } from '@mui/material'
+import { Backdrop, Box, CircularProgress, IconButton, Stack, Tooltip } from '@mui/material'
 import AddIcon from '@mui/icons-material/Add'
 import EditIcon from '@mui/icons-material/Edit'
 import SessionDialog from '../session/sessionDialog/SessionDialog'
@@ -123,9 +123,11 @@ export default function ConnectBar({ connectedSession, sessionStore, ddUIToast, 
   return (
     <>
       <Stack direction="row" spacing={ 2 } alignItems="center">
-        <IconButton disabled={!!connectedSession} color="success" onClick={() => setNewSessionDialogOpen(true)}>
-          <AddIcon/>
-        </IconButton>
+        <Tooltip title="Create a new Session">
+          <IconButton disabled={!!connectedSession} color="success" onClick={() => setNewSessionDialogOpen(true)}>
+            <AddIcon/>
+          </IconButton>
+        </Tooltip>
         <SessionSelect
           disabled={!!connectedSession}
           sessions={sessions}
@@ -133,9 +135,11 @@ export default function ConnectBar({ connectedSession, sessionStore, ddUIToast, 
           setSelectedSessionName={setSelectedSessionName}
           changeSelection={changeSession}
         />
-        <IconButton disabled={selectedSessionName === '' || !!connectedSession} onClick={handleEditSessionClick}>
-          <EditIcon/>
-        </IconButton>
+        <Tooltip title="Edit selected Session">
+          <IconButton disabled={selectedSessionName === '' || !!connectedSession} onClick={handleEditSessionClick}>
+            <EditIcon/>
+          </IconButton>
+        </Tooltip>
         <Box sx={ {flexGrow: 1} }/>
         <ConnectButton
           onConnect={handleConnectClick}
