@@ -41,6 +41,7 @@ jobs:
         uses: docker/build-push-action@v5
         with:
           context: ./docker/novnc_proxy
+          platforms: linux/amd64,linux/arm64
           file: ./docker/novnc_proxy/novnc_proxy.Dockerfile
           push: true
           tags: pgmystery/proxy_vnc:latest
