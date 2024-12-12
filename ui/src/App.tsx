@@ -34,8 +34,6 @@ export function App() {
   })
   const [downloadingProxyImage, setDownloadingProxyImage] = useState<Session | null>(null)
 
-  console.log('APP', loading)
-
   useEffect(() => {
     if (!sessionStore) return
 
