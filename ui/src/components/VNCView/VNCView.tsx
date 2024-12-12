@@ -27,6 +27,7 @@ export type VNCCredentials = Partial<SessionCredentials>
 
 
 export default function VNCView({ sessionName, url, onCancel, ddUIToast, openBrowserURL, credentials, sessionStore }: VNCViewProps) {
+  const [ready, setReady] = useState<boolean>(false)
   const vncContainerRef = useRef<HTMLDivElement>(null)
   const vncScreenRef = useRef<React.ElementRef<typeof VncScreen>>(null)
   const vncSettingsStore = useMemo(getVNCSettingsStore, [])
@@ -40,7 +41,7 @@ export default function VNCView({ sessionName, url, onCancel, ddUIToast, openBro
 
   useEffect(() => {
     if ('load' in vncSettingsStore)
-      vncSettingsStore.load()
+      vncSettingsStore.load().finally(() => setReady(true))
   }, [])
 
   useEffect(() => {
@@ -228,35 +229,40 @@ export default function VNCView({ sessionName, url, onCancel, ddUIToast, openBro
           position: "relative",
           overflow: 'hidden',
         }}>
-          <VncScreen
-            url={url?.ws || ''}
-            scaleViewport
-            clipViewport
-            style={{
-              width: '100%',
-              height: '100%',
-              overflow: 'hidden',
-            }}
-            ref={vncScreenRef}
-            onCredentialsRequired={handleCredentialRequest}
-            onSecurityFailure={handleSecurityFailure}
-            rfbOptions={{
-              credentials: currentCredentials,
-            }}
-            loadingUI={<VNCViewSkeleton />}
-            qualityLevel={vncSettings.qualityLevel}
-            compressionLevel={vncSettings.compressionLevel}
-            showDotCursor={vncSettings.showDotCursor}
-            viewOnly={vncSettings.viewOnly}
-            onClipboard={e => setClipboardText(e?.detail.text || '')}
-            onCapabilities={(e?: { detail: { capabilities: any } }) => {
-              setHavePowerCapability(false)
+          {
+            ready
+              ? <VncScreen
+                  url={url?.ws || ''}
+                  scaleViewport
+                  clipViewport
+                  style={{
+                    width: '100%',
+                    height: '100%',
+                    overflow: 'hidden',
+                  }}
+                  ref={vncScreenRef}
+                  onCredentialsRequired={handleCredentialRequest}
+                  onSecurityFailure={handleSecurityFailure}
+                  rfbOptions={{
+                    credentials: currentCredentials,
+                  }}
+                  loadingUI={<VNCViewSkeleton />}
+                  qualityLevel={vncSettings.qualityLevel}
+                  compressionLevel={vncSettings.compressionLevel}
+                  showDotCursor={vncSettings.showDotCursor}
+                  viewOnly={vncSettings.viewOnly}
+                  onClipboard={e => setClipboardText(e?.detail.text || '')}
+                  onCapabilities={(e?: { detail: { capabilities: any } }) => {
+                    setHavePowerCapability(false)
 
-              if (e?.detail.capabilities.hasOwnProperty('power')) {
-                setHavePowerCapability(e?.detail.capabilities.power || false)
-              }
-            }}
-          />
+                    if (e?.detail.capabilities.hasOwnProperty('power')) {
+                      setHavePowerCapability(e?.detail.capabilities.power || false)
+                    }
+                  }}
+                />
+              : <VNCViewSkeleton />
+          }
+
         </Box>
       </Stack>
 
