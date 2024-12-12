@@ -140,7 +140,7 @@ export default function Dashboard({ ddUIToast, connect, sessionStore }: Dashboar
         connection: {
           type: 'container',
           data: {
-            container: exampleContainer.Id,
+            container: exampleContainer.Name,
             port: UbuntuVNCDockerImagePort,
           },
         },
