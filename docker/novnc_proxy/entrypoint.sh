@@ -7,4 +7,4 @@ if [[ -z "${NONVC_REMOTE_SERVER}" ]]; then
   exit 1
 fi
 
-./utils/novnc_proxy --vnc "${NONVC_REMOTE_SERVER}" --listen "${NOVNC_LISTEN_HOST}:${NOVNC_LISTEN_PORT}" "$*"
+./utils/novnc_proxy --vnc "${NONVC_REMOTE_SERVER}" --listen "${NOVNC_LISTEN_HOST}:${NOVNC_LISTEN_PORT}" $*
