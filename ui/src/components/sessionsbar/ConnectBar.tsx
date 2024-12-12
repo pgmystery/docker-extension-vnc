@@ -149,22 +149,24 @@ export default function ConnectBar({ connectedSession, sessionStore, ddUIToast, 
         />
       </Stack>
 
-      <SessionDialog
-        title="Add new Session"
-        submitButtonText="Create Session"
-        open={ newSessionDialogOpen }
-        close={ () => setNewSessionDialogOpen(false) }
-        onSubmit={sendCreateSessionData}
-      />
-
-      <SessionDialogEdit
-        title="Edit Session"
-        submitButtonText="Edit Session"
-        editSession={editSession}
-        close={() => setEditSession(undefined)}
-        onSubmit={sendUpdateSessionData}
-        onDelete={sendDeleteSession}
-      />
+      {
+        editSession
+          ? <SessionDialogEdit
+              title="Edit Session"
+              submitButtonText="Edit Session"
+              editSession={editSession}
+              close={() => setEditSession(undefined)}
+              onSubmit={sendUpdateSessionData}
+              onDelete={sendDeleteSession}
+            />
+          : <SessionDialog
+              title="Add new Session"
+              submitButtonText="Create Session"
+              open={ newSessionDialogOpen }
+              close={ () => setNewSessionDialogOpen(false) }
+              onSubmit={sendCreateSessionData}
+            />
+      }
 
       <Backdrop sx={(theme) => ({ color: '#fff', zIndex: theme.zIndex.drawer + 1 })} open={loading}>
         <CircularProgress />
