@@ -46,7 +46,7 @@ To switch the target and the connection, you can create Sessions. The Session ar
 To create a new Session, just click on the plus icon button.
 Now you can enter the Session name, the connection type with data and optional the credentials.
 
-![screenshot6.png](docs/imgs/screenshot6.png)
+![Edit Session](docs/imgs/screenshot6.png)
 
 This extension support 2 different kind of connections.
 
