@@ -2,7 +2,6 @@ import { Dialog, DialogActions, DialogContent, DialogTitle, Divider, IconButton,
 import Button from '@mui/material/Button'
 import QualityLevel from './VNCSettingForms/QualityLevel'
 import { FormEvent, useEffect, useState } from 'react'
-import DeleteCredentials from './VNCSettingForms/DeleteCredentials'
 import { VNCSettingsData } from './VNCView'
 import CloseIcon from '@mui/icons-material/Close'
 import CompressionLevel from './VNCSettingForms/CompressionLevel'
@@ -91,7 +90,6 @@ export default function VNCSettingsDialog({ open, close, settingsData, onSetting
             reset={reset}
           />
           <Divider />
-          <DeleteCredentials />
         </Stack>
       </DialogContent>
       <DialogActions>
