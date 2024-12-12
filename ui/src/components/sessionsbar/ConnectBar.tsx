@@ -122,7 +122,7 @@ export default function ConnectBar({ connectedSession, sessionStore, ddUIToast, 
 
   return (
     <>
-      <Stack direction="row" spacing={ 2 }>
+      <Stack direction="row" spacing={ 2 } alignItems="center">
         <IconButton disabled={!!connectedSession} color="success" onClick={() => setNewSessionDialogOpen(true)}>
           <AddIcon/>
         </IconButton>
