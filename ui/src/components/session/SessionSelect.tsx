@@ -53,6 +53,7 @@ export default function SessionSelect({
       inputValue={selectedSessionName}
       onInputChange={(_, value) => setSelectedSessionName(value)}
       groupBy={(option) => option.firstLetter.toUpperCase()}
+      noOptionsText="No Sessions"
       sx={ {width: 300} }
     />
   )
