@@ -41,7 +41,7 @@ RUN npm run build
 
 FROM alpine
 LABEL org.opencontainers.image.title="VNC Viewer" \
-    org.opencontainers.image.description="Docker Extension for connecting to a VNC Server Container and control it over an built-in view." \
+    org.opencontainers.image.description="Docker Desktop Extension for connecting to a VNC Server Container or Remote Host and control it over an built-in view." \
     org.opencontainers.image.vendor="pgmystery" \
     com.docker.desktop.extension.api.version=">= 0.3.4" \
     com.docker.extension.screenshots="[{\"alt\":\"Webbrowser on a linux desktop\", \"url\":\"https://raw.githubusercontent.com/pgmystery/docker-extension-vnc/refs/heads/main/docs/imgs/screenshot1.png\"},\
