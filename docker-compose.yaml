@@ -16,6 +16,8 @@ services:
 
   vnc:
     image: ${DESKTOP_PLUGIN_IMAGE}
+    volumes:
+      - docker-extension-vnc-data:/data
 #    depends_on:
 #      db:
 #        condition: service_healthy
@@ -24,3 +26,6 @@ services:
 
 #networks:
 #  vnc-backend:
+
+volumes:
+  docker-extension-vnc-data:

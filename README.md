@@ -39,8 +39,6 @@ It will also then automatically creates the Container and a connection to the co
 ![Dashboard](docs/imgs/screenshot4.png)
 
 ### Sessions
-**⚠️IMPORTANT: After upgrading the extension to a new version, all Sessions getting deleted!⚠️**
-
 To switch the target and the connection, you can create Sessions. The Session are saved in the Backend Docker Container in a SQLite Database.
 
 To create a new Session, just click on the plus icon button.
