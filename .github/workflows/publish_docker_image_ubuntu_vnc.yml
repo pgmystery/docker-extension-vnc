@@ -41,6 +41,7 @@ jobs:
         uses: docker/build-push-action@v5
         with:
           context: ./docker/vnc_ubuntu
+          platforms: linux/amd64,linux/arm64
           file: ./docker/vnc_ubuntu/vnc_ubuntu.Dockerfile
           push: true
           tags: pgmystery/ubuntu_vnc:latest
