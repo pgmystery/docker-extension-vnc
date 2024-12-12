@@ -2,22 +2,22 @@ import { Dialog, DialogActions, DialogContent, DialogTitle, Divider, IconButton,
 import Button from '@mui/material/Button'
 import QualityLevel from './VNCSettingForms/QualityLevel'
 import { FormEvent, useEffect, useState } from 'react'
-import { VNCSettingsData } from './VNCView'
 import CloseIcon from '@mui/icons-material/Close'
 import CompressionLevel from './VNCSettingForms/CompressionLevel'
 import ShowDotCursor from './VNCSettingForms/ShowDotCursor'
 import ViewOnly from './VNCSettingForms/ViewOnly'
+import { VNCSettings } from '../../stores/vncSettingsStore'
 
 
-interface VNCSettingsSaveData extends Omit<VNCSettingsData, 'showDotCursor'> {
+interface VNCSettingsSaveData extends Omit<VNCSettings, 'showDotCursor'> {
   showDotCursor?: 'on'
 }
 
 interface VNCSettingsDialog {
   open: boolean
   close: ()=>void
-  settingsData: VNCSettingsData
-  onSettingChange: (settingsData: VNCSettingsData)=>void
+  settingsData: VNCSettings
+  onSettingChange: (settingsData: VNCSettings)=>void
 }
 
 
@@ -33,7 +33,7 @@ export default function VNCSettingsDialog({ open, close, settingsData, onSetting
       qualityLevel: Number(data.qualityLevel),
       compressionLevel: Number(data.compressionLevel),
       showDotCursor: !!data.showDotCursor,
-      viewOnly: !!data.viewOnly,
+      viewOnly: data.viewOnly,
     })
     close()
   }

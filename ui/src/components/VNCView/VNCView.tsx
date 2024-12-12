@@ -1,4 +1,4 @@
-import React, { useEffect, useRef, useState } from 'react'
+import React, { useEffect, useMemo, useRef, useState, useSyncExternalStore } from 'react'
 import { VncScreen } from 'react-vnc'
 import { Box, Stack } from '@mui/material'
 import VNCCredentialsDialog, { VNCCredentialsDialogData } from './VNCCredentialsDialog'
@@ -6,11 +6,11 @@ import VNCSessionBar from '../vncSessionBar/VNCSessionBar'
 import VNCSettingsDialog from './VNCSettingsDialog'
 import { Toast } from '@docker/extension-api-client-types/dist/v1'
 import VNCViewSkeleton from './VNCViewSkeleton'
-import useVNCSettings from '../../hooks/useVNCSettings'
 import { ProxyURL } from '../../libs/vnc/proxies/Proxy'
 import { MachineCommand } from '../vncSessionBar/SendMachineCommandsMenu'
 import { SessionCredentials } from '../../types/session'
 import { SessionStore } from '../../stores/sessionStore'
+import { VNCSettings, getVNCSettingsStore } from '../../stores/vncSettingsStore'
 
 
 interface VNCViewProps {
@@ -25,24 +25,23 @@ interface VNCViewProps {
 
 export type VNCCredentials = Partial<SessionCredentials>
 
-export interface VNCSettingsData {
-  viewOnly?: boolean
-  qualityLevel: number
-  compressionLevel: number
-  showDotCursor: boolean
-}
-
 
 export default function VNCView({ sessionName, url, onCancel, ddUIToast, openBrowserURL, credentials, sessionStore }: VNCViewProps) {
   const vncContainerRef = useRef<HTMLDivElement>(null)
   const vncScreenRef = useRef<React.ElementRef<typeof VncScreen>>(null)
+  const vncSettingsStore = useMemo(getVNCSettingsStore, [])
+  const vncSettings = useSyncExternalStore(vncSettingsStore.subscribe, vncSettingsStore.getSnapshot)
   const [currentCredentials, setCurrentCredentials] = useState<VNCCredentials>({})
   const [needsCredentials, setNeedsCredentials] = useState<boolean>(false)
   const [trySaveCredentials, setTrySaveCredentials] = useState<boolean>(false)
   const [openSettingsDialog, setOpenSettingsDialog] = useState<boolean>(false)
-  const [settings, saveSettings] = useVNCSettings()
   const [clipboardText, setClipboardText] = useState<string>('')
   const [havePowerCapability, setHavePowerCapability] = useState<boolean>(false)
+
+  useEffect(() => {
+    if ('load' in vncSettingsStore)
+      vncSettingsStore.load()
+  }, [])
 
   useEffect(() => {
     const { connect, connected, disconnect } = vncScreenRef.current ?? {}
@@ -56,7 +55,7 @@ export default function VNCView({ sessionName, url, onCancel, ddUIToast, openBro
 
   useEffect(() => {
     reconnect()
-  }, [settings])
+  }, [vncSettings])
 
   useEffect(() => {
     if (credentials)
@@ -158,8 +157,8 @@ export default function VNCView({ sessionName, url, onCancel, ddUIToast, openBro
     setOpenSettingsDialog(true)
   }
 
-  function handleSettingsChange(settings: VNCSettingsData) {
-    saveSettings(settings)
+  async function handleSettingsChange(settings: VNCSettings) {
+    await vncSettingsStore.set(settings)
   }
 
   function handleOpenInBrowserClick() {
@@ -245,10 +244,10 @@ export default function VNCView({ sessionName, url, onCancel, ddUIToast, openBro
               credentials: currentCredentials,
             }}
             loadingUI={<VNCViewSkeleton />}
-            qualityLevel={settings.qualityLevel}
-            compressionLevel={settings.compressionLevel}
-            showDotCursor={settings.showDotCursor}
-            viewOnly={settings.viewOnly}
+            qualityLevel={vncSettings.qualityLevel}
+            compressionLevel={vncSettings.compressionLevel}
+            showDotCursor={vncSettings.showDotCursor}
+            viewOnly={vncSettings.viewOnly}
             onClipboard={e => setClipboardText(e?.detail.text || '')}
             onCapabilities={(e?: { detail: { capabilities: any } }) => {
               setHavePowerCapability(false)
@@ -264,7 +263,7 @@ export default function VNCView({ sessionName, url, onCancel, ddUIToast, openBro
       <VNCSettingsDialog
         open={openSettingsDialog}
         close={() => setOpenSettingsDialog(false)}
-        settingsData={settings}
+        settingsData={vncSettings}
         onSettingChange={handleSettingsChange}
       />
 

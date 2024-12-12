@@ -5,6 +5,8 @@ import (
 	"gorm.io/gorm"
 	"gorm.io/gorm/logger"
 	"log"
+	"os"
+	"path/filepath"
 	"vnc/model"
 	"vnc/model/connections"
 )
@@ -21,15 +23,15 @@ func Connect() {
 		panic(err)
 	}
 
-	//dsn := fmt.Sprintf("host=%s port=%d dbname=%s user=%s password=%s sslmode=disable TimeZone=Asia/Shanghai",
-	//	config.Host,
-	//	config.Port,
-	//	config.Name,
-	//	config.User,
-	//	config.Password,
-	//)
-	//db, err := gorm.Open(postgres.Open(dsn), &gorm.Config{
-	db, err := gorm.Open(sqlite.Open(config.Name+".db"), &gorm.Config{
+	dataPath := filepath.Join(".", config.DataPath)
+	err = os.MkdirAll(dataPath, os.ModePerm)
+	if err != nil {
+		panic(err)
+	}
+
+	databaseFilePath := filepath.Join(dataPath, config.Name+".db")
+
+	db, err := gorm.Open(sqlite.Open(databaseFilePath), &gorm.Config{
 		Logger: logger.Default.LogMode(logger.Info),
 	})
 	if err != nil {

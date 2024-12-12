@@ -2,22 +2,30 @@ package routes
 
 import (
 	"github.com/gofiber/fiber/v2"
-	"github.com/google/uuid"
-	"vnc/crud"
+	"vnc/vnc"
 )
 
 func SettingsRouter(apiRouter fiber.Router) {
 	settingsRouter := apiRouter.Group("/settings")
 
 	settingsRouter.Get("/", getSettings)
+	settingsRouter.Post("/", setSettings)
 }
 
 func getSettings(ctx *fiber.Ctx) error {
-	settings := crud.GetSettings()
+	return ctx.Status(200).JSON(vnc.Settings.Data)
+}
 
-	if settings.ID == uuid.Nil {
-		return ctx.SendStatus(404)
+func setSettings(ctx *fiber.Ctx) error {
+	var vncSettingsData vnc.SettingsData
+
+	if err := ctx.BodyParser(&vncSettingsData); err != nil {
+		return fiber.NewError(fiber.StatusBadRequest, err.Error())
 	}
 
-	return ctx.JSON(settings)
+	if err := vnc.Settings.Save(vncSettingsData); err != nil {
+		return fiber.NewError(fiber.StatusInternalServerError, err.Error())
+	}
+
+	return ctx.SendStatus(200)
 }

@@ -10,6 +10,7 @@ import (
 	"net"
 	"os"
 	"vnc/database"
+	"vnc/vnc"
 )
 
 var logger = logrus.New()
@@ -22,7 +23,9 @@ func main() {
 		panic("Error loading .env file")
 	}
 
+	vnc.LoadVNCSettings()
 	database.Connect()
+
 	app := fiber.New()
 
 	createAPIs(app)

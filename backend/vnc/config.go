@@ -1,4 +1,4 @@
-package database
+package vnc
 
 import (
 	"github.com/caarlos0/env/v11"
@@ -7,7 +7,7 @@ import (
 
 type Config struct {
 	DataPath string `env:"VNC_DATA_PATH" envDefault:"data"`
-	Name     string `env:"VNC_DB_NAME" envDefault:"vnc"`
+	FileName string `env:"VNC_SETTINGS_NAME" envDefault:"vnc_settings"`
 }
 
 func loadConfig() (*Config, error) {

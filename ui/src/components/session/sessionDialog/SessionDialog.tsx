@@ -4,7 +4,7 @@ import {
   DialogContent,
   DialogTitle, Divider,
   FormControl,
-  FormLabel,
+  FormLabel, IconButton,
   Stack,
   TextField
 } from '@mui/material'
@@ -15,6 +15,7 @@ import { Session, SessionCreateData } from '../../../types/session'
 import SessionDialogCredentials, { serializeCredentials } from './SessionDialogCredentials'
 import { serializeConnectionDataRemoteHost } from './connections/SessionConnectionRemoteHost'
 import { serializeConnectionDataDockerContainer } from './connections/SessionConnectionDockerContainer'
+import CloseIcon from '@mui/icons-material/Close'
 
 
 export interface SessionDialogProps {
@@ -107,7 +108,19 @@ export default function SessionDialog({ open, close, title, session, submitButto
         },
       }}
     >
-     <DialogTitle>{ title }</DialogTitle>
+      <DialogTitle>{ title }</DialogTitle>
+      <IconButton
+        aria-label="close"
+        onClick={close}
+        sx={(theme) => ({
+          position: 'absolute',
+          right: 8,
+          top: 8,
+          color: theme.palette.grey[500],
+        })}
+      >
+        <CloseIcon />
+      </IconButton>
       <Divider />
       <DialogContent>
         <Stack spacing={1}>
