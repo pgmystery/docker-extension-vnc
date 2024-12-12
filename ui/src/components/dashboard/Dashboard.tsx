@@ -188,7 +188,12 @@ export default function Dashboard({ ddUIToast, connect, sessionStore }: Dashboar
   }
 
   return (
-    <Stack direction="column" spacing={2} alignItems="center" sx={{textAlign: 'center', height: '100%', overflow: 'auto'}}>
+    <Stack direction="column" spacing={2} alignItems="center" sx={{
+      textAlign: 'center',
+      height: '100%',
+      overflow: 'auto',
+      overflowX: 'hidden',
+    }}>
       <Typography variant="h2">Start with an example docker image:</Typography>
       <Stack direction="row" spacing={2} justifyContent="center" flexWrap="wrap" sx={{width: '100%'}}>
         <FormControl
