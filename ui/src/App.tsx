@@ -34,6 +34,8 @@ export function App() {
   })
   const [downloadingProxyImage, setDownloadingProxyImage] = useState<Session | null>(null)
 
+  console.log('APP', loading)
+
   useEffect(() => {
     if (!sessionStore) return
 
@@ -52,7 +54,7 @@ export function App() {
         ddClient.desktopUI.toast.error(`Try to connect to the session "${sessionName}", but the session don't exist anymore.`)
         await vnc.disconnect()
 
-        return
+        return setLoading(false)
       }
 
       setConnectedData({
