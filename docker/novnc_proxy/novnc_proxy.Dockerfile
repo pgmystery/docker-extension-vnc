@@ -10,9 +10,9 @@ WORKDIR /noVNC
 
 RUN git clone https://github.com/novnc/websockify ./utils/websockify
 
-EXPOSE $NOVNC_LISTEN_PORT
-
 COPY ./entrypoint.sh /entrypoint.sh
 RUN chmod +x /entrypoint.sh
+
+EXPOSE $NOVNC_LISTEN_PORT
 
 ENTRYPOINT ["/entrypoint.sh"]

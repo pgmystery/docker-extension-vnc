@@ -8,6 +8,12 @@ ENV DEBIAN_FRONTEND=noninteractive
 
 ENV USER=root
 
+# Set display resolution (change as needed)
+ENV RESOLUTION=1920x1080
+
+# Set port of VNC Server
+ENV PORT=5901
+
 # Install XFCE, VNC server, dbus-x11, and xfonts-base
 RUN apt-get update && apt-get install -y --no-install-recommends \
     xfce4 \
@@ -25,12 +31,6 @@ RUN mkdir /root/.vnc \
 
 # Create an .Xauthority file
 RUN touch /root/.Xauthority
-
-# Set display resolution (change as needed)
-ENV RESOLUTION=1920x1080
-
-# Set port of VNC Server
-ENV PORT=5901
 
 # Expose VNC port
 EXPOSE $PORT
