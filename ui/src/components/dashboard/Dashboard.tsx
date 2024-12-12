@@ -165,6 +165,12 @@ export default function Dashboard({ ddUIToast, connect, sessionStore }: Dashboar
 
     setLoading(true)
 
+    // Delete example session
+    const exampleSession = await sessionStore.getSessionByName(UbuntuVNCDockerSessionName)
+    if (exampleSession) {
+      await sessionStore.delete(exampleSession.id)
+    }
+
     let exampleContainerExist = await checkIfExampleContainerExist()
     if (!exampleContainerExist) return
     setLoading(true)

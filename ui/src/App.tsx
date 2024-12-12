@@ -45,10 +45,21 @@ export function App() {
       await vnc.reconnect()
       if (!vnc.connected || !vnc.connection) return setLoading(false)
 
+      const sessionName = vnc.connection.proxy.getSessionName()
+      const session = await sessionStore?.getSessionByName(sessionName)
+
+      if (!session) {
+        ddClient.desktopUI.toast.error(`Try to connect to the session "${sessionName}", but the session don't exist anymore.`)
+        await vnc.disconnect()
+
+        return
+      }
+
       setConnectedData({
-        sessionName: vnc.connection.proxy.getSessionName(),
+        sessionName: sessionName,
         url: vnc.connection.proxy.url,
         connection: vnc.connection,
+        credentials: session.credentials,
       })
     }
     catch (e: any) {
@@ -137,11 +148,12 @@ export function App() {
         }}>
 
           <ConnectBar
-            connected={vnc.connected}
+            connectedSession={connectedData?.sessionName}
             onConnect={connect}
             onDisconnect={disconnect}
             sessionStore={sessionStore}
             ddUIToast={ddClient.desktopUI.toast}
+            disabled={loading}
           />
           <Divider />
 

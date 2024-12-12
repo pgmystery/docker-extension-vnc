@@ -15,12 +15,13 @@ interface ConnectBarProps {
   sessionStore: SessionStore
   onConnect: (session: Session)=>void
   onDisconnect: ()=>void
-  connected: boolean
+  connectedSession?: string
   ddUIToast: Toast
+  disabled?: boolean
 }
 
 
-export default function ConnectBar({ connected, sessionStore, ddUIToast, onConnect, onDisconnect }: ConnectBarProps) {
+export default function ConnectBar({ connectedSession, sessionStore, ddUIToast, onConnect, onDisconnect, disabled }: ConnectBarProps) {
   const [loading, setLoading] = useState<boolean>(true)
   const sessions = useSyncExternalStore(sessionStore.subscribe, sessionStore.getSnapshot)
   const [selectedSessionName, setSelectedSessionName] = useState<string>('')
@@ -31,6 +32,20 @@ export default function ConnectBar({ connected, sessionStore, ddUIToast, onConne
   useEffect(() => {
     sessionStore.refresh().finally(() => setLoading(false))
   }, [])
+
+  useEffect(() => {
+    if (!sessions.find(session => session.name === selectedSessionName)) {
+      setSelectedSessionName('')
+      setChangeSession(null)
+    }
+  }, [sessions])
+
+  useEffect(() => {
+    if (connectedSession) {
+      setSelectedSessionName(connectedSession)
+      setChangeSession(connectedSession)
+    }
+  }, [connectedSession])
 
   async function sendCreateSessionData(sessionData: SessionCreateData) {
     try {
@@ -108,26 +123,26 @@ export default function ConnectBar({ connected, sessionStore, ddUIToast, onConne
   return (
     <>
       <Stack direction="row" spacing={ 2 }>
-        <IconButton disabled={connected} color="success" onClick={() => setNewSessionDialogOpen(true)}>
+        <IconButton disabled={!!connectedSession} color="success" onClick={() => setNewSessionDialogOpen(true)}>
           <AddIcon/>
         </IconButton>
         <SessionSelect
-          disabled={connected}
+          disabled={!!connectedSession}
           sessions={sessions}
           selectedSessionName={selectedSessionName}
           setSelectedSessionName={setSelectedSessionName}
           changeSelection={changeSession}
         />
-        <IconButton disabled={selectedSessionName === '' || connected} onClick={handleEditSessionClick}>
+        <IconButton disabled={selectedSessionName === '' || !!connectedSession} onClick={handleEditSessionClick}>
           <EditIcon/>
         </IconButton>
         <Box sx={ {flexGrow: 1} }/>
         <ConnectButton
           onConnect={handleConnectClick}
           onDisconnect={onDisconnect}
-          connected={connected}
-          connectButtonDisabled={selectedSessionName === '' || loading || connected}
-          disconnectButtonDisabled={!connected}
+          connected={!!connectedSession}
+          connectButtonDisabled={selectedSessionName === '' || loading || !!connectedSession || disabled}
+          disconnectButtonDisabled={loading || !connectedSession || disabled}
           sx={{
             minWidth: '180px',
           }}

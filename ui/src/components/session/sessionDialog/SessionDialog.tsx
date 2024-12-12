@@ -111,7 +111,7 @@ export default function SessionDialog({ open, close, title, session, submitButto
       <Divider />
       <DialogContent>
         <Stack spacing={1}>
-          <TextField type="hidden" name="id" value={session?.id} sx={{display: 'none'}} disabled/>
+          <TextField type="hidden" name="id" value={session?.id || ''} sx={{display: 'none'}} disabled/>
           {/* Session name */}
           <FormControl>
             <FormLabel required>Session Name</FormLabel>
