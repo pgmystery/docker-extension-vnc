@@ -3,7 +3,6 @@ package database
 import (
 	"gorm.io/driver/sqlite"
 	"gorm.io/gorm"
-	"gorm.io/gorm/logger"
 	"log"
 	"os"
 	"path/filepath"
@@ -32,14 +31,13 @@ func Connect() {
 	databaseFilePath := filepath.Join(dataPath, config.Name+".db")
 
 	db, err := gorm.Open(sqlite.Open(databaseFilePath), &gorm.Config{
-		Logger: logger.Default.LogMode(logger.Info),
+		//Logger: logger.Default.LogMode(logger.Info),
 	})
 	if err != nil {
 		panic(err)
 	}
 
 	log.Println("[DATABASE]: Connected")
-	db.Logger = logger.Default.LogMode(logger.Info)
 	log.Println("[DATABASE]: running migrations")
 
 	err = db.AutoMigrate(&model.Session{})
