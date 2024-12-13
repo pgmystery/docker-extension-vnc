@@ -1,48 +1,48 @@
-import React, { useEffect, useRef, useState } from 'react'
+import React, { useEffect, useMemo, useRef, useState, useSyncExternalStore } from 'react'
 import { VncScreen } from 'react-vnc'
 import { Box, Stack } from '@mui/material'
-import VNCCredentialsDialog from './VNCCredentialsDialog'
+import VNCCredentialsDialog, { VNCCredentialsDialogData } from './VNCCredentialsDialog'
 import VNCSessionBar from '../vncSessionBar/VNCSessionBar'
 import VNCSettingsDialog from './VNCSettingsDialog'
 import { Toast } from '@docker/extension-api-client-types/dist/v1'
 import VNCViewSkeleton from './VNCViewSkeleton'
-import useVNCSettings from '../../hooks/useVNCSettings'
 import { ProxyURL } from '../../libs/vnc/proxies/Proxy'
 import { MachineCommand } from '../vncSessionBar/SendMachineCommandsMenu'
+import { SessionCredentials } from '../../types/session'
+import { SessionStore } from '../../stores/sessionStore'
+import { VNCSettings, getVNCSettingsStore } from '../../stores/vncSettingsStore'
 
 
 interface VNCViewProps {
+  sessionName: string
   ddUIToast: Toast
   openBrowserURL: (url: string)=>void
   url?: ProxyURL
   onCancel: ()=>void
   credentials?: VNCCredentials
+  sessionStore: SessionStore
 }
 
-export interface VNCCredentials {
-  username?: string
-  password?: string
-  saveCredentials: boolean
-}
-
-export interface VNCSettingsData {
-  viewOnly?: boolean
-  qualityLevel: number
-  compressionLevel: number
-  showDotCursor: boolean
-}
+export type VNCCredentials = Partial<SessionCredentials>
 
 
-export default function VNCView({ url, onCancel, ddUIToast, openBrowserURL, credentials }: VNCViewProps) {
+export default function VNCView({ sessionName, url, onCancel, ddUIToast, openBrowserURL, credentials, sessionStore }: VNCViewProps) {
+  const [ready, setReady] = useState<boolean>(false)
   const vncContainerRef = useRef<HTMLDivElement>(null)
   const vncScreenRef = useRef<React.ElementRef<typeof VncScreen>>(null)
-  const [currentCredentials, setCurrentCredentials] = useState<VNCCredentials>({saveCredentials: false})
+  const vncSettingsStore = useMemo(getVNCSettingsStore, [])
+  const vncSettings = useSyncExternalStore(vncSettingsStore.subscribe, vncSettingsStore.getSnapshot)
+  const [currentCredentials, setCurrentCredentials] = useState<VNCCredentials>({})
   const [needsCredentials, setNeedsCredentials] = useState<boolean>(false)
   const [trySaveCredentials, setTrySaveCredentials] = useState<boolean>(false)
   const [openSettingsDialog, setOpenSettingsDialog] = useState<boolean>(false)
-  const [settings, saveSettings] = useVNCSettings()
   const [clipboardText, setClipboardText] = useState<string>('')
   const [havePowerCapability, setHavePowerCapability] = useState<boolean>(false)
+
+  useEffect(() => {
+    if ('load' in vncSettingsStore)
+      vncSettingsStore.load().finally(() => setReady(true))
+  }, [])
 
   useEffect(() => {
     const { connect, connected, disconnect } = vncScreenRef.current ?? {}
@@ -56,11 +56,14 @@ export default function VNCView({ url, onCancel, ddUIToast, openBrowserURL, cred
 
   useEffect(() => {
     reconnect()
-  }, [settings])
+  }, [vncSettings])
 
   useEffect(() => {
     if (credentials)
-      handleCredentialDialogSubmit(credentials)
+      handleCredentialDialogSubmit({
+        ...credentials,
+        save: false,
+      })
   }, [credentials])
 
   useEffect(() => {
@@ -100,15 +103,32 @@ export default function VNCView({ url, onCancel, ddUIToast, openBrowserURL, cred
     onCancel()
   }
 
-  function handleCredentialDialogSubmit(credentials: VNCCredentials) {
-    if (credentials.saveCredentials) {
-      localStorage.setItem('credentials', JSON.stringify({
-        username: credentials.username,
-        password: credentials.password,
-      }))
-    }
-    else {
-      localStorage.removeItem('credentials')
+  async function handleCredentialDialogSubmit(credentials: VNCCredentialsDialogData) {
+    if (credentials.save) {
+      const session = await sessionStore.getSessionByName(sessionName)
+      if (!session) {
+        const errorMessage = `Can't find session "${session}"`
+
+        ddUIToast.error(errorMessage)
+
+        throw new Error(errorMessage)
+      }
+
+      try {
+        await sessionStore.update({
+          ...session,
+          credentials: {
+            username: credentials.username || '',
+            password: credentials.password || '',
+          }
+        })
+      }
+      catch (e: any) {
+        console.error(e)
+
+        if (e instanceof Object && e.hasOwnProperty('message'))
+          ddUIToast.error(e.message)
+      }
     }
 
     setCurrentCredentials(credentials)
@@ -138,8 +158,8 @@ export default function VNCView({ url, onCancel, ddUIToast, openBrowserURL, cred
     setOpenSettingsDialog(true)
   }
 
-  function handleSettingsChange(settings: VNCSettingsData) {
-    saveSettings(settings)
+  async function handleSettingsChange(settings: VNCSettings) {
+    await vncSettingsStore.set(settings)
   }
 
   function handleOpenInBrowserClick() {
@@ -209,42 +229,47 @@ export default function VNCView({ url, onCancel, ddUIToast, openBrowserURL, cred
           position: "relative",
           overflow: 'hidden',
         }}>
-          <VncScreen
-            url={url?.ws || ''}
-            scaleViewport
-            clipViewport
-            style={{
-              width: '100%',
-              height: '100%',
-              overflow: 'hidden',
-            }}
-            ref={vncScreenRef}
-            onCredentialsRequired={handleCredentialRequest}
-            onSecurityFailure={handleSecurityFailure}
-            rfbOptions={{
-              credentials: currentCredentials,
-            }}
-            loadingUI={<VNCViewSkeleton />}
-            qualityLevel={settings.qualityLevel}
-            compressionLevel={settings.compressionLevel}
-            showDotCursor={settings.showDotCursor}
-            viewOnly={settings.viewOnly}
-            onClipboard={e => setClipboardText(e?.detail.text || '')}
-            onCapabilities={(e?: { detail: { capabilities: any } }) => {
-              setHavePowerCapability(false)
+          {
+            ready
+              ? <VncScreen
+                  url={url?.ws || ''}
+                  scaleViewport
+                  clipViewport
+                  style={{
+                    width: '100%',
+                    height: '100%',
+                    overflow: 'hidden',
+                  }}
+                  ref={vncScreenRef}
+                  onCredentialsRequired={handleCredentialRequest}
+                  onSecurityFailure={handleSecurityFailure}
+                  rfbOptions={{
+                    credentials: currentCredentials,
+                  }}
+                  loadingUI={<VNCViewSkeleton />}
+                  qualityLevel={vncSettings.qualityLevel}
+                  compressionLevel={vncSettings.compressionLevel}
+                  showDotCursor={vncSettings.showDotCursor}
+                  viewOnly={vncSettings.viewOnly}
+                  onClipboard={e => setClipboardText(e?.detail.text || '')}
+                  onCapabilities={(e?: { detail: { capabilities: any } }) => {
+                    setHavePowerCapability(false)
 
-              if (e?.detail.capabilities.hasOwnProperty('power')) {
-                setHavePowerCapability(e?.detail.capabilities.power || false)
-              }
-            }}
-          />
+                    if (e?.detail.capabilities.hasOwnProperty('power')) {
+                      setHavePowerCapability(e?.detail.capabilities.power || false)
+                    }
+                  }}
+                />
+              : <VNCViewSkeleton />
+          }
+
         </Box>
       </Stack>
 
       <VNCSettingsDialog
         open={openSettingsDialog}
         close={() => setOpenSettingsDialog(false)}
-        settingsData={settings}
+        settingsData={vncSettings}
         onSettingChange={handleSettingsChange}
       />
 

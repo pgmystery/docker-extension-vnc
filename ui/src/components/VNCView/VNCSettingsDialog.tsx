@@ -1,24 +1,23 @@
 import { Dialog, DialogActions, DialogContent, DialogTitle, Divider, IconButton, Stack } from '@mui/material'
 import Button from '@mui/material/Button'
 import QualityLevel from './VNCSettingForms/QualityLevel'
-import { useEffect, useState } from 'react'
-import DeleteCredentials from './VNCSettingForms/DeleteCredentials'
-import { VNCSettingsData } from './VNCView'
+import { FormEvent, useEffect, useState } from 'react'
 import CloseIcon from '@mui/icons-material/Close'
 import CompressionLevel from './VNCSettingForms/CompressionLevel'
 import ShowDotCursor from './VNCSettingForms/ShowDotCursor'
 import ViewOnly from './VNCSettingForms/ViewOnly'
+import { VNCSettings } from '../../stores/vncSettingsStore'
 
 
-interface VNCSettingsSaveData extends Omit<VNCSettingsData, 'showDotCursor'> {
+interface VNCSettingsSaveData extends Omit<VNCSettings, 'showDotCursor'> {
   showDotCursor?: 'on'
 }
 
 interface VNCSettingsDialog {
   open: boolean
   close: ()=>void
-  settingsData: VNCSettingsData
-  onSettingChange: (settingsData: VNCSettingsData)=>void
+  settingsData: VNCSettings
+  onSettingChange: (settingsData: VNCSettings)=>void
 }
 
 
@@ -34,7 +33,7 @@ export default function VNCSettingsDialog({ open, close, settingsData, onSetting
       qualityLevel: Number(data.qualityLevel),
       compressionLevel: Number(data.compressionLevel),
       showDotCursor: !!data.showDotCursor,
-      viewOnly: !!data.viewOnly,
+      viewOnly: data.viewOnly,
     })
     close()
   }
@@ -47,7 +46,7 @@ export default function VNCSettingsDialog({ open, close, settingsData, onSetting
       fullWidth={true}
       PaperProps={{
         component: 'form',
-        onSubmit: (event: React.FormEvent<HTMLFormElement>) => {
+        onSubmit: (event: FormEvent<HTMLFormElement>) => {
           event.preventDefault();
           const formData = new FormData(event.currentTarget)
           const formJson = Object.fromEntries((formData as any).entries()) as VNCSettingsSaveData
@@ -91,7 +90,6 @@ export default function VNCSettingsDialog({ open, close, settingsData, onSetting
             reset={reset}
           />
           <Divider />
-          <DeleteCredentials />
         </Stack>
       </DialogContent>
       <DialogActions>

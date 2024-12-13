@@ -1,18 +1,21 @@
 import React, { useEffect, useMemo, useState } from 'react'
 import { createDockerDesktopClient } from '@docker/extension-api-client'
 import { Backdrop, CircularProgress, Divider, Stack } from '@mui/material'
-import ConnectBar from './components/connectbar/ConnectBar'
 import useConnectionQueue from './hooks/useConnectionQueue'
 import VNCView, { VNCCredentials } from './components/VNCView/VNCView'
 import useVNC from './hooks/useVNC'
 import { isRawExecResult } from './libs/docker/cli/Exec'
 import VNCProxyImagePullDialog from './components/VNCView/VNCProxyImagePullDialog'
 import Dashboard from './components/dashboard/Dashboard'
-import { ConnectionData, VNCConnectionType } from './libs/vnc/VNC'
+import { VNCConnectionType } from './libs/vnc/VNC'
 import { ProxyURL } from './libs/vnc/proxies/Proxy'
+import ConnectBar from './components/sessionsbar/ConnectBar'
+import { getSessionStore } from './stores/sessionStore'
+import { Session } from './types/session'
 
 
 export interface ConnectedData {
+  sessionName: string
   url: ProxyURL
   connection: VNCConnectionType
   credentials?: VNCCredentials
@@ -21,6 +24,7 @@ export interface ConnectedData {
 
 export function App() {
   const ddClient = useMemo(createDockerDesktopClient, [])
+  const sessionStore = useMemo(getSessionStore, [])
   const vnc = useVNC(ddClient)
   const [loading, setLoading] = useState(true)
   const [connectedData, setConnectedData] = useState<ConnectedData>()
@@ -28,18 +32,34 @@ export function App() {
     onConnect: handleConnectClicked,
     onDisconnect: handleDisconnectClicked,
   })
-  const [downloadingProxyImage, setDownloadingProxyImage] = useState<ConnectionData | null>(null)
+  const [downloadingProxyImage, setDownloadingProxyImage] = useState<Session | null>(null)
 
-  useEffect(() => {reconnect()}, [vnc])
+  useEffect(() => {
+    if (!sessionStore) return
+
+    reconnect()
+  }, [sessionStore, vnc])
 
   async function reconnect() {
     try {
       await vnc.reconnect()
       if (!vnc.connected || !vnc.connection) return setLoading(false)
 
+      const sessionName = vnc.connection.proxy.getSessionName()
+      const session = await sessionStore?.getSessionByName(sessionName)
+
+      if (!session) {
+        ddClient.desktopUI.toast.error(`Try to connect to the session "${sessionName}", but the session don't exist anymore.`)
+        await vnc.disconnect()
+
+        return setLoading(false)
+      }
+
       setConnectedData({
+        sessionName: sessionName,
         url: vnc.connection.proxy.url,
         connection: vnc.connection,
+        credentials: session.credentials,
       })
     }
     catch (e: any) {
@@ -57,15 +77,15 @@ export function App() {
     setLoading(false)
   }
 
-  async function handleConnectClicked(connectionData: ConnectionData, credentials?: VNCCredentials) {
+  async function handleConnectClicked(session: Session) {
     async function connect() {
       const proxyDockerImageExist = await vnc.dockerProxyImageExist()
 
       if (!proxyDockerImageExist)
-        return setDownloadingProxyImage(connectionData)
+        return setDownloadingProxyImage(session)
 
       try {
-        await vnc.connect(connectionData)
+        await vnc.connect(session.name, session.connection)
       }
       catch (e: any) {
         console.error(e)
@@ -82,9 +102,10 @@ export function App() {
       if (!vnc.connected || !vnc.connection) return
 
       setConnectedData({
-        url: vnc.connection?.proxy.url,
+        sessionName: vnc.connection.proxy.getSessionName(),
+        url: vnc.connection.proxy.url,
         connection: vnc.connection,
-        credentials,
+        credentials: session.credentials,
       })
     }
 
@@ -119,35 +140,43 @@ export function App() {
 
   return (
     <>
-      <Stack alignItems="start" spacing={2} sx={{
-        height: '100%',
-        alignItems: 'stretch',
-      }}>
+      {
+        sessionStore &&
+        <Stack alignItems="start" spacing={2} sx={{
+          height: '100%',
+          alignItems: 'stretch',
+        }}>
 
-        <ConnectBar
-          onConnect={connect}
-          onDisconnect={disconnect}
-          disabled={loading}
-          connection={vnc?.connection}
-        />
-        <Divider />
+          <ConnectBar
+            connectedSession={connectedData?.sessionName}
+            onConnect={connect}
+            onDisconnect={disconnect}
+            sessionStore={sessionStore}
+            ddUIToast={ddClient.desktopUI.toast}
+            disabled={loading}
+          />
+          <Divider />
 
-        {
-          loading || !connectedData
+          {
+            loading || !connectedData
             ? <Dashboard
-                ddUIToast={ddClient.desktopUI.toast}
-                connect={connect}
-              />
+              ddUIToast={ddClient.desktopUI.toast}
+              connect={connect}
+              sessionStore={sessionStore}
+            />
             : <VNCView
-                url={connectedData.url}
-                credentials={connectedData.credentials}
-                onCancel={disconnect}
-                ddUIToast={ddClient.desktopUI.toast}
-                openBrowserURL={ddClient.host.openExternal}
-              />
-        }
+              sessionName={connectedData.sessionName}
+              url={connectedData.url}
+              credentials={connectedData.credentials}
+              onCancel={disconnect}
+              ddUIToast={ddClient.desktopUI.toast}
+              openBrowserURL={ddClient.host.openExternal}
+              sessionStore={sessionStore}
+            />
+          }
 
-      </Stack>
+        </Stack>
+      }
 
       {
         downloadingProxyImage &&
@@ -160,7 +189,10 @@ export function App() {
             setDownloadingProxyImage(null)
           }}
           ddUIToast={ddClient.desktopUI.toast}
-          pullProxyDockerImage={(addStdout: (stdout: string)=>void, onFinish: (exitCode: number)=>void) => vnc.pullProxyDockerImage(addStdout, onFinish)}
+          pullProxyDockerImage={(
+            addStdout: (stdout: string)=>void,
+            onFinish: (exitCode: number)=>void
+          ) => vnc.pullProxyDockerImage(addStdout, onFinish)}
         />
       }
 

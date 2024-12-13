@@ -1,4 +1,4 @@
-import { useEffect, useReducer, useRef, useState } from 'react'
+import { useEffect, useReducer, useRef, useState, useSyncExternalStore } from 'react'
 import { FormControl, IconButton, InputAdornment, OutlinedInput, Stack, Tooltip, Typography } from '@mui/material'
 import ContentCopyIcon from '@mui/icons-material/ContentCopy'
 import SendIcon from '@mui/icons-material/Send'
@@ -8,25 +8,28 @@ import TextStreamOutput from '../utils/TextStreamOutput'
 import { Toast } from '@docker/extension-api-client-types/dist/v1'
 import { isRawExecResult } from '../../libs/docker/cli/Exec'
 import DockerCli from '../../libs/docker/DockerCli'
-import { ConnectionData } from '../../libs/vnc/VNC'
 import { ContainerExtended } from '../../types/docker/cli/inspect'
-import { VNCCredentials } from '../VNCView/VNCView'
 import useConfig from '../../hooks/useConfig'
+import { Session } from '../../types/session'
+import { SessionStore } from '../../stores/sessionStore'
 
 
 interface DashboardProps {
-  ddUIToast?: Toast
-  connect: (connectionData: ConnectionData, credentials?: VNCCredentials)=>void
+  ddUIToast: Toast
+  connect: (session: Session)=>void
+  sessionStore: SessionStore
 }
 
+const UbuntuVNCDockerSessionName = 'example vnc container'
 const UbuntuVNCDockerContainerName = 'ubuntu_vnc'
 const UbuntuVNCDockerImage = 'pgmystery/ubuntu_vnc:latest'
 const UbuntuVNCDockerImageLabel = 'pgmystery.vnc.extension.example'
 const UbuntuVNCDockerImagePort = 5901
 
 
-export default function Dashboard({ ddUIToast, connect }: DashboardProps) {
+export default function Dashboard({ ddUIToast, connect, sessionStore }: DashboardProps) {
   const [loading, setLoading] = useState<boolean>(true)
+  const sessions = useSyncExternalStore(sessionStore.subscribe, sessionStore.getSnapshot)
   const exampleRunInputRef = useRef<HTMLInputElement>(null)
   const [started, setStarted] = useState<boolean>(false)
   const [pullStdout, dispatch] = useReducer(addPullStdout, [])
@@ -104,7 +107,7 @@ export default function Dashboard({ ddUIToast, connect }: DashboardProps) {
     })
 
     if (execResult.stderr) {
-      ddUIToast?.error(execResult.stderr)
+      ddUIToast.error(execResult.stderr)
 
       return
     }
@@ -119,24 +122,38 @@ export default function Dashboard({ ddUIToast, connect }: DashboardProps) {
       exampleContainer = await runExampleContainer(dockerCli)
 
       if (!exampleContainer)
-        return ddUIToast?.error('Can\'t find the example docker container...')
+        return ddUIToast.error('Can\'t find the example docker container...')
     }
 
     setExampleContainer(exampleContainer)
 
     if (exampleContainer.State.Status !== 'running')
-      return ddUIToast?.error('The example container is not running...')
+      return ddUIToast.error('The example container is not running...')
 
-    connect({
-      type: 'container',
-      data: {
-        targetContainerId: exampleContainer.Id,
-        targetPort: UbuntuVNCDockerImagePort,
+    const exampleSessionItem = sessions.find(session => session.name === UbuntuVNCDockerSessionName)
+    let exampleSession = await exampleSessionItem?.getInfo()
+
+    if (!exampleSession) {
+      exampleSession = {
+        id: '',
+        name: UbuntuVNCDockerSessionName,
+        connection: {
+          type: 'container',
+          data: {
+            container: exampleContainer.Name,
+            port: UbuntuVNCDockerImagePort,
+          },
+        },
+        credentials: {
+          username: '',
+          password: proxyContainerPassword,
+        },
       }
-    }, {
-      password: proxyContainerPassword,
-      saveCredentials: true,
-    })
+
+      await sessionStore.add(exampleSession)
+    }
+
+    connect(exampleSession)
   }
 
   function getExampleContainer(dockerCli: DockerCli) {
@@ -147,6 +164,12 @@ export default function Dashboard({ ddUIToast, connect }: DashboardProps) {
     if (!exampleContainer) return
 
     setLoading(true)
+
+    // Delete example session
+    const exampleSession = await sessionStore.getSessionByName(UbuntuVNCDockerSessionName)
+    if (exampleSession) {
+      await sessionStore.delete(exampleSession.id)
+    }
 
     let exampleContainerExist = await checkIfExampleContainerExist()
     if (!exampleContainerExist) return
@@ -165,7 +188,12 @@ export default function Dashboard({ ddUIToast, connect }: DashboardProps) {
   }
 
   return (
-    <Stack direction="column" spacing={2} alignItems="center" sx={{textAlign: 'center', height: '100%', overflow: 'auto'}}>
+    <Stack direction="column" spacing={2} alignItems="center" sx={{
+      textAlign: 'center',
+      height: '100%',
+      overflow: 'auto',
+      overflowX: 'hidden',
+    }}>
       <Typography variant="h2">Start with an example docker image:</Typography>
       <Stack direction="row" spacing={2} justifyContent="center" flexWrap="wrap" sx={{width: '100%'}}>
         <FormControl

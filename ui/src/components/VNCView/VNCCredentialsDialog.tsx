@@ -10,12 +10,17 @@ import {
 } from '@mui/material'
 import { VNCCredentials } from './VNCView'
 import Button from '@mui/material/Button'
+import { FormEvent } from 'react'
 
 
 export interface VNCCredentialsDialogProps {
   open: boolean
   onClose: ()=>void
-  onSubmit: (credentials: VNCCredentials)=>void
+  onSubmit: (credentials: VNCCredentialsDialogData)=>void
+}
+
+export interface VNCCredentialsDialogData extends VNCCredentials {
+  save: boolean
 }
 
 
@@ -26,7 +31,7 @@ export default function VNCCredentialsDialog({ open, onClose, onSubmit }: VNCCre
       onClose={onClose}
       PaperProps={{
         component: 'form',
-        onSubmit: (event: React.FormEvent<HTMLFormElement>) => {
+        onSubmit: (event: FormEvent<HTMLFormElement>) => {
           event.preventDefault()
 
           const formData = new FormData(event.currentTarget)
@@ -39,7 +44,7 @@ export default function VNCCredentialsDialog({ open, onClose, onSubmit }: VNCCre
           onSubmit({
             username,
             password,
-            saveCredentials,
+            save: saveCredentials,
           })
         },
       }}
@@ -59,7 +64,7 @@ export default function VNCCredentialsDialog({ open, onClose, onSubmit }: VNCCre
             type="password"
             fullWidth
           />
-          <FormControlLabel control={<Checkbox name="saveCredentials" />} label="Save credentials in local-storage (not encrypted)" />
+          <FormControlLabel control={<Checkbox name="saveCredentials" />} label="Save credentials (not encrypted)" />
         </Stack>
       </DialogContent>
       <DialogActions>

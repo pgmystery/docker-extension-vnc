@@ -37,14 +37,14 @@ export default class ProxyDockerContainer extends Proxy {
     return this.getLabel(this.config.proxyContainerLabelContainerId)
   }
 
-  async create(_: ConnectionType, target: TargetDockerContainer, data: ConnectionDataDockerContainerData) {
+  async create(sessionName: string, _: ConnectionType, target: TargetDockerContainer, data: ConnectionDataDockerContainerData) {
     if (!target.connected || !target.connection) return false
     await this.get()
 
-    const { targetContainerId, targetPort } = data
+    const { container, port } = data
     const targetIp = target.connection?.ip
 
-    const isTargetInNetwork = await this.proxyNetwork.hasContainer(targetContainerId)
+    const isTargetInNetwork = await this.proxyNetwork.hasContainer(container)
     if (!isTargetInNetwork)
       return false
 
@@ -53,17 +53,17 @@ export default class ProxyDockerContainer extends Proxy {
       if (!isInNetwork)
         await this.delete()
 
-      const targetContainer = new DockerContainer(targetContainerId, this.docker)
+      const targetContainer = new DockerContainer(container, this.docker)
       const targetContainerExist = await targetContainer.get()
       if (!targetContainerExist || !targetContainer.container)
-        throw new Error(`Target container with the id "${targetContainerId}" don't exist`)
+        throw new Error(`Target container with the id "${container}" don't exist`)
 
       const containerTargetIp = targetContainer.container.NetworkSettings.Networks[this.proxyNetwork.name].IPAddress
 
       if (
-        this.getTargetContainerId() !== targetContainerId
+        this.getTargetContainerId() !== container
         || containerTargetIp !== targetIp
-        || this.getTargetPort() !== targetPort
+        || this.getTargetPort() !== port
       ) {
         await this.delete()
       }
@@ -75,9 +75,9 @@ export default class ProxyDockerContainer extends Proxy {
     const {
       proxyContainerLabelContainerId,
     } = this.config
-    const labelTargetContainerId = `${proxyContainerLabelContainerId}=${targetContainerId}`
+    const labelTargetContainerId = `${proxyContainerLabelContainerId}=${container}`
 
-    await this.createContainerFromTarget('container', target, [
+    await this.createContainerFromTarget(sessionName, 'container', target, [
       '--label', labelTargetContainerId,
       '--network', this.config.network,
     ])

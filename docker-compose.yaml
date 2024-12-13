@@ -1,3 +1,8 @@
 services:
   vnc:
     image: ${DESKTOP_PLUGIN_IMAGE}
+    volumes:
+      - docker-extension-vnc-data:/data
+
+volumes:
+  docker-extension-vnc-data:

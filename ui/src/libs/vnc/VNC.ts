@@ -49,10 +49,10 @@ export default class VNC {
     }
   }
 
-  async connect(connectionData: ConnectionData) {
+  async connect(sessionName: string, connectionData: ConnectionData) {
     await this.disconnect()
 
-    await this.newConnection(connectionData)
+    await this.newConnection(sessionName, connectionData)
   }
 
   async disconnect() {
@@ -68,16 +68,16 @@ export default class VNC {
     return this.connection.connected
   }
 
-  private newConnection(connectionData: ConnectionData) {
+  private newConnection(sessionName: string, connectionData: ConnectionData) {
     switch (connectionData.type) {
       case 'container':
         this.connection = new VNCDockerContainer(this.docker, this.config)
 
-          return this.connection.connect(connectionData)
+          return this.connection.connect(sessionName, connectionData)
       case 'remote':
         this.connection = new VNCRemoteHost(this.docker, this.config)
 
-        return this.connection.connect(connectionData)
+        return this.connection.connect(sessionName, connectionData)
     }
   }
 

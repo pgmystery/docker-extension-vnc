@@ -7,7 +7,7 @@ A VNC Viewer extension for Docker Desktop.
 - [Manual Installation](#manual-installation)
 - [Usage](#usage)
   - [Example Container](#the-example-container)
-  - [Manually](#manually)
+  - [Sessions](#sessions)
     - [Docker Container](#docker-container)
     - [Remote Host](#remote-host)
 
@@ -38,7 +38,14 @@ It will also then automatically creates the Container and a connection to the co
 
 ![Dashboard](docs/imgs/screenshot4.png)
 
-### Manually
+### Sessions
+To switch the target and the connection, you can create Sessions. The Session are saved in the Backend Docker Container in a SQLite Database. For that, this extension use a Docker Volume for saving the data on the host.
+
+To create a new Session, just click on the plus icon button.
+Now you can enter the Session name, the connection type with data and optional the credentials.
+
+![Edit Session](docs/imgs/screenshot6.png)
+
 This extension support 2 different kind of connections.
 
 - [Docker Container](#docker-container)
@@ -48,7 +55,8 @@ This extension support 2 different kind of connections.
 1. Select the connection type "Docker Container".
 2. Select the Container from the list (if the container is not showing up, you can also manually insert the Container Name or ID).
 3. Enter or select the port on which the vnc server is listening on (it is an internal port, it don't need to be exposed to the host).
-4. Click on "Connect".
+4. Save the Session.
+5. Click on "Connect".
 
 ![Webbrowser on a linux desktop](docs/imgs/screenshot1.png)
 
@@ -56,6 +64,7 @@ This extension support 2 different kind of connections.
 1. Select the connection type "Remote Host".
 2. Enter the IP of the Host you have access to.
 3. Type in the port of the VNC Server on the Remote Host.
-4. Click on "Connect".
+4. Save the Session.
+5. Click on "Connect".
 
 ![Remote Host connection](docs/imgs/screenshot5.png)

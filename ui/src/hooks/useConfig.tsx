@@ -6,6 +6,7 @@ export interface Config {
   proxyContainerName: string
   proxyContainerLabelKey: string
   proxyContainerLocalPort: number
+  proxyContainerLabelSessionName: string
   proxyContainerLabelContainerId: string
   proxyContainerLabelTargetIp: string
   proxyContainerLabelTargetPort: string
@@ -28,6 +29,7 @@ export function loadConfig(): Config {
   const proxyContainerName = import.meta.env.VITE_VNC_PROXY_CONTAINER_NAME as EnvVarType
   const proxyContainerLabelKey = import.meta.env.VITE_VNC_PROXY_CONTAINER_LABEL_KEY as EnvVarType
   const proxyContainerLocalPort = Number(import.meta.env.VITE_VNC_PROXY_CONTAINER_LOCAL_PORT as EnvVarType)
+  const proxyContainerLabelSessionName = import.meta.env.VITE_VNC_PROXY_CONTAINER_LABEL_SESSION_NAME as EnvVarType
   const proxyContainerLabelContainerId = import.meta.env.VITE_VNC_PROXY_CONTAINER_LABEL_CONTAINER_ID as EnvVarType
   const proxyContainerLabelTargetIp = import.meta.env.VITE_VNC_PROXY_CONTAINER_LABEL_TARGET_IP as EnvVarType
   const proxyContainerLabelTargetPort = import.meta.env.VITE_VNC_PROXY_CONTAINER_LABEL_TARGET_PORT as EnvVarType
@@ -48,6 +50,9 @@ export function loadConfig(): Config {
 
   if (isNaN(proxyContainerLocalPort) || proxyContainerLocalPort === 0)
     throw new Error('the envar "VITE_VNC_PROXY_CONTAINER_LOCAL_PORT" is not set or is not a number')
+
+  if (!proxyContainerLabelSessionName)
+    throw new Error('the envar "VITE_VNC_PROXY_CONTAINER_LABEL_SESSION_NAME" is not set')
 
   if (!proxyContainerLabelContainerId)
     throw new Error('the envar "VITE_VNC_PROXY_CONTAINER_LABEL_CONTAINER_ID" is not set')
@@ -70,6 +75,7 @@ export function loadConfig(): Config {
     proxyContainerName,
     proxyContainerLabelKey,
     proxyContainerLocalPort,
+    proxyContainerLabelSessionName,
     proxyContainerLabelContainerId,
     proxyContainerLabelTargetIp,
     proxyContainerLabelTargetPort,

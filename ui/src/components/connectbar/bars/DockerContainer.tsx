@@ -113,8 +113,8 @@ export default function DockerContainer({ ddClient, disabled, onConnect, onDisco
       onConnect({
         type: 'container',
         data: {
-          targetContainerId: container.Id,
-          targetPort: Number(selectedPort)
+          container: container.Id,
+          port: Number(selectedPort)
         }
       })
 
@@ -124,8 +124,8 @@ export default function DockerContainer({ ddClient, disabled, onConnect, onDisco
     onConnect({
       type: 'container',
       data: {
-        targetContainerId: selectedContainer.Id,
-        targetPort: Number(selectedPort)
+        container: selectedContainer.Id,
+        port: Number(selectedPort)
       }
     })
   }
@@ -170,6 +170,7 @@ export default function DockerContainer({ ddClient, disabled, onConnect, onDisco
           disabled={disabled || connection !== undefined}
           selectedContainerName={selectedContainerName}
           setSelectedContainerName={handleSelectedContainerNameChanged}
+          dockerClient={ddClient.docker}
         />
       </Stack>
       <Autocomplete
