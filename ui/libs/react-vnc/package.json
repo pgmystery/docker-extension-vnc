@@ -40,7 +40,11 @@
     "react-dom": "^18.3.1"
   },
   "overrides": {
-    "typescript": "^5.4.5"
+    "typescript": "^5.4.5",
+    "react-scripts": {
+      "postcss": ">=8.4.31",
+      "nth-check": ">=2.1.1"
+    }
   },
   "scripts": {
     "start": "react-scripts start",
@@ -77,19 +81,12 @@
   "devDependencies": {
     "@commitlint/cli": "^19.3.0",
     "@commitlint/config-conventional": "^19.2.2",
+    "@rollup/plugin-typescript": "^11.1.6",
     "@semantic-release/changelog": "^6.0.3",
     "@semantic-release/commit-analyzer": "^13.0.0",
     "@semantic-release/git": "^10.0.1",
     "@semantic-release/npm": "^12.0.1",
     "@semantic-release/release-notes-generator": "^14.0.0",
-    "commitizen": "^4.3.0",
-    "cz-conventional-changelog": "^3.3.0",
-    "husky": "^9.0.11",
-    "is-ci": "^3.0.1",
-    "rollup": "^4.18.0",
-    "semantic-release": "^24.0.0",
-    "typescript": "^5.4.5",
-    "@rollup/plugin-typescript": "^11.1.6",
     "@testing-library/jest-dom": "^6.4.5",
     "@testing-library/react": "^16.0.0",
     "@testing-library/user-event": "^14.5.2",
@@ -97,7 +94,14 @@
     "@types/node": "^20.14.2",
     "@types/react": "^18.3.3",
     "@types/react-dom": "^18.3.0",
-    "react-scripts": "5.0.1",
+    "commitizen": "^4.3.0",
+    "cz-conventional-changelog": "^3.3.0",
+    "husky": "^9.0.11",
+    "is-ci": "^3.0.1",
+    "react-scripts": "^5.0.1",
+    "rollup": "^4.18.0",
+    "semantic-release": "^24.0.0",
+    "typescript": "^5.4.5",
     "web-vitals": "^4.1.0"
   },
   "commitlint": {
