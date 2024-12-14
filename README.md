@@ -39,7 +39,7 @@ It will also then automatically creates the Container and a connection to the co
 ![Dashboard](docs/imgs/screenshot4.png)
 
 ### Sessions
-To switch the target and the connection, you can create Sessions. The Session are saved in the Backend Docker Container in a SQLite Database. For that, this extension use a Docker Volume for saving the data on the host.
+To switch the target and the connection, you can create Sessions. The Sessions are saved in the Backend Docker Container in a SQLite Database. For that, this extension use a Docker Volume for saving the data on the host.
 
 To create a new Session, just click on the plus icon button.
 Now you can enter the Session name, the connection type with data and optional the credentials.
