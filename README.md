@@ -46,7 +46,7 @@ Now you can enter the Session name, the connection type with data and optional t
 
 ![Edit Session](docs/imgs/screenshot6.png)
 
-This extension support 2 different kind of connections.
+This extension supports 2 different kind of connections.
 
 - [Docker Container](#docker-container)
 - [Remote Host](#remote-host)
