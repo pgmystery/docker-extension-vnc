@@ -4,7 +4,7 @@ import typescript from "@rollup/plugin-typescript";
 const config = {
     input: pkg.source,
     output: [
-        { file: pkg.main, format: "cjs" },
+        { file: pkg.main, format: "es" },
         { file: pkg.module, format: "es" },
     ],
     plugins: [typescript()],

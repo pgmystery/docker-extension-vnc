@@ -48,5 +48,5 @@ jobs:
           context: .
           platforms: linux/amd64,linux/arm64
           push: true
-          tags: ${{ steps.pre_meta.outputs.tags }}
+          tags: pgmystery/docker-extension-vnc:${{ github.event.release.tag_name }}
           labels: ${{ steps.pre_meta.outputs.labels }}

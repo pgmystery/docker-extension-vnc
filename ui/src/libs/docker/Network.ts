@@ -1,6 +1,5 @@
 import { Docker as DockerClient } from '@docker/extension-api-client-types/dist/v1'
 import DockerCliNetwork from './cli/Network'
-import { ContainerInfo } from '../../types/docker/extension'
 import { DockerNetworkContainer, DockerNetworkInfo } from '../../types/docker/cli/network'
 
 
