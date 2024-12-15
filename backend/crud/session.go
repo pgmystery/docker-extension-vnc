@@ -70,7 +70,7 @@ func GetSessions() []ResponseSessionList {
 	return responseSessions
 }
 
-func getSessionModel(id uuid.UUID) (*model.Session, error) {
+func GetSessionModel(id uuid.UUID) (*model.Session, error) {
 	db := database.DB
 	var session model.Session
 
@@ -86,7 +86,7 @@ func getSessionModel(id uuid.UUID) (*model.Session, error) {
 }
 
 func GetSession(id uuid.UUID) (*ResponseSession, error) {
-	session, err := getSessionModel(id)
+	session, err := GetSessionModel(id)
 	if err != nil {
 		return nil, err
 	}
@@ -133,7 +133,7 @@ func CreateSession(requestSession *RequestCreateSession) (*model.Session, error)
 func UpdateSession(id uuid.UUID, sessionUpdate *SessionUpdate) (*ResponseSession, error) {
 	db := database.DB
 
-	oldSession, err := getSessionModel(id)
+	oldSession, err := GetSessionModel(id)
 	if err != nil {
 		return nil, err
 	}
@@ -188,7 +188,7 @@ func UpdateSession(id uuid.UUID, sessionUpdate *SessionUpdate) (*ResponseSession
 func DeleteSession(id uuid.UUID) error {
 	db := database.DB
 
-	session, err := getSessionModel(id)
+	session, err := GetSessionModel(id)
 	if err != nil {
 		return err
 	}

@@ -23,7 +23,7 @@ func main() {
 		panic("Error loading .env file")
 	}
 
-	vnc.LoadVNCSettings()
+	vnc.Init()
 	database.Connect()
 
 	app := fiber.New()
