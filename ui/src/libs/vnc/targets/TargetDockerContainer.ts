@@ -29,17 +29,23 @@ export default class TargetDockerContainer extends Target {
     if (!containerExist || !this.dockerContainer?.exist())
       throw new Error(`Can't find the target container "${container}"`)
 
-    if (this.dockerContainer.container?.State.Status !== 'running')
+    if (this.dockerContainer.container?.State.Status !== 'running') {
+      await this.disconnect()
+
       throw new Error(`Can't connect the container "${container}", because the container is not running`)
+    }
 
     await this.proxyNetwork.addContainer(container)
     await this.dockerContainer.get()
     const ip = this.dockerContainer.container.NetworkSettings.Networks[this.proxyNetwork.name].IPAddress
 
-    if (!ip)
+    if (!ip) {
+      await this.disconnect()
+
       throw new Error(
         `An Error appear while getting the target container "${container}" network ip in the network with the name ${this.proxyNetwork.name}`
       )
+    }
 
     return super.connect(ip, port)
   }

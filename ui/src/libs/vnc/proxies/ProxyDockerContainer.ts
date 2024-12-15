@@ -20,17 +20,8 @@ export default class ProxyDockerContainer extends Proxy {
 
   async get(container?: ContainerExtended) {
     const gotDockerContainer = await super.get(container)
-    if (!gotDockerContainer || !this.container) return false
 
-    const isInNetwork = await this.proxyNetwork.hasContainer(this.container.Id)
-
-    if (!isInNetwork) {
-      await this.delete()
-
-      return false
-    }
-
-    return true
+    return !(!gotDockerContainer || !this.container)
   }
 
   getTargetContainerId(): string {
@@ -91,8 +82,10 @@ export default class ProxyDockerContainer extends Proxy {
     const deleteExecResult = await super.delete()
     execResult.addExecResult(deleteExecResult)
 
-    const networkRemoveExecResult = await this.proxyNetwork.remove({force: true})
-    execResult.addExecResult(networkRemoveExecResult)
+    if (await this.proxyNetwork.exist()) {
+      const networkRemoveExecResult = await this.proxyNetwork.remove({force: true})
+      execResult.addExecResult(networkRemoveExecResult)
+    }
 
     return execResult
   }

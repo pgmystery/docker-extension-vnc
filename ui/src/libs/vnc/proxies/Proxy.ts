@@ -76,9 +76,10 @@ export default class Proxy extends DockerContainer {
     }
 
     if (this.container.State.Status !== 'running') {
-      await this.delete()
-
-      return false
+      try {
+        await this.start()
+      }
+      catch {}
     }
 
     return true

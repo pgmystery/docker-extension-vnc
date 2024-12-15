@@ -47,8 +47,7 @@ export default class VNCConnection {
   }
 
   async disconnect() {
-    if (this.target.connected)
-      await this.target.disconnect()
+    await this.target.disconnect()
 
     if (this.proxy.exist())
       await this.proxy.delete()

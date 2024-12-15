@@ -62,6 +62,28 @@ export default class Container {
     return this.docker.cli.exec('run', [...args, dockerImage, ...cmds])
   }
 
+  async start() {
+    if (!this.container) {
+      const containerExist = await this.get()
+
+      if (!containerExist || !this.container) throw new ContainerDontExistError()
+    }
+
+    await this.docker.cli.exec('start', [
+      this.container.Id,
+    ])
+
+    const checkCallback = async () => {
+      const containerExist = await this.get()
+
+      if (!containerExist || !this.container) throw new ContainerDontExistError()
+
+      return this.container.State.Status === 'running'
+    }
+
+    await this.waitForContainer(checkCallback, 10000, 30)
+  }
+
   async delete({force}={force: false}) {
     if (!this.container) {
       const containerExist = await this.get()
@@ -84,5 +106,19 @@ export default class Container {
 
   withContainer() {
     if (!this.exist()) throw new ContainerDontExistError()
+  }
+
+  private async waitForContainer(callback: ()=>Promise<boolean>, waitTime = 10000, maxWaitCounter = 10) {
+    let waitCounter = maxWaitCounter
+
+    while (waitCounter > 0) {
+      const check = await callback()
+      if (check) break
+
+      await new Promise(r => setTimeout(r, waitTime / 10))
+      waitCounter--
+    }
+
+    if (waitCounter === 0) throw new Error('Wait time exceeded')
   }
 }

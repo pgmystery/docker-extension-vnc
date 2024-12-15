@@ -1,7 +1,7 @@
 # Use an official Ubuntu base image
 FROM ubuntu:20.04
 
-ENV PASSWORD="foobar"
+ARG VNC_PASSWORD="foobar"
 
 # Avoid warnings by switching to noninteractive for the build process
 ENV DEBIAN_FRONTEND=noninteractive
@@ -26,7 +26,7 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
 
 # Setup VNC server
 RUN mkdir /root/.vnc \
-    && echo "$PASSWORD" | vncpasswd -f > /root/.vnc/passwd \
+    && echo "$VNC_PASSWORD" | vncpasswd -f > /root/.vnc/passwd \
     && chmod 600 /root/.vnc/passwd
 
 # Create an .Xauthority file
