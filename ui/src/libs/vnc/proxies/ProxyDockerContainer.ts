@@ -12,10 +12,10 @@ import { ContainerExtended } from '../../../types/docker/cli/inspect'
 export default class ProxyDockerContainer extends Proxy {
   private readonly proxyNetwork: ProxyNetwork
 
-  constructor(docker?: Docker, config?: Config) {
+  constructor(proxyNetwork: ProxyNetwork, docker?: Docker, config?: Config) {
     super(docker, config)
 
-    this.proxyNetwork = new ProxyNetwork(docker, config)
+    this.proxyNetwork = proxyNetwork
   }
 
   async get(container?: ContainerExtended) {

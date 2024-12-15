@@ -9,11 +9,8 @@ export default class Target {
   public connection: {ip: string, port: number} | undefined
 
   constructor(docker?: Docker, config?: Config) {
-    if (!docker)
-      docker = createDockerDesktopClient().docker
-
-    if (!config)
-      config = loadConfig()
+    docker = docker || createDockerDesktopClient().docker
+    config = config || loadConfig()
 
     this.docker = docker
     this.config = config

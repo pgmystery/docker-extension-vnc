@@ -110,4 +110,8 @@ export default class DockerCli extends DockerCliExec {
 
     return this.exec('rm', execOptions, containerId)
   }
+
+  start(containerId: string, options: CliExecOptions = {}) {
+    return this.exec('start', options, containerId)
+  }
 }

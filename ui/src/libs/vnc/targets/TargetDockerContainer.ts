@@ -10,16 +10,13 @@ export default class TargetDockerContainer extends Target {
   private readonly proxyNetwork: ProxyNetwork
   private dockerContainer: DockerContainer | undefined
 
-  constructor(docker?: Docker, config?: Config) {
-    if (!docker)
-      docker = createDockerDesktopClient().docker
-
-    if (!config)
-      config = loadConfig()
+  constructor(proxyNetwork: ProxyNetwork, docker?: Docker, config?: Config) {
+    docker = docker || createDockerDesktopClient().docker
+    config = config || loadConfig()
 
     super(docker, config)
 
-    this.proxyNetwork = new ProxyNetwork(this.docker, this.config)
+    this.proxyNetwork = proxyNetwork
   }
 
   async connect(container: string, port: number) {

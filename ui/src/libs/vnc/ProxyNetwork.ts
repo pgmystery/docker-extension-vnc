@@ -38,7 +38,14 @@ export default class ProxyNetwork extends DockerNetwork {
 
   async removeContainer(containerId: string) {
     const isInNetwork = await this.hasContainer(containerId)
-    if (!isInNetwork) return new MultiExecResult()
+    if (!isInNetwork) {
+      try {
+        await super.removeContainer(containerId, {force: true})
+      }
+      catch {}
+
+      return new MultiExecResult()
+    }
 
     const execResult = await super.removeContainer(containerId, {force: true})
     if (execResult.stderr)

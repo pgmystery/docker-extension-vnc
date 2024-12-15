@@ -18,11 +18,8 @@ export default class Proxy extends DockerContainer {
   protected readonly config: Config
 
   constructor(docker?: Docker, config?: Config) {
-    if (!docker)
-      docker = createDockerDesktopClient().docker
-
-    if (!config)
-      config = loadConfig()
+    docker = docker || createDockerDesktopClient().docker
+    config = config || loadConfig()
 
     super(config.proxyContainerName, docker)
 

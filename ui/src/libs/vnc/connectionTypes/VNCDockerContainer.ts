@@ -26,18 +26,16 @@ export default class VNCDockerContainer extends VNCConnection {
   public network: ProxyNetwork
 
   constructor(docker?: Docker, config?: Config) {
-    if (!docker)
-      docker = createDockerDesktopClient().docker
+    docker = docker || createDockerDesktopClient().docker
+    config = config || loadConfig()
 
-    if (!config)
-      config = loadConfig()
-
-    const proxy = new ProxyDockerContainer(docker, config)
-    const target = new TargetDockerContainer(docker, config)
+    const proxyNetwork = new ProxyNetwork(docker, config)
+    const proxy = new ProxyDockerContainer(proxyNetwork, docker, config)
+    const target = new TargetDockerContainer(proxyNetwork, docker, config)
 
     super(docker, config, proxy, target)
 
-    this.network = new ProxyNetwork(docker, config)
+    this.network = proxyNetwork
     this.type = 'container'
   }
 

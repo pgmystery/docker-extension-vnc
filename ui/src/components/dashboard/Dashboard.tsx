@@ -1,9 +1,6 @@
 import { useEffect, useReducer, useRef, useState, useSyncExternalStore } from 'react'
 import { FormControl, IconButton, InputAdornment, OutlinedInput, Stack, Tooltip, Typography } from '@mui/material'
 import ContentCopyIcon from '@mui/icons-material/ContentCopy'
-import SendIcon from '@mui/icons-material/Send'
-import DeleteIcon from '@mui/icons-material/Delete'
-import Button from '@mui/material/Button'
 import TextStreamOutput from '../utils/TextStreamOutput'
 import { Toast } from '@docker/extension-api-client-types/dist/v1'
 import { isRawExecResult } from '../../libs/docker/cli/Exec'
@@ -12,6 +9,7 @@ import { ContainerExtended } from '../../types/docker/cli/inspect'
 import useConfig from '../../hooks/useConfig'
 import { Session } from '../../types/session'
 import { SessionStore } from '../../stores/sessionStore'
+import ExampleContainerButton from './ExampleContainerButton'
 
 
 interface DashboardProps {
@@ -187,6 +185,37 @@ export default function Dashboard({ ddUIToast, connect, sessionStore }: Dashboar
     setLoading(false)
   }
 
+  async function handleStartExampleContainerClick() {
+    if (!exampleContainer || exampleContainer.State.Status !== 'exited') return
+
+    setLoading(true)
+
+    const exampleContainerExist = await checkIfExampleContainerExist()
+    if (!exampleContainerExist) return
+    setLoading(true)
+
+    try {
+      const dockerCli = new DockerCli()
+      const execResult = await dockerCli.start(exampleContainer.Id)
+
+      setLoading(false)
+
+      if (execResult.stderr)
+        return ddUIToast?.error(execResult.stderr)
+
+      await handleRunCmdClick()
+    }
+    catch (e: any) {
+      console.error(e)
+      setLoading(false)
+
+      if (e instanceof Error)
+        ddUIToast.error(e.message)
+      else if (isRawExecResult(e))
+        ddUIToast.error(e.stderr)
+    }
+  }
+
   return (
     <Stack direction="column" spacing={2} alignItems="center" sx={{
       textAlign: 'center',
@@ -239,25 +268,15 @@ export default function Dashboard({ ddUIToast, connect, sessionStore }: Dashboar
             marginRight: '14px',
           }}>VNC Port = 5901</Typography>
         </FormControl>
-        {
-          exampleContainer
-            ? <Button
-                variant="outlined"
-                sx={{height: '55px'}}
-                endIcon={<DeleteIcon />}
-                color="error"
-                onClick={handleDeleteExampleContainerClick}
-                disabled={started || loading}
-              >Delete example container</Button>
-            : <Button
-                variant="outlined"
-                sx={{height: '55px'}}
-                endIcon={<SendIcon />}
-                color="success"
-                onClick={handleRunCmdClick}
-                disabled={started || loading}
-              >Try example container</Button>
-        }
+
+        <ExampleContainerButton
+          exampleContainer={exampleContainer}
+          disabled={started || loading}
+          tryExampleClick={handleRunCmdClick}
+          deleteExampleClick={handleDeleteExampleContainerClick}
+          startExampleClick={handleStartExampleContainerClick}
+        />
+
       </Stack>
 
       {
