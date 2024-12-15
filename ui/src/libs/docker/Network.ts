@@ -1,6 +1,7 @@
 import { Docker as DockerClient } from '@docker/extension-api-client-types/dist/v1'
 import DockerCliNetwork from './cli/Network'
 import { DockerNetworkContainer, DockerNetworkInfo } from '../../types/docker/cli/network'
+import { isRawExecResult } from './cli/Exec'
 
 
 export default class Network {
@@ -44,16 +45,25 @@ export default class Network {
   }
 
   async inspect() {
-    const networkInfoExecResult = await this.docker.cli.exec('network', [
-      'inspect',
-      '--format', '"json"',
-      this.name
-    ])
+    try {
+      const networkInfoExecResult = await this.docker.cli.exec('network', [
+        'inspect',
+        '--format', '"json"',
+        this.name
+      ])
 
-    if (networkInfoExecResult.stderr)
-      return
+      if (networkInfoExecResult.stderr)
+        return
 
-    return networkInfoExecResult.parseJsonObject()[0] as DockerNetworkInfo
+      return networkInfoExecResult.parseJsonObject()[0] as DockerNetworkInfo
+    }
+    catch (e: any) {
+      if (isRawExecResult(e))
+        if (e.stderr.includes(`network ${this.name} not found`))
+          return
+
+      throw e
+    }
   }
 
   async remove({force}={force: false}) {
