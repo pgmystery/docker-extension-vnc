@@ -32,7 +32,7 @@ export default class TargetDockerContainer extends Target {
     if (this.dockerContainer.container?.State.Status !== 'running') {
       await this.disconnect()
 
-      throw new Error(`Can't connect the container "${container}", because the container is not running`)
+      throw new Error(`Can't connect to the container "${container}", because the container is not running`)
     }
 
     await this.proxyNetwork.addContainer(container)
