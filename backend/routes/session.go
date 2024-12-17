@@ -10,13 +10,15 @@ import (
 func SessionRouter(apiRouter fiber.Router) {
 	sessionRouter := apiRouter.Group("/session")
 
+	sessionRouter.Get("/active", getActiveSession)
+	sessionRouter.Post("/active", setActiveSession)
+	sessionRouter.Delete("/active", deleteActiveSession)
+
 	sessionRouter.Get("/", getSessions)
 	sessionRouter.Get("/:id", getSession)
 	sessionRouter.Post("/", createSession)
 	sessionRouter.Post("/:id", updateSession)
 	sessionRouter.Delete("/:id", deleteSession)
-	sessionRouter.Get("/active", getActiveSession)
-	sessionRouter.Post("/active", setActiveSession)
 }
 
 func getSessions(ctx *fiber.Ctx) error {
@@ -105,17 +107,25 @@ func getActiveSession(ctx *fiber.Ctx) error {
 		return ctx.SendStatus(404)
 	}
 
-	return ctx.Status(200).JSON(vnc.ActiveSession)
+	return ctx.Status(200).JSON(vnc.ActiveSession.ActiveSessionData)
 }
 
 func setActiveSession(ctx *fiber.Ctx) error {
-	var activeSessionRequest vnc.ActiveSessionRequest
+	var activeSessionRequest vnc.ActiveSessionData
 
 	if err := ctx.BodyParser(&activeSessionRequest); err != nil {
 		return fiber.NewError(fiber.StatusBadRequest, err.Error())
 	}
 
 	if err := vnc.ActiveSession.Save(activeSessionRequest); err != nil {
+		return fiber.NewError(fiber.StatusInternalServerError, err.Error())
+	}
+
+	return ctx.SendStatus(200)
+}
+
+func deleteActiveSession(ctx *fiber.Ctx) error {
+	if err := vnc.ActiveSession.Reset(); err != nil {
 		return fiber.NewError(fiber.StatusInternalServerError, err.Error())
 	}
 

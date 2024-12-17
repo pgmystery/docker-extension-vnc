@@ -2,40 +2,28 @@ package vnc
 
 import (
 	"encoding/json"
-	"github.com/google/uuid"
 	"os"
 	"path/filepath"
 	"sync"
 	"vnc/crud"
-	"vnc/model"
 )
 
-type ActiveSessionRequest struct {
-	ID               string `json:"id"`
-	ProxyContainerID string `json:"proxy_container_id"`
-}
-
 type ActiveSessionData struct {
-	*model.Session   `json:"Session"`
+	Name             string `json:"name"`
 	ProxyContainerID string `json:"proxy_container_id"`
 }
 
 type ActiveSessionHandler struct {
-	ActiveSession *ActiveSessionData
-	fileSaveLock  *sync.Mutex
-	filePath      string
-	config        *Config
+	ActiveSessionData *ActiveSessionData
+	fileSaveLock      *sync.Mutex
+	filePath          string
+	config            *Config
 }
 
 var ActiveSession *ActiveSessionHandler
 
-func (activeSessionHandler *ActiveSessionHandler) Save(data ActiveSessionRequest) error {
-	sessionId, err := uuid.Parse(data.ID)
-	if err != nil {
-		return err
-	}
-
-	session, err := crud.GetSessionModel(sessionId)
+func (activeSessionHandler *ActiveSessionHandler) Save(data ActiveSessionData) error {
+	session, err := crud.GetSessionModelByName(data.Name)
 	if err != nil {
 		return err
 	}
@@ -58,16 +46,35 @@ func (activeSessionHandler *ActiveSessionHandler) Save(data ActiveSessionRequest
 		return err
 	}
 
-	ActiveSession.ActiveSession = &ActiveSessionData{
-		Session:          session,
+	ActiveSession.ActiveSessionData = &ActiveSessionData{
+		Name:             session.Name,
 		ProxyContainerID: data.ProxyContainerID,
 	}
 
 	return nil
 }
 
+func (activeSessionHandler *ActiveSessionHandler) Reset() error {
+	defer activeSessionHandler.fileSaveLock.Unlock()
+	activeSessionHandler.fileSaveLock.Lock()
+
+	err := os.MkdirAll(activeSessionHandler.config.DataPath, os.ModePerm)
+	if err != nil {
+		return err
+	}
+
+	err = os.WriteFile(activeSessionHandler.filePath, []byte("{}"), os.ModePerm)
+	if err != nil {
+		return err
+	}
+
+	ActiveSession.ActiveSessionData = nil
+
+	return nil
+}
+
 func (activeSessionHandler *ActiveSessionHandler) Exist() bool {
-	return activeSessionHandler.ActiveSession != nil
+	return activeSessionHandler.ActiveSessionData != nil
 }
 
 func loadActiveSessionFromFile(filePath string) *ActiveSessionData {
@@ -93,12 +100,12 @@ func LoadActiveSession() {
 	}
 
 	filePath := filepath.Join(".", config.DataPath, config.ActiveSessionFileName+".json")
-	activeSession := loadActiveSessionFromFile(filePath)
+	activeSessionData := loadActiveSessionFromFile(filePath)
 
 	ActiveSession = &ActiveSessionHandler{
-		ActiveSession: activeSession,
-		fileSaveLock:  &sync.Mutex{},
-		filePath:      filePath,
-		config:        config,
+		ActiveSessionData: activeSessionData,
+		fileSaveLock:      &sync.Mutex{},
+		filePath:          filePath,
+		config:            config,
 	}
 }

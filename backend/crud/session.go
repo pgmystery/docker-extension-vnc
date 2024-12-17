@@ -85,6 +85,21 @@ func GetSessionModel(id uuid.UUID) (*model.Session, error) {
 	return &session, nil
 }
 
+func GetSessionModelByName(name string) (*model.Session, error) {
+	db := database.DB
+	var session model.Session
+
+	err := db.Model(&model.Session{}).Preload("Credentials").Find(&session, "name = ?", name).Error
+	if err != nil {
+		return nil, err
+	}
+	if session.ID == uuid.Nil {
+		return nil, errors.New("session not found")
+	}
+
+	return &session, nil
+}
+
 func GetSession(id uuid.UUID) (*ResponseSession, error) {
 	session, err := GetSessionModel(id)
 	if err != nil {
