@@ -1,7 +1,7 @@
 # Use an official Ubuntu base image
 FROM ubuntu:20.04
 
-ARG VNC_PASSWORD="foobar"
+ENV VNC_PASSWORD="foobar"
 
 # Avoid warnings by switching to noninteractive for the build process
 ENV DEBIAN_FRONTEND=noninteractive
@@ -22,12 +22,11 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
     tigervnc-standalone-server \
     dbus-x11 \
     xfonts-base \
+    firefox \
     && apt-get clean && rm -rf /var/lib/apt/lists/* /tmp/* /var/tmp/*
 
-# Setup VNC server
-RUN mkdir /root/.vnc \
-    && echo "$VNC_PASSWORD" | vncpasswd -f > /root/.vnc/passwd \
-    && chmod 600 /root/.vnc/passwd
+# Create .vnc directory
+RUN mkdir /root/.vnc
 
 # Create an .Xauthority file
 RUN touch /root/.Xauthority

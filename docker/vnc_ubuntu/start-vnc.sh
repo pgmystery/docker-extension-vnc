@@ -4,6 +4,9 @@ echo 'Updating /etc/hosts file...'
 HOSTNAME=$(hostname)
 echo "127.0.1.1\t$HOSTNAME" >> /etc/hosts
 
+echo "$VNC_PASSWORD" | vncpasswd -f > /root/.vnc/passwd
+chmod 600 /root/.vnc/passwd
+
 echo "Starting tiger VNC server at $RESOLUTION..."
 tigervncserver -kill :0 || true
 tigervncserver -kill :1 || true
