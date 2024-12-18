@@ -11,9 +11,9 @@ export default function useFullscreen(): [boolean, (ref: RefObject<HTMLElement>)
     if (ref.current == null) return
 
     ref.current
-         .requestFullscreen()
-         .then(() => setIsFullscreen(getBrowserFullscreenElementProp() != null))
-         .catch(() => setIsFullscreen(false))
+      .requestFullscreen()
+      .then(() => setIsFullscreen(getBrowserFullscreenElementProp() != null))
+      .catch(() => setIsFullscreen(false))
   }
 
   useLayoutEffect(() => {
