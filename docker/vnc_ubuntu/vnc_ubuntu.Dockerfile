@@ -1,5 +1,5 @@
 # Use an official Ubuntu base image
-FROM ubuntu:20.04
+FROM ubuntu:24.10
 
 ENV VNC_PASSWORD="foobar"
 
@@ -14,16 +14,25 @@ ENV RESOLUTION=1920x1080
 # Set port of VNC Server
 ENV PORT=5901
 
+COPY apt/preferences.d/ /etc/apt/preferences.d/
+COPY apt/apt.conf.d/ /etc/apt/apt.conf.d/
+
 # Install XFCE, VNC server, dbus-x11, and xfonts-base
 RUN apt-get update && apt-get install -y --no-install-recommends \
     xfce4 \
     xfce4-goodies \
-    tigervnc-common \
-    tigervnc-standalone-server \
     dbus-x11 \
     xfonts-base \
-    firefox \
-    && apt-get clean && rm -rf /var/lib/apt/lists/* /tmp/* /var/tmp/*
+    software-properties-common \
+    tightvncpasswd  \
+    tigervnc-common \
+    tigervnc-standalone-server
+
+RUN apt remove --purge -y snapd
+RUN add-apt-repository -y ppa:mozillateam/ppa \
+    && apt update \
+    && apt install -y firefox
+RUN apt-get clean && rm -rf /var/lib/apt/lists/* /tmp/* /var/tmp/*
 
 # Create .vnc directory
 RUN mkdir /root/.vnc
