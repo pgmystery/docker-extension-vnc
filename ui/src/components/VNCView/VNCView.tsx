@@ -81,6 +81,31 @@ export default function VNCView({ sessionName, url, onCancel, ddUIToast, openBro
     setHavePowerCapability(capabilities?.power || false)
   }, [vncContainerRef.current])
 
+  function onVNCConnect() {
+    if (!vncContainerRef.current) return
+
+    const bodyElement = document.getElementsByTagName('body').item(0)
+    if (!bodyElement) return
+
+    const bodyCanvasElements = bodyElement.getElementsByTagName('canvas')
+    if (bodyCanvasElements.length === 0) return
+
+    let bodyCanvasElement: HTMLCanvasElement | undefined
+    for (const canvasElement of bodyCanvasElements) {
+      if (canvasElement.parentElement === bodyElement) {
+        bodyCanvasElement = canvasElement
+        break
+      }
+    }
+
+    if (!bodyCanvasElement) return
+
+    const vncCanvasElement = vncContainerRef.current.getElementsByTagName('canvas').item(0)
+    if (!vncCanvasElement) return
+
+    vncCanvasElement.parentElement?.appendChild(bodyCanvasElement)
+  }
+
   function handleCredentialRequest() {
     if (trySaveCredentials) {
       setTrySaveCredentials(false)
@@ -223,7 +248,7 @@ export default function VNCView({ sessionName, url, onCancel, ddUIToast, openBro
 
   return (
     <>
-      <Stack direction="column" spacing={1} sx={{height: '100%', overflow: 'hidden',}} >
+      <Stack direction="column" spacing={1} sx={{height: '100%', overflow: 'hidden'}} >
         <VNCSessionBar
           vncScreenRef={vncScreenRef.current}
           onFullscreenClicked={handleFullscreenClick}
@@ -252,6 +277,7 @@ export default function VNCView({ sessionName, url, onCancel, ddUIToast, openBro
                     overflow: 'hidden',
                   }}
                   ref={vncScreenRef}
+                  onConnect={onVNCConnect}
                   onCredentialsRequired={handleCredentialRequest}
                   onSecurityFailure={handleSecurityFailure}
                   rfbOptions={{
