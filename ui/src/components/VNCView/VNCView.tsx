@@ -90,7 +90,7 @@ export default function VNCView({ sessionName, url, onCancel, ddUIToast, openBro
     const bodyCanvasElements = bodyElement.getElementsByTagName('canvas')
     if (bodyCanvasElements.length === 0) return
 
-    let bodyCanvasElement
+    let bodyCanvasElement: HTMLCanvasElement | undefined
     for (const canvasElement of bodyCanvasElements) {
       if (canvasElement.parentElement === bodyElement) {
         bodyCanvasElement = canvasElement
