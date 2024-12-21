@@ -11,6 +11,7 @@ import { MachineCommand } from '../vncSessionBar/SendMachineCommandsMenu'
 import { SessionCredentials } from '../../types/session'
 import { SessionStore } from '../../stores/sessionStore'
 import { VNCSettings, getVNCSettingsStore } from '../../stores/vncSettingsStore'
+import useWindowFocus from '../../hooks/useWindowFocus'
 
 
 interface VNCViewProps {
@@ -27,6 +28,9 @@ export type VNCCredentials = Partial<SessionCredentials>
 
 
 export default function VNCView({ sessionName, url, onCancel, ddUIToast, openBrowserURL, credentials, sessionStore }: VNCViewProps) {
+  useWindowFocus({
+    onFocus: handleWindowFocus,
+  })
   const [ready, setReady] = useState<boolean>(false)
   const vncContainerRef = useRef<HTMLDivElement>(null)
   const vncScreenRef = useRef<React.ElementRef<typeof VncScreen>>(null)
@@ -76,6 +80,31 @@ export default function VNCView({ sessionName, url, onCancel, ddUIToast, openBro
 
     setHavePowerCapability(capabilities?.power || false)
   }, [vncContainerRef.current])
+
+  function onVNCConnect() {
+    if (!vncContainerRef.current) return
+
+    const bodyElement = document.getElementsByTagName('body').item(0)
+    if (!bodyElement) return
+
+    const bodyCanvasElements = bodyElement.getElementsByTagName('canvas')
+    if (bodyCanvasElements.length === 0) return
+
+    let bodyCanvasElement: HTMLCanvasElement | undefined
+    for (const canvasElement of bodyCanvasElements) {
+      if (canvasElement.parentElement === bodyElement) {
+        bodyCanvasElement = canvasElement
+        break
+      }
+    }
+
+    if (!bodyCanvasElement) return
+
+    const vncCanvasElement = vncContainerRef.current.getElementsByTagName('canvas').item(0)
+    if (!vncCanvasElement) return
+
+    vncCanvasElement.parentElement?.appendChild(bodyCanvasElement)
+  }
 
   function handleCredentialRequest() {
     if (trySaveCredentials) {
@@ -210,9 +239,16 @@ export default function VNCView({ sessionName, url, onCancel, ddUIToast, openBro
     }
   }
 
+  function handleWindowFocus() {
+    const { connected, focus } = vncScreenRef.current || {}
+
+    if (connected && focus && document.activeElement?.tagName.toLowerCase() === 'body')
+      focus()
+  }
+
   return (
     <>
-      <Stack direction="column" spacing={1} sx={{height: '100%', overflow: 'hidden',}} >
+      <Stack direction="column" spacing={1} sx={{height: '100%', overflow: 'hidden'}} >
         <VNCSessionBar
           vncScreenRef={vncScreenRef.current}
           onFullscreenClicked={handleFullscreenClick}
@@ -241,6 +277,7 @@ export default function VNCView({ sessionName, url, onCancel, ddUIToast, openBro
                     overflow: 'hidden',
                   }}
                   ref={vncScreenRef}
+                  onConnect={onVNCConnect}
                   onCredentialsRequired={handleCredentialRequest}
                   onSecurityFailure={handleSecurityFailure}
                   rfbOptions={{
