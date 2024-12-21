@@ -13,7 +13,7 @@ RUN --mount=type=cache,target=/go/pkg/mod \
     go build -trimpath -ldflags="-s -w" -o bin/service
 
 # BUILD lib react-vnc
-FROM --platform=$BUILDPLATFORM node:22.11-alpine AS lib-react-vnc
+FROM --platform=$BUILDPLATFORM node:22.12-alpine AS lib-react-vnc
 RUN apk add git
 WORKDIR /react-vnc
 COPY .git ./.git
@@ -25,7 +25,7 @@ RUN --mount=type=cache,target=/usr/src/app/.npm \
     npm ci --prefix ./ui/libs/react-vnc
 RUN npm --prefix ./ui/libs/react-vnc run build:lib
 
-FROM --platform=$BUILDPLATFORM node:22.11-alpine AS client-builder
+FROM --platform=$BUILDPLATFORM node:22.12-alpine AS client-builder
 WORKDIR /ui
 # cache packages in layer
 COPY ui/package.json /ui/package.json
