@@ -12,7 +12,6 @@ import { SessionCredentials } from '../../types/session'
 import { SessionStore } from '../../stores/sessionStore'
 import { VNCSettings, getVNCSettingsStore } from '../../stores/vncSettingsStore'
 import useWindowFocus from '../../hooks/useWindowFocus'
-import useFullscreen from '../../hooks/useFullscreen'
 
 
 interface VNCViewProps {
@@ -26,9 +25,6 @@ interface VNCViewProps {
 }
 
 export type VNCCredentials = Partial<SessionCredentials>
-
-
-const mouseCursorCss = 'url("data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAoAAAAQCAYAAAAvf+5AAAAAAXNSR0IArs4c6QAAAGNJREFUKFON0tsOwCAIA1D6/x/NUuMIYmHzxURPvBTg7m5mBgCcuwFCGvoJB+RJEz7ghC/YYQkVbmHFI8z4EwZ+c6xB7zrEsspxbdZMr8rkGzJeMNe6haoJFJYd8xvuzxxPegCXZHgJiRuQCgAAAABJRU5ErkJggg==") 1 1, default'
 
 
 export default function VNCView({ sessionName, url, onCancel, ddUIToast, openBrowserURL, credentials, sessionStore }: VNCViewProps) {
@@ -46,8 +42,6 @@ export default function VNCView({ sessionName, url, onCancel, ddUIToast, openBro
   const [openSettingsDialog, setOpenSettingsDialog] = useState<boolean>(false)
   const [clipboardText, setClipboardText] = useState<string>('')
   const [havePowerCapability, setHavePowerCapability] = useState<boolean>(false)
-  const [isFullscreen, requestFullscreen, checkIfFullscreen] = useFullscreen()
-  const [defaultCursorCss, setDefaultCursorCss] = useState<string>(mouseCursorCss)
 
   useEffect(() => {
     if ('load' in vncSettingsStore)
@@ -87,19 +81,29 @@ export default function VNCView({ sessionName, url, onCancel, ddUIToast, openBro
     setHavePowerCapability(capabilities?.power || false)
   }, [vncContainerRef.current])
 
-  useEffect(() => {
-    if (isFullscreen) {
-      handleFullscreenOn()
-    }
-    else {
-      handleFullscreenOff()
-    }
-  }, [isFullscreen])
-
   function onVNCConnect() {
-    if (checkIfFullscreen()) {
-      handleFullscreenOn()
+    if (!vncContainerRef.current) return
+
+    const bodyElement = document.getElementsByTagName('body').item(0)
+    if (!bodyElement) return
+
+    const bodyCanvasElements = bodyElement.getElementsByTagName('canvas')
+    if (bodyCanvasElements.length === 0) return
+
+    let bodyCanvasElement
+    for (const canvasElement of bodyCanvasElements) {
+      if (canvasElement.parentElement === bodyElement) {
+        bodyCanvasElement = canvasElement
+        break
+      }
     }
+
+    if (!bodyCanvasElement) return
+
+    const vncCanvasElement = vncContainerRef.current.getElementsByTagName('canvas').item(0)
+    if (!vncCanvasElement) return
+
+    vncCanvasElement.parentElement?.appendChild(bodyCanvasElement)
   }
 
   function handleCredentialRequest() {
@@ -176,7 +180,7 @@ export default function VNCView({ sessionName, url, onCancel, ddUIToast, openBro
   }
 
   function handleFullscreenClick() {
-    requestFullscreen(vncContainerRef)
+    vncContainerRef.current?.requestFullscreen()
   }
 
   function handleSettingsClick() {
@@ -240,30 +244,6 @@ export default function VNCView({ sessionName, url, onCancel, ddUIToast, openBro
 
     if (connected && focus && document.activeElement?.tagName.toLowerCase() === 'body')
       focus()
-  }
-
-  function handleFullscreenOn() {
-    if (!vncContainerRef.current) return
-
-    const vncCanvas = vncContainerRef.current.getElementsByTagName('canvas').item(0)
-    if (!vncCanvas) return
-
-    if (vncCanvas.style.cursor === 'none') {
-      setDefaultCursorCss(vncCanvas.style.cursor)
-
-      vncCanvas.style.cursor = mouseCursorCss
-    }
-  }
-
-  function handleFullscreenOff() {
-    if (!vncContainerRef.current) return
-
-    const vncCanvas = vncContainerRef.current.getElementsByTagName('canvas').item(0)
-    if (!vncCanvas) return
-
-    if (defaultCursorCss === 'none') {
-      vncCanvas.style.cursor = defaultCursorCss
-    }
   }
 
   return (
