@@ -42,7 +42,7 @@ export function App() {
 
   async function reconnect() {
     try {
-      await vnc.reconnect()
+      await vnc.reconnect(sessionStore)
       if (!vnc.connected || !vnc.connection) return setLoading(false)
 
       const sessionName = vnc.connection.proxy.getSessionName()

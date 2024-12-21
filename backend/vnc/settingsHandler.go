@@ -62,7 +62,7 @@ func LoadVNCSettings() {
 		panic(err)
 	}
 
-	settingsFilePath := filepath.Join(".", config.DataPath, config.FileName+".json")
+	settingsFilePath := filepath.Join(".", config.DataPath, config.SettingsFileName+".json")
 	vncSettings := loadSettingsFromFile(settingsFilePath)
 
 	Settings = &SettingsHandler{
