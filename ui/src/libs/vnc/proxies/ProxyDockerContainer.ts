@@ -21,7 +21,7 @@ export default class ProxyDockerContainer extends Proxy {
   async get(container?: ContainerExtended) {
     const gotDockerContainer = await super.get(container)
 
-    return !(!gotDockerContainer || !this.container)
+    return gotDockerContainer && !!this.container
   }
 
   getTargetContainerId(): string {
