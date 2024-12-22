@@ -57,6 +57,13 @@ export default class VNCDockerContainer extends VNCConnection {
     if (!targetContainerId)
       throw new Error(`Can't get target container "${data.container}" ID`)
 
+    if (this.proxy.container) {
+      const isProxyContainerInNetwork = await this.network.hasContainer(this.proxy.container.Id)
+
+      if (!isProxyContainerInNetwork)
+        await this.proxy.delete()
+    }
+
     return super.connect(sessionName, {
       type: this.type,
       data: {
