@@ -50,6 +50,7 @@ export default class VNC {
       await this.connection.reconnect(proxy.container)
     }
     catch (e) {
+      console.error(e)
       await this.disconnect()
 
       throw e
