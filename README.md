@@ -1,4 +1,4 @@
-# Docker extension VNC
+# Docker extension: VNC Viewer
 
 A VNC Viewer extension for Docker Desktop.
 
