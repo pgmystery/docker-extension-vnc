@@ -9,6 +9,7 @@ RUN git clone --depth 1 --branch $NOVNC_VERSION https://github.com/novnc/noVNC.g
 WORKDIR /noVNC
 
 RUN git clone https://github.com/novnc/websockify ./utils/websockify
+RUN pip3 install numpy
 
 COPY ./entrypoint.sh /entrypoint.sh
 RUN chmod +x /entrypoint.sh
