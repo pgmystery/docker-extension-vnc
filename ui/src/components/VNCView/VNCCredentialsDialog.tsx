@@ -69,7 +69,7 @@ export default function VNCCredentialsDialog({ open, onClose, onSubmit }: VNCCre
       </DialogContent>
       <DialogActions>
         <Button onClick={onClose}>Cancel</Button>
-        <Button type="submit">OK</Button>
+        <Button type="submit" color="success">OK</Button>
       </DialogActions>
     </Dialog>
   )

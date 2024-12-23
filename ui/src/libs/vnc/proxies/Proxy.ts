@@ -48,7 +48,7 @@ export default class Proxy extends DockerContainer {
 
     const internalPort = this.container?.NetworkSettings.Ports[`${this.config.proxyContainerLocalPort}/tcp`]
 
-    if (!internalPort)
+    if (!internalPort || internalPort.length === 0)
       return
 
     return Number(internalPort[0].HostPort)
@@ -88,7 +88,7 @@ export default class Proxy extends DockerContainer {
   async update() {
     const gotDockerContainer = await super.get()
 
-    return !(!gotDockerContainer || !this.container)
+    return gotDockerContainer && !!this.container
   }
 
   async create(sessionName: string, connectionType: ConnectionType, target: Target, _?: unknown) {
@@ -136,8 +136,8 @@ export default class Proxy extends DockerContainer {
   }
 
   async delete() {
-    await this.update()
-    if (!this.exist()) return new MultiExecResult()
+    const gotDockerContainer = await this.update()
+    if (!gotDockerContainer || !this.exist()) return new MultiExecResult()
 
     const execResult = await super.delete({force: true})
     if (execResult.stderr)

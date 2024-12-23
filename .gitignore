@@ -1,4 +1,5 @@
 .old.backend/
+data/
 
 ### VisualStudioCode template
 .vscode/*
