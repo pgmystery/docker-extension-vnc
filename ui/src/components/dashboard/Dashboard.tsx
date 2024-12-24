@@ -61,16 +61,10 @@ export default function Dashboard({ ddUIToast, connect, sessionStore }: Dashboar
     const dockerCli = new DockerCli()
 
     if (!await dockerCli.imageExist(UbuntuVNCDockerImage)) {
-      const onPullFinished = (exitCode: number) => {
-        setPullFinished(true)
-
-        if (exitCode === 0) {
-          connectToExampleContainer(dockerCli)
-        }
-      }
-
       try {
-        dockerCli.pull(UbuntuVNCDockerImage, dispatch, onPullFinished)
+        await dockerCli.pull(UbuntuVNCDockerImage, dispatch)
+        setPullFinished(true)
+        await connectToExampleContainer(dockerCli)
       }
       catch (e: any) {
         console.error(e)
@@ -80,8 +74,14 @@ export default function Dashboard({ ddUIToast, connect, sessionStore }: Dashboar
             ddUIToast.error(e.message)
           else if (isRawExecResult(e))
             ddUIToast.error(e.stderr)
+          else {
+            ddUIToast.error(e)
+          }
         }
       }
+
+      setLoading(false)
+      setStarted(false)
     }
     else {
       await connectToExampleContainer(dockerCli)

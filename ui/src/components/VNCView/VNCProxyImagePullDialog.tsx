@@ -1,57 +1,58 @@
 import { CircularProgress, Dialog, DialogContent, DialogContentText, DialogTitle, Typography } from '@mui/material'
-import { useEffect, useReducer, useRef, useState } from 'react'
-import { Toast } from '@docker/extension-api-client-types/dist/v1'
+import { useEffect, useMemo, useReducer, useRef, useState } from 'react'
 import { isRawExecResult } from '../../libs/docker/cli/Exec'
+import useVNC from '../../hooks/useVNC'
+import { createDockerDesktopClient } from '@docker/extension-api-client'
+import { DialogProps } from '@toolpad/core'
 
 
 interface VNCProxyImagePullDialogProps {
-  open: boolean,
-  onDone: (successful: boolean) => void,
-  pullProxyDockerImage: (addStdout: (stdout: string)=>void, onFinish: (exitCode: number)=>void)=>void,
-  ddUIToast?: Toast
+  onSuccess?: ()=>void,
+  onError?: (error: any)=>void,
 }
 
 
-export default function VNCProxyImagePullDialog({open, onDone, pullProxyDockerImage, ddUIToast}: VNCProxyImagePullDialogProps) {
+export default function VNCProxyImagePullDialog({open, onClose, payload}: DialogProps<VNCProxyImagePullDialogProps>) {
+  const { onSuccess, onError } = payload
+  const ddClient = useMemo(createDockerDesktopClient, [])
+  const vnc = useVNC(ddClient)
   const [stdout, dispatch] = useReducer(addStdout, [])
   const dialogContentElementRef = useRef<HTMLElement>(null)
   const descriptionElementRef = useRef<HTMLElement>(null)
   const [finished, setFinished] = useState<boolean>(false)
 
   useEffect(() => {
-    if (open) {
-      const { current: descriptionElement } = descriptionElementRef
-
-      if (descriptionElement !== null) {
-        descriptionElement.focus()
-      }
-    }
-  }, [open])
-
-  useEffect(() => {
     if (!open) return
 
-    try {
-      const onFinish = (exitCode: number) => {
-        setFinished(true)
-        onDone(exitCode === 0)
-      }
+    const { current: descriptionElement } = descriptionElementRef
 
-      pullProxyDockerImage(dispatch, onFinish)
+    if (descriptionElement !== null) {
+      descriptionElement.focus()
     }
-    catch (e: any) {
-      console.error(e)
 
-      if (ddUIToast) {
-        if (e instanceof Error)
-          ddUIToast.error(e.message)
-        else if (isRawExecResult(e))
-          ddUIToast.error(e.stderr)
-      }
+    vnc.pullProxyDockerImage(dispatch)
+       .then(() => {
+         setFinished(true)
 
-      onDone(false)
-    }
-  }, [open, pullProxyDockerImage])
+         if (onSuccess)
+           onSuccess()
+       })
+       .catch(e => {
+         console.error(e)
+
+         if (e instanceof Error)
+           ddClient.desktopUI.toast.error(e.message)
+         else if (isRawExecResult(e))
+           ddClient.desktopUI.toast.error(e.stderr)
+         else {
+           ddClient.desktopUI.toast.error(e)
+         }
+
+         if (onError)
+           onError(e)
+       })
+       .finally(onClose)
+  }, [open])
 
   useEffect(() => {
     if (!dialogContentElementRef || stdout.length === 0) return
