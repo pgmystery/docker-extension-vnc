@@ -269,8 +269,6 @@ export default function VNCView({ sessionName, url, onCancel, ddUIToast, openBro
             ready
               ? <VncScreen
                   url={url?.ws || ''}
-                  scaleViewport
-                  clipViewport
                   style={{
                     width: '100%',
                     height: '100%',
@@ -288,6 +286,10 @@ export default function VNCView({ sessionName, url, onCancel, ddUIToast, openBro
                   compressionLevel={vncSettings.compressionLevel}
                   showDotCursor={vncSettings.showDotCursor}
                   viewOnly={vncSettings.viewOnly}
+                  scaleViewport={vncSettings.scaling.resize === 'scale'}
+                  resizeSession={vncSettings.scaling.resize === 'remote'}
+                  clipViewport={vncSettings.scaling.clipToWindow}
+                  // dragViewport={true}  // TODO
                   onClipboard={e => setClipboardText(e?.detail.text || '')}
                   onCapabilities={(e?: { detail: { capabilities: any } }) => {
                     setHavePowerCapability(false)

@@ -7,10 +7,14 @@ import CompressionLevel from './VNCSettingForms/CompressionLevel'
 import ShowDotCursor from './VNCSettingForms/ShowDotCursor'
 import ViewOnly from './VNCSettingForms/ViewOnly'
 import { VNCSettings } from '../../stores/vncSettingsStore'
+import Scaling, { ScalingResize } from './VNCSettingForms/Scaling'
 
 
-interface VNCSettingsSaveData extends Omit<VNCSettings, 'showDotCursor'> {
+interface VNCSettingsSaveData extends Omit<VNCSettings, 'showDotCursor' | 'viewOnly' | 'scaling'> {
   showDotCursor?: 'on'
+  viewOnly?: 'on'
+  'scaling.clipToWindow'?: 'on'
+  'scaling.resize': ScalingResize
 }
 
 interface VNCSettingsDialog {
@@ -33,7 +37,11 @@ export default function VNCSettingsDialog({ open, close, settingsData, onSetting
       qualityLevel: Number(data.qualityLevel),
       compressionLevel: Number(data.compressionLevel),
       showDotCursor: !!data.showDotCursor,
-      viewOnly: data.viewOnly,
+      viewOnly: !!data.viewOnly,
+      scaling: {
+        clipToWindow: !!data['scaling.clipToWindow'],
+        resize: data['scaling.resize'],
+      },
     })
     close()
   }
@@ -87,6 +95,11 @@ export default function VNCSettingsDialog({ open, close, settingsData, onSetting
           <Divider />
           <ViewOnly
             initValue={settingsData.viewOnly}
+            reset={reset}
+          />
+          <Divider />
+          <Scaling
+            initValue={settingsData.scaling}
             reset={reset}
           />
           <Divider />
