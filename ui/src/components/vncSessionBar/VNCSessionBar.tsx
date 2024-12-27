@@ -7,11 +7,11 @@ import { VncScreenHandle } from 'react-vnc'
 import ClipboardMenu from './ClipboardMenu'
 import SendMachineCommandsMenu, { MachineCommand } from './SendMachineCommandsMenu'
 import DragViewportButton from './DragViewportButton'
-import { useEffect } from 'react'
+import { RefObject, useEffect } from 'react'
 
 
 export interface VNCSessionBarProps {
-  vncScreenRef: VncScreenHandle | null,
+  vncScreenRef: RefObject<VncScreenHandle> | null,
   clippedViewport: boolean,
   clipToWindowActive: boolean,
   onDragWindowChange: (state: boolean) => void,
@@ -41,10 +41,10 @@ export default function VNCSessionBar({
   viewOnly,
 }: VNCSessionBarProps) {
   useEffect(() => {
-    if (!vncScreenRef || !vncScreenRef.rfb)
+    if (!vncScreenRef || !vncScreenRef.current?.rfb)
       return
 
-    vncScreenRef.rfb.dragViewport = false
+    vncScreenRef.current.rfb.dragViewport = false
   }, [clipToWindowActive])
 
   return (
@@ -57,22 +57,19 @@ export default function VNCSessionBar({
 
       {
         clipToWindowActive && <DragViewportButton onChange={ (state) => {
-          console.log('TEST123', state)
           onDragWindowChange(state)
-          // vncScreenRef?.disconnect()
-          // vncScreenRef?.connect()
-          if (!vncScreenRef || !vncScreenRef.rfb)
+          if (!vncScreenRef || !vncScreenRef.current?.rfb)
             return
 
-          vncScreenRef.rfb.dragViewport = state
+          vncScreenRef.current.rfb.dragViewport = state
         } } disabled={ !clippedViewport }/>
       }
 
       {
         !viewOnly && <>
           <SendKeysMenu
-            sendKey={ vncScreenRef?.sendKey }
-            sendCtrlAltDel={ vncScreenRef?.sendCtrlAltDel }
+            sendKey={ vncScreenRef?.current?.sendKey }
+            sendCtrlAltDel={ vncScreenRef?.current?.sendCtrlAltDel }
           />
           <ClipboardMenu clipboardText={ clipboardText } sendClipboardText={ sendClipboardText }/>
           { havePowerCapability && <SendMachineCommandsMenu sendMachineCommand={ sendMachineCommand }/> }
