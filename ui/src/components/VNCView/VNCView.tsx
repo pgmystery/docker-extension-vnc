@@ -42,6 +42,7 @@ export default function VNCView({ sessionName, url, onCancel, ddUIToast, openBro
   const [openSettingsDialog, setOpenSettingsDialog] = useState<boolean>(false)
   const [clipboardText, setClipboardText] = useState<string>('')
   const [havePowerCapability, setHavePowerCapability] = useState<boolean>(false)
+  const [isClippedViewport, setIsClippedViewport] = useState<boolean>(false)
 
   useEffect(() => {
     if ('load' in vncSettingsStore)
@@ -246,11 +247,18 @@ export default function VNCView({ sessionName, url, onCancel, ddUIToast, openBro
       focus()
   }
 
+  function handleClippingViewport(e?: { detail: boolean }) {
+    setIsClippedViewport(e?.detail || false)
+  }
+
   return (
     <>
       <Stack direction="column" spacing={1} sx={{height: '100%', overflow: 'hidden'}} >
         <VNCSessionBar
-          vncScreenRef={vncScreenRef.current}
+          vncScreenRef={vncScreenRef}
+          clippedViewport={isClippedViewport}
+          clipToWindowActive={vncSettings.scaling.clipToWindow}
+          onDragWindowChange={(state) => vncScreenRef.current?.rfb && (vncScreenRef.current.rfb.dragViewport = state)}
           onFullscreenClicked={handleFullscreenClick}
           onSettingsClicked={handleSettingsClick}
           onOpenInBrowserClicked={handleOpenInBrowserClick}
@@ -258,6 +266,7 @@ export default function VNCView({ sessionName, url, onCancel, ddUIToast, openBro
           sendClipboardText={sendClipboardText}
           sendMachineCommand={sendMachineCommand}
           havePowerCapability={havePowerCapability}
+          viewOnly={vncSettings.viewOnly}
         />
         <Box ref={vncContainerRef} sx={{
           width: '100%',
@@ -269,8 +278,6 @@ export default function VNCView({ sessionName, url, onCancel, ddUIToast, openBro
             ready
               ? <VncScreen
                   url={url?.ws || ''}
-                  scaleViewport
-                  clipViewport
                   style={{
                     width: '100%',
                     height: '100%',
@@ -288,6 +295,10 @@ export default function VNCView({ sessionName, url, onCancel, ddUIToast, openBro
                   compressionLevel={vncSettings.compressionLevel}
                   showDotCursor={vncSettings.showDotCursor}
                   viewOnly={vncSettings.viewOnly}
+                  scaleViewport={vncSettings.scaling.resize === 'scale'}
+                  resizeSession={vncSettings.scaling.resize === 'remote'}
+                  clipViewport={vncSettings.scaling.clipToWindow}
+                  onClippingViewport={handleClippingViewport}
                   onClipboard={e => setClipboardText(e?.detail.text || '')}
                   onCapabilities={(e?: { detail: { capabilities: any } }) => {
                     setHavePowerCapability(false)

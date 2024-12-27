@@ -2,6 +2,10 @@
 
 History of all released versions and changes
 
+## v1.0.3
+- VNC settings for scaling the viewport.
+- Add a way to drag the screen of the vnc viewport.
+
 ## v1.0.2
 - Fix Typos.
 - Fix mouse cursor hide bug after fullscreen on some devices.
