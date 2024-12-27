@@ -5,7 +5,7 @@ import { Checkbox, FormControl, FormLabel } from '@mui/material'
 export const ShowDotCursorDefault = false
 
 interface ShowDotCursorProps {
-  initValue: boolean
+  initValue?: boolean
   reset: boolean
 }
 
