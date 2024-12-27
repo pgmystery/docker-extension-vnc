@@ -1,6 +1,6 @@
 import { IconButton, styled, Tooltip } from '@mui/material'
 import PanToolIcon from '@mui/icons-material/PanTool'
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 
 
 interface DragViewportButtonProps {
@@ -23,6 +23,12 @@ const ToggleIconButton = styled(IconButton)(({ theme }) => {
 
 export default function DragViewportButton({ onChange, disabled }: DragViewportButtonProps) {
   const [selected, setSelected] = useState<boolean>(false)
+
+  useEffect(() => {
+    if (disabled)
+      onChange(false)
+      setSelected(false)
+  }, [disabled])
 
   function handleChange() {
     onChange(!selected)
