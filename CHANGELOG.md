@@ -2,6 +2,9 @@
 
 History of all released versions and changes
 
+## v1.0.3
+### WIP
+
 ## v1.0.2
 - Fix Typos.
 - Fix mouse cursor hide bug after fullscreen on some devices.
