@@ -6,10 +6,15 @@ import SendKeysMenu from './SendKeysMenu'
 import { VncScreenHandle } from 'react-vnc'
 import ClipboardMenu from './ClipboardMenu'
 import SendMachineCommandsMenu, { MachineCommand } from './SendMachineCommandsMenu'
+import DragViewportButton from './DragViewportButton'
+import { useEffect } from 'react'
 
 
 export interface VNCSessionBarProps {
   vncScreenRef:  VncScreenHandle | null
+  clippedViewport: boolean
+  clipToWindowActive: boolean
+  onDragWindowChange: (state: boolean)=>void
   onFullscreenClicked: ()=>void
   onSettingsClicked: ()=>void
   onOpenInBrowserClicked: ()=>void
@@ -22,6 +27,9 @@ export interface VNCSessionBarProps {
 
 export default function VNCSessionBar({
   vncScreenRef,
+  clippedViewport,
+  clipToWindowActive,
+  onDragWindowChange,
   onFullscreenClicked,
   onSettingsClicked,
   onOpenInBrowserClicked,
@@ -30,6 +38,13 @@ export default function VNCSessionBar({
   sendMachineCommand,
   havePowerCapability,
 }: VNCSessionBarProps) {
+  useEffect(() => {
+    if (!vncScreenRef || !vncScreenRef.rfb)
+      return
+
+    vncScreenRef.rfb.dragViewport = false
+  }, [clipToWindowActive])
+
   return (
     <Stack direction="row" spacing={1}>
       <Tooltip title="Fullscreen" arrow>
@@ -37,6 +52,20 @@ export default function VNCSessionBar({
           <FullscreenIcon />
         </IconButton>
       </Tooltip>
+
+      {
+        clipToWindowActive && <DragViewportButton onChange={(state) => {
+          console.log('TEST123', state)
+          onDragWindowChange(state)
+          // vncScreenRef?.disconnect()
+          // vncScreenRef?.connect()
+          if (!vncScreenRef || !vncScreenRef.rfb)
+            return
+
+          vncScreenRef.rfb.dragViewport = state
+        }} disabled={!clippedViewport} />
+      }
+
       <SendKeysMenu
         sendKey={vncScreenRef?.sendKey}
         sendCtrlAltDel={vncScreenRef?.sendCtrlAltDel}

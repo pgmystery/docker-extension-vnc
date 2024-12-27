@@ -42,6 +42,8 @@ export default function VNCView({ sessionName, url, onCancel, ddUIToast, openBro
   const [openSettingsDialog, setOpenSettingsDialog] = useState<boolean>(false)
   const [clipboardText, setClipboardText] = useState<string>('')
   const [havePowerCapability, setHavePowerCapability] = useState<boolean>(false)
+  const [isDragViewport, setIsDragViewport] = useState<boolean>(false)
+  const [isClippedViewport, setIsClippedViewport] = useState<boolean>(false)
 
   useEffect(() => {
     if ('load' in vncSettingsStore)
@@ -246,11 +248,23 @@ export default function VNCView({ sessionName, url, onCancel, ddUIToast, openBro
       focus()
   }
 
+  function handleClippingViewport(e?: { detail: boolean }) {
+    setIsClippedViewport(e?.detail || false)
+  }
+
+  console.log('clipViewport', vncSettings.scaling.clipToWindow)
+  console.log('vncSettings.scaling.clipToWindow', vncSettings.scaling.clipToWindow)
+  console.log('clippedViewport', isClippedViewport)
+  console.log('isDragViewport', isDragViewport)
+
   return (
     <>
       <Stack direction="column" spacing={1} sx={{height: '100%', overflow: 'hidden'}} >
         <VNCSessionBar
           vncScreenRef={vncScreenRef.current}
+          clippedViewport={isClippedViewport}
+          clipToWindowActive={vncSettings.scaling.clipToWindow}
+          onDragWindowChange={(state) => setIsDragViewport(state)}
           onFullscreenClicked={handleFullscreenClick}
           onSettingsClicked={handleSettingsClick}
           onOpenInBrowserClicked={handleOpenInBrowserClick}
@@ -289,7 +303,8 @@ export default function VNCView({ sessionName, url, onCancel, ddUIToast, openBro
                   scaleViewport={vncSettings.scaling.resize === 'scale'}
                   resizeSession={vncSettings.scaling.resize === 'remote'}
                   clipViewport={vncSettings.scaling.clipToWindow}
-                  // dragViewport={true}  // TODO
+                  // dragViewport={isDragViewport}
+                  onClippingViewport={handleClippingViewport}
                   onClipboard={e => setClipboardText(e?.detail.text || '')}
                   onCapabilities={(e?: { detail: { capabilities: any } }) => {
                     setHavePowerCapability(false)
