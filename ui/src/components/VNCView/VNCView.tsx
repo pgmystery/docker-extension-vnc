@@ -272,6 +272,7 @@ export default function VNCView({ sessionName, url, onCancel, ddUIToast, openBro
           sendClipboardText={sendClipboardText}
           sendMachineCommand={sendMachineCommand}
           havePowerCapability={havePowerCapability}
+          viewOnly={vncSettings.viewOnly}
         />
         <Box ref={vncContainerRef} sx={{
           width: '100%',
