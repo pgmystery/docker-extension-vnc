@@ -34,7 +34,6 @@ export function App() {
     onDisconnect: handleDisconnectClicked,
   })
   const dialogs = useDialogs()
-  // const [downloadingProxyImage, setDownloadingProxyImage] = useState<Session | null>(null)
 
   useEffect(() => {
     if (!sessionStore) return
