@@ -113,6 +113,9 @@ export function App() {
       })
     }
 
+    if (loading)
+      return
+
     setLoading(true)
 
     return connect
