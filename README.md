@@ -26,7 +26,7 @@ It also comes with an example VNC Server as a docker container. So you can test 
 You can install the extension by using the command:
 
 ```shell
-docker extension install pgmystery/docker-extension-vnc:1.0.3
+docker extension install pgmystery/docker-extension-vnc:1.1.0
 ```
 
 ## Usage
