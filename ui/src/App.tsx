@@ -87,13 +87,9 @@ export function App() {
         await dialogs.open(VNCProxyImagePullDialog, {})
 
       try {
-        console.log('VNC CONNECT START')
         await vnc.connect(session.name, session.connection)
-        console.log('CONNECT DONE')
       }
       catch (e: any) {
-        console.error(e)
-
         if (e instanceof Error)
           ddClient.desktopUI.toast.error(e.message)
         else if (isRawExecResult(e))
