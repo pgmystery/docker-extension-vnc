@@ -2,6 +2,12 @@
 
 History of all released versions and changes
 
+## v1.1.0
+- VNC settings for scaling the viewport.
+- Add a way to drag the screen of the vnc viewport.
+- Fix a bug on trying to have 2 connections at the same time.
+- Fix other bugs with the dialogs.
+
 ## v1.0.2
 - Fix Typos.
 - Fix mouse cursor hide bug after fullscreen on some devices.

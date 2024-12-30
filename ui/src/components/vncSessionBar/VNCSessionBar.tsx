@@ -6,22 +6,31 @@ import SendKeysMenu from './SendKeysMenu'
 import { VncScreenHandle } from 'react-vnc'
 import ClipboardMenu from './ClipboardMenu'
 import SendMachineCommandsMenu, { MachineCommand } from './SendMachineCommandsMenu'
+import DragViewportButton from './DragViewportButton'
+import { RefObject, useEffect } from 'react'
 
 
 export interface VNCSessionBarProps {
-  vncScreenRef:  VncScreenHandle | null
-  onFullscreenClicked: ()=>void
-  onSettingsClicked: ()=>void
-  onOpenInBrowserClicked: ()=>void
-  clipboardText: string
-  sendClipboardText?: (text: string)=>void
-  sendMachineCommand: (command: MachineCommand)=>void
-  havePowerCapability: boolean
+  vncScreenRef: RefObject<VncScreenHandle> | null,
+  clippedViewport: boolean,
+  clipToWindowActive: boolean,
+  onDragWindowChange: (state: boolean) => void,
+  onFullscreenClicked: () => void,
+  onSettingsClicked: () => void,
+  onOpenInBrowserClicked: () => void,
+  clipboardText: string,
+  sendClipboardText?: (text: string) => void,
+  sendMachineCommand: (command: MachineCommand) => void,
+  havePowerCapability: boolean,
+  viewOnly: boolean
 }
 
 
 export default function VNCSessionBar({
   vncScreenRef,
+  clippedViewport,
+  clipToWindowActive,
+  onDragWindowChange,
   onFullscreenClicked,
   onSettingsClicked,
   onOpenInBrowserClicked,
@@ -29,31 +38,54 @@ export default function VNCSessionBar({
   sendClipboardText,
   sendMachineCommand,
   havePowerCapability,
+  viewOnly,
 }: VNCSessionBarProps) {
+  useEffect(() => {
+    if (!vncScreenRef || !vncScreenRef.current?.rfb)
+      return
+
+    vncScreenRef.current.rfb.dragViewport = false
+  }, [clipToWindowActive])
+
   return (
-    <Stack direction="row" spacing={1}>
+    <Stack direction="row" spacing={ 1 }>
       <Tooltip title="Fullscreen" arrow>
-        <IconButton onClick={onFullscreenClicked}>
-          <FullscreenIcon />
+        <IconButton onClick={ onFullscreenClicked }>
+          <FullscreenIcon/>
         </IconButton>
       </Tooltip>
-      <SendKeysMenu
-        sendKey={vncScreenRef?.sendKey}
-        sendCtrlAltDel={vncScreenRef?.sendCtrlAltDel}
-      />
-      <ClipboardMenu clipboardText={clipboardText} sendClipboardText={sendClipboardText} />
-      { havePowerCapability && <SendMachineCommandsMenu sendMachineCommand={sendMachineCommand} /> }
 
-      <Box sx={{flexGrow: 1}} />
+      {
+        clipToWindowActive && <DragViewportButton onChange={ (state) => {
+          onDragWindowChange(state)
+          if (!vncScreenRef || !vncScreenRef.current?.rfb)
+            return
+
+          vncScreenRef.current.rfb.dragViewport = state
+        } } disabled={ !clippedViewport }/>
+      }
+
+      {
+        !viewOnly && <>
+          <SendKeysMenu
+            sendKey={ vncScreenRef?.current?.sendKey }
+            sendCtrlAltDel={ vncScreenRef?.current?.sendCtrlAltDel }
+          />
+          <ClipboardMenu clipboardText={ clipboardText } sendClipboardText={ sendClipboardText }/>
+          { havePowerCapability && <SendMachineCommandsMenu sendMachineCommand={ sendMachineCommand }/> }
+        </>
+      }
+
+      <Box sx={ {flexGrow: 1} }/>
 
       <Tooltip title="Open in Browser" arrow>
-        <IconButton onClick={onOpenInBrowserClicked}>
-          <OpenInBrowserIcon />
+        <IconButton onClick={ onOpenInBrowserClicked }>
+          <OpenInBrowserIcon/>
         </IconButton>
       </Tooltip>
       <Tooltip title="VNC Settings" arrow>
-        <IconButton onClick={onSettingsClicked}>
-          <SettingsIcon />
+        <IconButton onClick={ onSettingsClicked }>
+          <SettingsIcon/>
         </IconButton>
       </Tooltip>
     </Stack>

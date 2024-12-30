@@ -12,6 +12,7 @@ import { ProxyURL } from './libs/vnc/proxies/Proxy'
 import ConnectBar from './components/sessionsbar/ConnectBar'
 import { getSessionStore } from './stores/sessionStore'
 import { Session } from './types/session'
+import { useDialogs } from '@toolpad/core'
 
 
 export interface ConnectedData {
@@ -32,7 +33,7 @@ export function App() {
     onConnect: handleConnectClicked,
     onDisconnect: handleDisconnectClicked,
   })
-  const [downloadingProxyImage, setDownloadingProxyImage] = useState<Session | null>(null)
+  const dialogs = useDialogs()
 
   useEffect(() => {
     if (!sessionStore) return
@@ -82,14 +83,12 @@ export function App() {
       const proxyDockerImageExist = await vnc.dockerProxyImageExist()
 
       if (!proxyDockerImageExist)
-        return setDownloadingProxyImage(session)
+        await dialogs.open(VNCProxyImagePullDialog, {})
 
       try {
         await vnc.connect(session.name, session.connection)
       }
       catch (e: any) {
-        console.error(e)
-
         if (e instanceof Error)
           ddClient.desktopUI.toast.error(e.message)
         else if (isRawExecResult(e))
@@ -108,6 +107,9 @@ export function App() {
         credentials: session.credentials,
       })
     }
+
+    if (loading)
+      return
 
     setLoading(true)
 
@@ -176,24 +178,6 @@ export function App() {
           }
 
         </Stack>
-      }
-
-      {
-        downloadingProxyImage &&
-        <VNCProxyImagePullDialog
-          open={!!downloadingProxyImage}
-          onDone={successful => {
-            if (successful)
-              connect(downloadingProxyImage)
-
-            setDownloadingProxyImage(null)
-          }}
-          ddUIToast={ddClient.desktopUI.toast}
-          pullProxyDockerImage={(
-            addStdout: (stdout: string)=>void,
-            onFinish: (exitCode: number)=>void
-          ) => vnc.pullProxyDockerImage(addStdout, onFinish)}
-        />
       }
 
       <Backdrop sx={(theme) => ({ color: '#fff', zIndex: theme.zIndex.drawer + 1 })} open={loading}>

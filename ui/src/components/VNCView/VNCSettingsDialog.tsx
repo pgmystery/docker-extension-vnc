@@ -7,21 +7,19 @@ import CompressionLevel from './VNCSettingForms/CompressionLevel'
 import ShowDotCursor from './VNCSettingForms/ShowDotCursor'
 import ViewOnly from './VNCSettingForms/ViewOnly'
 import { VNCSettings } from '../../stores/vncSettingsStore'
+import Scaling, { ScalingResize } from './VNCSettingForms/Scaling'
+import { DialogProps } from '@toolpad/core'
 
 
-interface VNCSettingsSaveData extends Omit<VNCSettings, 'showDotCursor'> {
+interface VNCSettingsSaveData extends Omit<VNCSettings, 'showDotCursor' | 'viewOnly' | 'scaling'> {
   showDotCursor?: 'on'
-}
-
-interface VNCSettingsDialog {
-  open: boolean
-  close: ()=>void
-  settingsData: VNCSettings
-  onSettingChange: (settingsData: VNCSettings)=>void
+  viewOnly?: 'on'
+  'scaling.clipToWindow'?: 'on'
+  'scaling.resize': ScalingResize
 }
 
 
-export default function VNCSettingsDialog({ open, close, settingsData, onSettingChange }: VNCSettingsDialog) {
+export default function VNCSettingsDialog({ open, onClose, payload }: DialogProps<VNCSettings, null | VNCSettings>) {
   const [reset, setReset] = useState<boolean>(false)
 
   useEffect(() => {
@@ -29,19 +27,22 @@ export default function VNCSettingsDialog({ open, close, settingsData, onSetting
   }, [reset])
 
   function save(data: VNCSettingsSaveData) {
-    onSettingChange({
+    onClose({
       qualityLevel: Number(data.qualityLevel),
       compressionLevel: Number(data.compressionLevel),
       showDotCursor: !!data.showDotCursor,
-      viewOnly: data.viewOnly,
+      viewOnly: !!data.viewOnly,
+      scaling: {
+        clipToWindow: !!data['scaling.clipToWindow'],
+        resize: data['scaling.resize'],
+      },
     })
-    close()
   }
 
   return (
     <Dialog
       open={open}
-      onClose={close}
+      onClose={() => onClose(null)}
       maxWidth="sm"
       fullWidth={true}
       PaperProps={{
@@ -58,7 +59,7 @@ export default function VNCSettingsDialog({ open, close, settingsData, onSetting
       <DialogTitle>VNC Settings</DialogTitle>
       <IconButton
         aria-label="close"
-        onClick={close}
+        onClick={() => onClose(null)}
         sx={(theme) => ({
           position: 'absolute',
           right: 8,
@@ -71,22 +72,27 @@ export default function VNCSettingsDialog({ open, close, settingsData, onSetting
       <DialogContent>
         <Stack spacing={1}>
           <QualityLevel
-            initValue={settingsData.qualityLevel}
+            initValue={payload.qualityLevel}
             reset={reset}
           />
           <Divider />
           <CompressionLevel
-            initValue={settingsData.compressionLevel}
+            initValue={payload.compressionLevel}
             reset={reset}
           />
           <Divider />
           <ShowDotCursor
-            initValue={settingsData.showDotCursor}
+            initValue={payload.showDotCursor}
             reset={reset}
           />
           <Divider />
           <ViewOnly
-            initValue={settingsData.viewOnly}
+            initValue={payload.viewOnly}
+            reset={reset}
+          />
+          <Divider />
+          <Scaling
+            initValue={payload.scaling}
             reset={reset}
           />
           <Divider />

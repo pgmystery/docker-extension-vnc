@@ -149,26 +149,31 @@ export default class VNC {
     return images.length === 1
   }
 
-  pullProxyDockerImage(addStdout: (stdout: string)=>void, onFinish: (exitCode: number)=>void) {
-    this.docker.cli.exec('pull', [this.config.proxyDockerImage], {
-      stream: {
-        onOutput(data) {
-          if (data.stdout) {
-            addStdout(data.stdout)
-          }
+  pullProxyDockerImage(addStdout: (stdout: string)=>void) {
+    return new Promise<void>((resolve, reject) => (
+      this.docker.cli.exec('pull', [this.config.proxyDockerImage], {
+        stream: {
+          onOutput(data) {
+            if (data.stdout) {
+              addStdout(data.stdout)
+            }
 
-          if (data.stderr) {
-            throw new Error(data.stderr)
-          }
+            if (data.stderr) {
+              reject(data.stderr)
+            }
+          },
+          onError(error) {
+            reject(error)
+          },
+          onClose(exitCode) {
+            if (exitCode !== 0)
+              return reject(exitCode)
+
+            resolve()
+          },
+          splitOutputLines: true,
         },
-        onError(error) {
-          throw error
-        },
-        onClose(exitCode) {
-          onFinish(exitCode)
-        },
-        splitOutputLines: true,
-      },
-    })
+      }
+    )))
   }
 }

@@ -45,6 +45,7 @@ export interface Props {
     onBell?: () => void;
     onDesktopName?: (e?: { detail: { name: string } }) => void;
     onCapabilities?: (e?: { detail: { capabilities: RFB["capabilities"] } }) => void;
+    onClippingViewport?: (e?: { detail: RFB["clippingViewport"] }) => void;
 }
 
 export enum Events {
@@ -56,6 +57,7 @@ export enum Events {
     bell,
     desktopname,
     capabilities,
+    clippingviewport,
 }
 
 export type EventListeners = { -readonly [key in keyof typeof Events]?: (e?: any) => void };
@@ -113,6 +115,7 @@ const VncScreen: React.ForwardRefRenderFunction<VncScreenHandle, Props> = (props
         onBell,
         onDesktopName,
         onCapabilities,
+        onClippingViewport,
     } = props;
 
     const logger = {
@@ -188,6 +191,24 @@ const VncScreen: React.ForwardRefRenderFunction<VncScreenHandle, Props> = (props
         logger.info(`Desktop name is ${e.detail.name}`);
     };
 
+    const _onCapabilities = (e: { detail: { capabilities: RFB["capabilities"] } }) => {
+      if (onCapabilities) {
+        onCapabilities(e);
+        return;
+      }
+
+      logger.info(`Capabilities are ${e.detail.capabilities}`);
+    };
+
+    const _onClippingViewport = (e: { detail: RFB["clippingViewport"] }) => {
+      if (onClippingViewport) {
+        onClippingViewport(e);
+        return;
+      }
+
+      logger.info(`Clipping Viewport is ${e.detail}`);
+    };
+
     const disconnect = () => {
         const rfb = getRfb();
         try {
@@ -250,7 +271,8 @@ const VncScreen: React.ForwardRefRenderFunction<VncScreenHandle, Props> = (props
             eventListeners.current.clipboard = onClipboard;
             eventListeners.current.bell = onBell;
             eventListeners.current.desktopname = _onDesktopName;
-            eventListeners.current.capabilities = onCapabilities;
+            eventListeners.current.capabilities = _onCapabilities;
+            eventListeners.current.clippingviewport = _onClippingViewport;
 
             (Object.keys(eventListeners.current) as (keyof typeof Events)[]).forEach((event) => {
                 if (eventListeners.current[event]) {
@@ -310,8 +332,8 @@ const VncScreen: React.ForwardRefRenderFunction<VncScreenHandle, Props> = (props
     };
 
     const getCapabilities = () => {
-      const rgb = getRfb();
-      return rgb?.capabilities;
+      const rfb = getRfb();
+      return rfb?.capabilities;
     }
 
     useImperativeHandle(ref, () => ({

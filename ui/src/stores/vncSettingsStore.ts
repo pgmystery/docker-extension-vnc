@@ -5,6 +5,7 @@ import { ViewOnlyDefault } from '../components/VNCView/VNCSettingForms/ViewOnly'
 import { createDockerDesktopClient } from '@docker/extension-api-client'
 import { HttpService } from '@docker/extension-api-client-types/dist/v1'
 import BackendRoute from '../api/BackendRoute'
+import { ScalingDefault, ScalingSettings } from '../components/VNCView/VNCSettingForms/Scaling'
 
 
 export interface VNCSettings {
@@ -12,6 +13,7 @@ export interface VNCSettings {
   qualityLevel: number
   compressionLevel: number
   showDotCursor: boolean
+  scaling: ScalingSettings
 }
 
 interface VNCSettingsStoreWithoutBackend {
@@ -35,6 +37,7 @@ const defaultSettings: VNCSettings = {
   compressionLevel: CompressionLevelRange.default,
   showDotCursor: ShowDotCursorDefault,
   viewOnly: ViewOnlyDefault,
+  scaling: ScalingDefault,
 }
 const ddClient = createDockerDesktopClient()
 let vncSettings: VNCSettings = defaultSettings

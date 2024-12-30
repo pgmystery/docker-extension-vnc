@@ -26,7 +26,7 @@ It also comes with an example VNC Server as a docker container. So you can test 
 You can install the extension by using the command:
 
 ```shell
-docker extension install pgmystery/docker-extension-vnc:1.0.2
+docker extension install pgmystery/docker-extension-vnc:1.1.0
 ```
 
 ## Usage
@@ -68,3 +68,4 @@ This extension supports 2 different kind of connections.
 5. Click on "Connect".
 
 ![Remote Host connection](docs/imgs/screenshot5.png)
+![Remote Host connection Linux Mint](docs/imgs/screenshot7.png)

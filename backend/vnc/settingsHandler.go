@@ -41,12 +41,12 @@ func (vncSettings *SettingsHandler) Save(settings SettingsData) error {
 }
 
 func loadSettingsFromFile(settingsFilePath string) SettingsData {
+	settingsData := getDefaultSettings()
+
 	data, err := os.ReadFile(settingsFilePath)
 	if err != nil {
-		return getDefaultSettings()
+		return settingsData
 	}
-
-	var settingsData SettingsData
 
 	err = json.Unmarshal(data, &settingsData)
 	if err != nil {
