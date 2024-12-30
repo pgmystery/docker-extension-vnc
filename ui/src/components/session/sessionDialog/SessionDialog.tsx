@@ -5,7 +5,7 @@ import {
   DialogTitle, Divider,
   IconButton,
 } from '@mui/material'
-import { FormEvent, useEffect, useState } from 'react'
+import { FormEvent, useState } from 'react'
 import Button from '@mui/material/Button'
 import { Session, SessionCreateData } from '../../../types/session'
 import CloseIcon from '@mui/icons-material/Close'
@@ -22,14 +22,7 @@ export interface SessionDialogProps {
 
 export default function SessionDialog({ open, onClose, payload }: DialogProps<SessionDialogProps, null | SessionCreateData>) {
   const { title, submitButtonText, session } = payload
-  const [sessionName, setSessionName] = useState<string>(session?.name || '')
   const [sessionDataFormReady, setSessionDataFormReady] = useState<boolean>(false)
-
-  useEffect(() => {
-    if (!session) return
-
-    setSessionName(session.name)
-  }, [session])
 
   function handleSubmit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault()
@@ -73,7 +66,7 @@ export default function SessionDialog({ open, onClose, payload }: DialogProps<Se
         <Button onClick={() => onClose(null)}>Close</Button>
         <Button
           color="success"
-          disabled={sessionName === '' || !sessionDataFormReady}
+          disabled={!sessionDataFormReady}
           type="submit"
         >{ submitButtonText }</Button>
       </DialogActions>

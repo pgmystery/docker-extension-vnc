@@ -1,7 +1,7 @@
 import { Divider, FormControl, FormLabel, Stack, TextField } from '@mui/material'
 import SessionDialogConnection from '../sessionDialog/SessionDialogConnection'
 import SessionDialogCredentials, { serializeCredentials } from '../sessionDialog/SessionDialogCredentials'
-import { ReactNode, useState } from 'react'
+import { ReactNode, useEffect, useState } from 'react'
 import { Session, SessionCreateData } from '../../../types/session'
 import { serializeConnectionDataRemoteHost } from '../sessionDialog/connections/SessionConnectionRemoteHost'
 import { serializeConnectionDataDockerContainer } from '../sessionDialog/connections/SessionConnectionDockerContainer'
@@ -73,6 +73,14 @@ export function serializeSessionFormData(formData: FormData) {
 
 export default function SessionDataForm({ session, onReady, children }: SessionDataFormProps) {
   const [sessionName, setSessionName] = useState<string>(session?.name || '')
+  const [connectionReady, setConnectionReady] = useState<boolean>(false)
+
+  useEffect(() => {
+    if (!onReady)
+      return
+
+    onReady(sessionName !== '' && connectionReady)
+  }, [sessionName, connectionReady])
 
   return (
     <Stack spacing={1}>
@@ -90,7 +98,7 @@ export default function SessionDataForm({ session, onReady, children }: SessionD
       </FormControl>
       <Divider />
       <SessionDialogConnection
-        setSubmitReady={state => onReady && onReady(state)}
+        setSubmitReady={setConnectionReady}
         connection={session?.connection}
       />
       <Divider />

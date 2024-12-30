@@ -100,6 +100,7 @@ export default function SessionDialogEdit({ open, onClose, payload }: DialogProp
               </Box>
         }
       </DialogContent>
+      <Divider />
       <DialogActions>
         <Button onClick={() => onClose(null)}>Close</Button>
         <Button
