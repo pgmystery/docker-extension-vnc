@@ -1,5 +1,15 @@
 import { SessionDialogProps } from './SessionDialog'
-import { Box, Dialog, DialogActions, DialogContent, DialogTitle, Divider, FormControl, IconButton } from '@mui/material'
+import {
+  Box,
+  Dialog,
+  DialogActions,
+  DialogContent,
+  DialogTitle,
+  Divider,
+  FormControl,
+  FormLabel,
+  IconButton
+} from '@mui/material'
 import DeleteIcon from '@mui/icons-material/Delete'
 import { FormEvent, useEffect, useState } from 'react'
 import { Session, SessionItem, SessionUpdateData } from '../../../types/session'
@@ -113,6 +123,7 @@ export default function SessionDialogEdit({ open, onClose, payload }: DialogProp
                 <SessionDataForm session={currentSession} onReady={state => setSessionDataFormReady(state)} />
                 <Divider />
                 <FormControl>
+                  <FormLabel sx={{marginBottom: '10px'}}>Delete Session</FormLabel>
                   <Button color="error" onClick={handleDeleteSessionClick} sx={{width: '200px'}} endIcon={<DeleteIcon />}>
                     Delete Session
                   </Button>
