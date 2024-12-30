@@ -11,42 +11,39 @@ import {
 import { VNCCredentials } from './VNCView'
 import Button from '@mui/material/Button'
 import { FormEvent } from 'react'
+import { DialogProps } from '@toolpad/core'
 
 
-export interface VNCCredentialsDialogProps {
-  open: boolean
-  onClose: ()=>void
-  onSubmit: (credentials: VNCCredentialsDialogData)=>void
-}
-
-export interface VNCCredentialsDialogData extends VNCCredentials {
+interface VNCCredentialsDialogData extends VNCCredentials {
   save: boolean
 }
 
 
-export default function VNCCredentialsDialog({ open, onClose, onSubmit }: VNCCredentialsDialogProps) {
+export default function VNCCredentialsDialog({ open, onClose }: DialogProps<undefined, null | VNCCredentialsDialogData>) {
+  function handleSubmit(event: FormEvent<HTMLFormElement>) {
+    event.preventDefault()
+
+    const formData = new FormData(event.currentTarget)
+    const formJson = Object.fromEntries((formData as any).entries())
+
+    const username = formJson.username
+    const password = formJson.password
+    const saveCredentials = formJson.hasOwnProperty('saveCredentials') && formJson.saveCredentials === 'on'
+
+    onClose({
+      username,
+      password,
+      save: saveCredentials,
+    })
+  }
+
   return (
     <Dialog
       open={open}
-      onClose={onClose}
+      onClose={() => onClose(null)}
       PaperProps={{
         component: 'form',
-        onSubmit: (event: FormEvent<HTMLFormElement>) => {
-          event.preventDefault()
-
-          const formData = new FormData(event.currentTarget)
-          const formJson = Object.fromEntries((formData as any).entries())
-
-          const username = formJson.username
-          const password = formJson.password
-          const saveCredentials = formJson.hasOwnProperty('saveCredentials') && formJson.saveCredentials === 'on'
-
-          onSubmit({
-            username,
-            password,
-            save: saveCredentials,
-          })
-        },
+        onSubmit: handleSubmit,
       }}
     >
       <DialogTitle>VNC Session Credentials</DialogTitle>
@@ -68,7 +65,7 @@ export default function VNCCredentialsDialog({ open, onClose, onSubmit }: VNCCre
         </Stack>
       </DialogContent>
       <DialogActions>
-        <Button onClick={onClose}>Cancel</Button>
+        <Button onClick={() => onClose(null)}>Cancel</Button>
         <Button type="submit" color="success">OK</Button>
       </DialogActions>
     </Dialog>

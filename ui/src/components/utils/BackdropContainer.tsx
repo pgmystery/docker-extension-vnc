@@ -9,6 +9,8 @@ export default function BackdropContainer(props: BackdropProps) {
       zIndex: 0,
       top: 0,
       left: 0,
+      width: '100%',
+      height: '100%',
     }}>
       { props.children }
       <Backdrop { ...props } sx={{
