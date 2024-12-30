@@ -1,20 +1,20 @@
 import { Dialog, DialogActions, DialogContent, DialogContentText, DialogTitle } from '@mui/material'
 import Button from '@mui/material/Button'
+import { DialogProps } from '@toolpad/core'
 
 
 interface SessionDialogDeleteProps {
   sessionName: string
-  open: boolean
-  onClose: ()=>void
-  onDelete: ()=>void
 }
 
 
-export default function SessionDialogDelete({ sessionName, open, onDelete, onClose }: SessionDialogDeleteProps) {
+export default function SessionDialogDelete({ open, onClose, payload }: DialogProps<SessionDialogDeleteProps, boolean>) {
+  const { sessionName } = payload
+
   return (
     <Dialog
       open={open}
-      onClose={onClose}
+      onClose={() => onClose(false)}
     >
       <DialogTitle>
         Do you really want to delete the selected session?
@@ -25,8 +25,8 @@ export default function SessionDialogDelete({ sessionName, open, onDelete, onClo
         </DialogContentText>
       </DialogContent>
       <DialogActions>
-        <Button onClick={onClose} autoFocus>Cancel</Button>
-        <Button onClick={onDelete} color="error">
+        <Button onClick={() => onClose(false)} autoFocus>Cancel</Button>
+        <Button onClick={() => onClose(true)} color="error">
           Delete Session
         </Button>
       </DialogActions>

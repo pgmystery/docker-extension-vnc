@@ -1,22 +1,37 @@
-import SessionDialog, { SessionDialogProps } from './SessionDialog'
-import { Divider, FormControl } from '@mui/material'
+import { SessionDialogProps } from './SessionDialog'
+import { Box, Dialog, DialogActions, DialogContent, DialogTitle, Divider, FormControl } from '@mui/material'
 import DeleteIcon from '@mui/icons-material/Delete'
-import { useEffect, useState } from 'react'
-import { Session, SessionCreateData, SessionItem, SessionUpdateData } from '../../../types/session'
+import { FormEvent, useEffect, useState } from 'react'
+import { Session, SessionItem, SessionUpdateData } from '../../../types/session'
 import Button from '@mui/material/Button'
 import SessionDialogDelete from './SessionDialogDelete'
+import { DialogProps, useDialogs } from '@toolpad/core'
+import SessionDataForm, { serializeSessionFormData } from '../forms/SessionDataForm'
+import BackdropContainer from '../../utils/BackdropContainer'
 
 
 interface SessionDialogEditProps extends Omit<SessionDialogProps, 'open' | 'onSubmit'> {
-  editSession?: SessionItem
-  onSubmit: (sessionData: SessionUpdateData)=>void
-  onDelete: (sessionId: string)=>Promise<void>
+  editSession: SessionItem
 }
 
+interface SessionDialogEditReturnUpdate {
+  type: 'update'
+  data: SessionUpdateData
+}
 
-export default function SessionDialogEdit({ editSession, close, onSubmit, onDelete, ...props }: SessionDialogEditProps) {
+interface SessionDialogEditReturnDelete {
+  type: 'delete'
+  data: string
+}
+
+type SessionDialogEditReturnProps = SessionDialogEditReturnUpdate | SessionDialogEditReturnDelete
+
+
+export default function SessionDialogEdit({ open, onClose, payload }: DialogProps<SessionDialogEditProps, null | SessionDialogEditReturnProps>) {
+  const { editSession } = payload
   const [currentSession, setCurrentSession] = useState<Session | undefined>()
-  const [deleteConfirm, setDeleteConfirm] = useState<boolean>(false)
+  const dialogs = useDialogs()
+  const [sessionDataFormReady, setSessionDataFormReady] = useState<boolean>(false)
 
   useEffect(() => {
     if (!editSession) return
@@ -24,51 +39,75 @@ export default function SessionDialogEdit({ editSession, close, onSubmit, onDele
     editSession.getInfo().then(session => setCurrentSession(session))
   }, [editSession])
 
-  function onClose() {
-    setCurrentSession(undefined)
-    close()
-  }
+  function handleEditSubmit(event: FormEvent<HTMLFormElement>) {
+    event.preventDefault()
 
-  function handleSubmitData(sessionData: SessionCreateData) {
     if (!currentSession) return
 
-    onSubmit({
-      ...sessionData,
-      id: currentSession.id,
+    const formData = new FormData(event.currentTarget)
+    const sessionFormDataJson = serializeSessionFormData(formData)
+
+    onClose({
+      type: 'update',
+      data: {
+        ...sessionFormDataJson,
+        id: currentSession.id,
+      },
     })
   }
 
-  function handleDeleteSessionClick() {
-    setDeleteConfirm(true)
-  }
-
-  async function handleOnDelete() {
+  async function handleDeleteSessionClick() {
     if (!currentSession) return
 
-    setDeleteConfirm(false)
-    onDelete(currentSession.id).then(() => onClose())
+    const result = await dialogs.open(SessionDialogDelete, {
+      sessionName: currentSession.name,
+    })
+
+    if (result)
+      await onClose({
+        type: 'delete',
+        data: currentSession.id,
+      })
   }
 
   return (
-    <SessionDialog
-      { ...props }
-      open={!!currentSession}
-      close={onClose}
-      session={currentSession}
-      onSubmit={handleSubmitData}
+    <Dialog
+      open={open}
+      onClose={() => onClose(null)}
+      maxWidth="sm"
+      fullWidth={true}
+      PaperProps={{
+        component: 'form',
+        onSubmit: handleEditSubmit,
+      }}
     >
+      <DialogTitle>Edit Session</DialogTitle>
       <Divider />
-      <FormControl>
-        <Button color="error" onClick={handleDeleteSessionClick} sx={{width: '200px'}} endIcon={<DeleteIcon />}>
-          Delete Session
-        </Button>
-        <SessionDialogDelete
-          onClose={() => setDeleteConfirm(false)}
-          open={deleteConfirm}
-          sessionName={currentSession?.name || ''}
-          onDelete={handleOnDelete}
-        />
-      </FormControl>
-    </SessionDialog>
+      <DialogContent>
+        {
+          currentSession
+            ? <>
+                <SessionDataForm session={currentSession} onReady={state => setSessionDataFormReady(state)} />
+                <Divider />
+                <FormControl>
+                  <Button color="error" onClick={handleDeleteSessionClick} sx={{width: '200px'}} endIcon={<DeleteIcon />}>
+                    Delete Session
+                  </Button>
+                </FormControl>
+              </>
+            : <Box sx={{position: 'relative', height: '100px'}}>
+                <BackdropContainer open={true} />
+              </Box>
+        }
+      </DialogContent>
+      <DialogActions>
+        <Button onClick={() => onClose(null)}>Close</Button>
+        <Button
+          color="success"
+          disabled={!sessionDataFormReady}
+          type="submit"
+        >Edit Session</Button>
+      </DialogActions>
+    </Dialog>
   )
 }

@@ -1,6 +1,6 @@
 import { FormGroup, Stack, TextField } from '@mui/material'
 import React, { useEffect, useState } from 'react'
-import { serializeConnectionData } from '../SessionDialog'
+import { serializeConnectionData } from '../../forms/SessionDataForm'
 
 
 interface RemoteHostProps {

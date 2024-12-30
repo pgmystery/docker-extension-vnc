@@ -5,10 +5,11 @@ import EditIcon from '@mui/icons-material/Edit'
 import SessionDialog from '../session/sessionDialog/SessionDialog'
 import SessionSelect from '../session/SessionSelect'
 import SessionDialogEdit from '../session/sessionDialog/SessionDialogEdit'
-import { Session, SessionCreateData, SessionItem, SessionUpdateData } from '../../types/session'
+import { Session, SessionCreateData, SessionUpdateData } from '../../types/session'
 import { SessionStore } from '../../stores/sessionStore'
 import { Toast } from '@docker/extension-api-client-types/dist/v1'
 import ConnectButton from '../connectbar/ConnectButton'
+import { useDialogs } from '@toolpad/core'
 
 
 interface ConnectBarProps {
@@ -25,9 +26,8 @@ export default function ConnectBar({ connectedSession, sessionStore, ddUIToast, 
   const [loading, setLoading] = useState<boolean>(true)
   const sessions = useSyncExternalStore(sessionStore.subscribe, sessionStore.getSnapshot)
   const [selectedSessionName, setSelectedSessionName] = useState<string>('')
-  const [newSessionDialogOpen, setNewSessionDialogOpen] = useState<boolean>(false)
-  const [editSession, setEditSession] = useState<SessionItem | undefined>()
   const [changeSession, setChangeSession] = useState<string | null>(null)
+  const dialogs = useDialogs()
 
   useEffect(() => {
     sessionStore.refresh().finally(() => setLoading(false))
@@ -46,6 +46,18 @@ export default function ConnectBar({ connectedSession, sessionStore, ddUIToast, 
       setChangeSession(connectedSession)
     }
   }, [connectedSession])
+
+  async function handleAddNewSessionClick() {
+    const newSessionData = await dialogs.open(SessionDialog, {
+      title: 'Add new Session',
+      submitButtonText: 'Create Session',
+    })
+
+    if (!newSessionData)
+      return
+
+    await sendCreateSessionData(newSessionData)
+  }
 
   async function sendCreateSessionData(sessionData: SessionCreateData) {
     try {
@@ -106,7 +118,25 @@ export default function ConnectBar({ connectedSession, sessionStore, ddUIToast, 
     const selectedSession = getSelectedSession()
     if (!selectedSession) return
 
-    setEditSession(selectedSession)
+    const result = await dialogs.open(SessionDialogEdit, {
+      title: 'Edit Session',
+      submitButtonText: 'Edit Session',
+      editSession: selectedSession,
+    })
+
+    if (!result)
+      return
+
+    switch (result.type) {
+      case 'update':
+        await sendUpdateSessionData(result.data)
+
+        break
+      case 'delete':
+        await sendDeleteSession(result.data)
+
+        break
+    }
   }
 
   async function handleConnectClick() {
@@ -124,7 +154,11 @@ export default function ConnectBar({ connectedSession, sessionStore, ddUIToast, 
     <>
       <Stack direction="row" spacing={ 2 } alignItems="center">
         <Tooltip title="Create a new Session">
-          <IconButton disabled={!!connectedSession} color="success" onClick={() => setNewSessionDialogOpen(true)}>
+          <IconButton
+            disabled={!!connectedSession}
+            color="success"
+            onClick={handleAddNewSessionClick}
+          >
             <AddIcon/>
           </IconButton>
         </Tooltip>
@@ -152,25 +186,6 @@ export default function ConnectBar({ connectedSession, sessionStore, ddUIToast, 
           }}
         />
       </Stack>
-
-      {
-        editSession
-          ? <SessionDialogEdit
-              title="Edit Session"
-              submitButtonText="Edit Session"
-              editSession={editSession}
-              close={() => setEditSession(undefined)}
-              onSubmit={sendUpdateSessionData}
-              onDelete={sendDeleteSession}
-            />
-          : <SessionDialog
-              title="Add new Session"
-              submitButtonText="Create Session"
-              open={ newSessionDialogOpen }
-              close={ () => setNewSessionDialogOpen(false) }
-              onSubmit={sendCreateSessionData}
-            />
-      }
 
       <Backdrop sx={(theme) => ({ color: '#fff', zIndex: theme.zIndex.drawer + 1 })} open={loading}>
         <CircularProgress />
