@@ -55,7 +55,6 @@ export default function SessionConnectionRemoteHost ({ connectionData, setSubmit
           label="Remote Host IP/NAME"
           value={remoteHost}
           onChange={event => setRemoteHost(event.target.value)}
-          autoFocus
           required
         />
         <TextField

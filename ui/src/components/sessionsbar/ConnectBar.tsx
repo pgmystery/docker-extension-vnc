@@ -28,6 +28,7 @@ export default function ConnectBar({ connectedSession, sessionStore, ddUIToast, 
   const [selectedSessionName, setSelectedSessionName] = useState<string>('')
   const [changeSession, setChangeSession] = useState<string | null>(null)
   const dialogs = useDialogs()
+  const [currentDialog, setCurrentDialog] = useState<null | Promise<any>>(null)
 
   useEffect(() => {
     sessionStore.refresh().finally(() => setLoading(false))
@@ -44,14 +45,21 @@ export default function ConnectBar({ connectedSession, sessionStore, ddUIToast, 
     if (connectedSession) {
       setSelectedSessionName(connectedSession)
       setChangeSession(connectedSession)
+
+      if (currentDialog)
+        dialogs.close(currentDialog, null).finally(() => setCurrentDialog(null))
     }
   }, [connectedSession])
 
   async function handleAddNewSessionClick() {
-    const newSessionData = await dialogs.open(SessionDialog, {
+    const sessionDialogPromise = dialogs.open(SessionDialog, {
       title: 'Add new Session',
       submitButtonText: 'Create Session',
     })
+
+    setCurrentDialog(sessionDialogPromise)
+    const newSessionData = await sessionDialogPromise
+    setCurrentDialog(null)
 
     if (!newSessionData)
       return
@@ -118,11 +126,15 @@ export default function ConnectBar({ connectedSession, sessionStore, ddUIToast, 
     const selectedSession = getSelectedSession()
     if (!selectedSession) return
 
-    const result = await dialogs.open(SessionDialogEdit, {
+    const sessionEditDialogPromise = dialogs.open(SessionDialogEdit, {
       title: 'Edit Session',
       submitButtonText: 'Edit Session',
       editSession: selectedSession,
     })
+
+    setCurrentDialog(sessionEditDialogPromise)
+    const result = await sessionEditDialogPromise
+    setCurrentDialog(null)
 
     if (!result)
       return

@@ -1,5 +1,5 @@
 import { SessionDialogProps } from './SessionDialog'
-import { Box, Dialog, DialogActions, DialogContent, DialogTitle, Divider, FormControl } from '@mui/material'
+import { Box, Dialog, DialogActions, DialogContent, DialogTitle, Divider, FormControl, IconButton } from '@mui/material'
 import DeleteIcon from '@mui/icons-material/Delete'
 import { FormEvent, useEffect, useState } from 'react'
 import { Session, SessionItem, SessionUpdateData } from '../../../types/session'
@@ -8,6 +8,7 @@ import SessionDialogDelete from './SessionDialogDelete'
 import { DialogProps, useDialogs } from '@toolpad/core'
 import SessionDataForm, { serializeSessionFormData } from '../forms/SessionDataForm'
 import BackdropContainer from '../../utils/BackdropContainer'
+import CloseIcon from '@mui/icons-material/Close'
 
 
 interface SessionDialogEditProps extends Omit<SessionDialogProps, 'open' | 'onSubmit'> {
@@ -32,6 +33,12 @@ export default function SessionDialogEdit({ open, onClose, payload }: DialogProp
   const [currentSession, setCurrentSession] = useState<Session | undefined>()
   const dialogs = useDialogs()
   const [sessionDataFormReady, setSessionDataFormReady] = useState<boolean>(false)
+  const [deleteDialogPromise, setDeleteDialogPromise] = useState<null | Promise<boolean>>(null)
+
+  useEffect(() => {
+    if (!open && deleteDialogPromise)
+        dialogs.close(deleteDialogPromise, false).finally(() => setDeleteDialogPromise(null))
+  }, [open])
 
   useEffect(() => {
     if (!editSession) return
@@ -59,9 +66,13 @@ export default function SessionDialogEdit({ open, onClose, payload }: DialogProp
   async function handleDeleteSessionClick() {
     if (!currentSession) return
 
-    const result = await dialogs.open(SessionDialogDelete, {
+    const sessionDeleteDialogPromise = dialogs.open(SessionDialogDelete, {
       sessionName: currentSession.name,
     })
+
+    setDeleteDialogPromise(sessionDeleteDialogPromise)
+    const result = await sessionDeleteDialogPromise
+    setDeleteDialogPromise(null)
 
     if (result)
       await onClose({
@@ -82,6 +93,18 @@ export default function SessionDialogEdit({ open, onClose, payload }: DialogProp
       }}
     >
       <DialogTitle>Edit Session</DialogTitle>
+      <IconButton
+        aria-label="close"
+        onClick={() => onClose(null)}
+        sx={(theme) => ({
+          position: 'absolute',
+          right: 8,
+          top: 8,
+          color: theme.palette.grey[500],
+        })}
+      >
+        <CloseIcon />
+      </IconButton>
       <Divider />
       <DialogContent>
         {
