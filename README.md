@@ -1,6 +1,6 @@
-# Docker extension: VNC Viewer
+# Docker extension: [VNC Viewer](https://hub.docker.com/extensions/pgmystery/docker-extension-vnc)
 
-A VNC Viewer extension for Docker Desktop.
+A VNC Viewer [extension](https://www.docker.com/products/extensions/) for [Docker Desktop](https://www.docker.com/products/docker-desktop/).
 
 ## Table of Contents
 - [Description](#description)
