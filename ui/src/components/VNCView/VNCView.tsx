@@ -43,6 +43,8 @@ export default function VNCView({ sessionName, url, onCancel, ddUIToast, openBro
   const [isClippedViewport, setIsClippedViewport] = useState<boolean>(false)
   const dialogs = useDialogs()
 
+  console.log('URL', url)
+
   useEffect(() => {
     if ('load' in vncSettingsStore)
       vncSettingsStore.load().finally(() => setReady(true))
@@ -226,6 +228,12 @@ export default function VNCView({ sessionName, url, onCancel, ddUIToast, openBro
     setIsClippedViewport(e?.detail || false)
   }
 
+  function handleWebsocketUrlCopyClick() {
+    if (!url) return
+
+    navigator.clipboard.writeText(url.ws)
+  }
+
   return (
     <Stack direction="column" spacing={1} sx={{height: '100%', overflow: 'hidden'}} >
       <VNCSessionBar
@@ -236,6 +244,7 @@ export default function VNCView({ sessionName, url, onCancel, ddUIToast, openBro
         onFullscreenClicked={handleFullscreenClick}
         onSettingsClicked={handleSettingsClick}
         onOpenInBrowserClicked={handleOpenInBrowserClick}
+        onWebsocketUrlCopyClick={handleWebsocketUrlCopyClick}
         clipboardText={clipboardText}
         sendClipboardText={sendClipboardText}
         sendMachineCommand={sendMachineCommand}
