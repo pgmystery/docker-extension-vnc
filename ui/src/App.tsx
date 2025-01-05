@@ -30,7 +30,7 @@ export function App() {
   const [connectedData, setConnectedData] = useState<ConnectedData>()
   const dialogs = useDialogs()
   const { showBackdrop: backdrop, isBackdropShowing } = useBackdrop({
-    sx: (theme) => ({ color: '#fff', zIndex: theme.zIndex.drawer + 1 }),
+    sx: (theme) => ({ zIndex: theme.zIndex.drawer + 1 }),
   })
 
   useEffect(() => {
