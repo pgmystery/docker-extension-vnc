@@ -2,6 +2,9 @@
 
 History of all released versions and changes
 
+## v1.2.0
+**WIP**
+
 ## v1.1.0
 - VNC settings for scaling the viewport.
 - Add a way to drag the screen of the vnc viewport.
