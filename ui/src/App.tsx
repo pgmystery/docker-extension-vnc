@@ -33,6 +33,8 @@ export function App() {
     sx: (theme) => ({ zIndex: theme.zIndex.drawer + 1 }),
   })
 
+  console.log('isBackdropShowing 1', isBackdropShowing)
+
   useEffect(() => {
     if (!sessionStore) return
 
@@ -73,8 +75,8 @@ export function App() {
     })
   }
 
-  async function handleConnectClicked(session: Session) {
-    async function connect(): Promise<ConnectedData | undefined> {
+  async function connect(session: Session) {
+    async function _connect(): Promise<ConnectedData | undefined> {
       const proxyDockerImageExist = await vnc.dockerProxyImageExist()
 
       if (!proxyDockerImageExist)
@@ -102,14 +104,17 @@ export function App() {
       }
     }
 
+    console.log('isBackdropShowing 2', isBackdropShowing)
+
+    debugger
     if (isBackdropShowing)
       return
 
-    const connectData = await backdrop(connect)
+    const connectData = await backdrop(_connect)
     setConnectedData(connectData)
   }
 
-  async function handleDisconnectClicked() {
+  async function disconnect() {
     try {
       await backdrop(() => vnc.disconnect())
     }
@@ -134,8 +139,8 @@ export function App() {
 
       <ConnectBar
         connectedSession={connectedData?.sessionName}
-        onConnect={handleConnectClicked}
-        onDisconnect={handleDisconnectClicked}
+        onConnect={connect}
+        onDisconnect={disconnect}
         sessionStore={sessionStore}
         ddUIToast={ddClient.desktopUI.toast}
         disabled={isBackdropShowing}
@@ -146,14 +151,14 @@ export function App() {
         isBackdropShowing || !connectedData
         ? <Dashboard
           ddUIToast={ddClient.desktopUI.toast}
-          connect={handleConnectClicked}
+          connect={connect}
           sessionStore={sessionStore}
         />
         : <VNCView
           sessionName={connectedData.sessionName}
           url={connectedData.url}
           credentials={connectedData.credentials}
-          onCancel={handleDisconnectClicked}
+          onCancel={disconnect}
           ddUIToast={ddClient.desktopUI.toast}
           openBrowserURL={ddClient.host.openExternal}
           sessionStore={sessionStore}
