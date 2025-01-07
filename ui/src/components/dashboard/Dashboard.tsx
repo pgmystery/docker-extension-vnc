@@ -55,6 +55,7 @@ export default function Dashboard({ ddUIToast, connect, sessionStore }: Dashboar
   }
 
   async function handleRunCmdClick() {
+    setLoading(true)
     setStarted(true)
 
     const dockerCli = new DockerCli()
@@ -123,6 +124,7 @@ export default function Dashboard({ ddUIToast, connect, sessionStore }: Dashboar
     }
 
     setExampleContainer(exampleContainer)
+    setLoading(false)
 
     if (exampleContainer.State.Status !== 'running')
       return ddUIToast.error('The example container is not running...')
@@ -269,6 +271,7 @@ export default function Dashboard({ ddUIToast, connect, sessionStore }: Dashboar
         <ExampleContainerButton
           exampleContainer={exampleContainer}
           disabled={started || loading}
+          loading={loading}
           tryExampleClick={handleRunCmdClick}
           deleteExampleClick={handleDeleteExampleContainerClick}
           startExampleClick={handleStartExampleContainerClick}
