@@ -127,10 +127,10 @@ export default function SendKeysMenu({ sendKey, sendCtrlAltDel }: SendKeysMenuPr
       >
         <ListSubheader>Toggle keys</ListSubheader>
 
-        {/*https://docs.rs/x11-dl/1.0.1/x11_dl/keysym/constant.XK_Control_L.html*/}
+        {/*https://github.com/novnc/noVNC/blob/master/core/input/keysym.js#L193C37-L193C43*/}
         <MenuItem
           onClick={() => {
-            toggleKey(!ctrlKeyDown, 65507, 'ControlLeft')
+            toggleKey(!ctrlKeyDown, 0xffe3, 'ControlLeft')
             setCtrlKeyDown(!ctrlKeyDown)
           }}
           selected={ctrlKeyDown}
@@ -142,10 +142,10 @@ export default function SendKeysMenu({ sendKey, sendCtrlAltDel }: SendKeysMenuPr
           />
         </MenuItem>
 
-        {/*https://docs.rs/x11-dl/1.0.1/x11_dl/keysym/constant.XK_Alt_L.html*/}
+        {/*https://github.com/novnc/noVNC/blob/master/core/input/keysym.js#L200C37-L200C43*/}
         <MenuItem
           onClick={() => {
-            toggleKey(!altKeyDown, 65513, 'AltLeft')
+            toggleKey(!altKeyDown, 0xffe9, 'AltLeft')
             setAltKeyDown(!altKeyDown)
           }}
           selected={altKeyDown}
@@ -157,10 +157,10 @@ export default function SendKeysMenu({ sendKey, sendCtrlAltDel }: SendKeysMenuPr
           />
         </MenuItem>
 
-        {/*https://docs.rs/x11-dl/1.0.1/x11_dl/keysym/constant.XK_Win_L.html*/}
+        {/*https://github.com/novnc/noVNC/blob/master/core/input/keysym.js#L202C37-L202C43*/}
         <MenuItem
           onClick={() => {
-            toggleKey(!windowsKeyDown, 65371, 'MetaLeft')
+            toggleKey(!windowsKeyDown, 0xffeb, 'MetaLeft')
             setWindowsKeyDown(!windowsKeyDown)
           }}
           selected={windowsKeyDown}
@@ -175,15 +175,15 @@ export default function SendKeysMenu({ sendKey, sendCtrlAltDel }: SendKeysMenuPr
         <Divider />
         <ListSubheader>Send keys</ListSubheader>
 
-        {/*https://docs.rs/x11-dl/1.0.1/x11_dl/keysym/constant.XK_Tab.html*/}
-        <MenuItem onClick={() => sendKeyToVNCView(65289, 'Tab')}>
+        {/*https://github.com/novnc/noVNC/blob/master/core/input/keysym.js#L7C37-L7C43*/}
+        <MenuItem onClick={() => sendKeyToVNCView(0xff09, 'Tab')}>
           <Avatar>
             <TabIcon />
           </Avatar> Tab
         </MenuItem>
 
-        {/*https://docs.rs/x11-dl/1.0.1/x11_dl/keysym/constant.XK_Escape.html*/}
-        <MenuItem onClick={() => sendKeyToVNCView(65307, 'Escape')}>
+        {/*https://github.com/novnc/noVNC/blob/master/core/input/keysym.js#L14C37-L14C43*/}
+        <MenuItem onClick={() => sendKeyToVNCView(0xff1b, 'Escape')}>
           <Avatar>
             <EscIcon />
           </Avatar> Escape

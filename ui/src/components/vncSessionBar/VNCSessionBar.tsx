@@ -68,8 +68,11 @@ export default function VNCSessionBar({
       {
         !viewOnly && <>
           <SendKeysMenu
-            sendKey={ vncScreenRef?.current?.sendKey }
-            sendCtrlAltDel={ vncScreenRef?.current?.sendCtrlAltDel }
+            sendKey={ (keysym: number, code: string, down?: boolean) => vncScreenRef?.current?.sendKey(keysym, code, down) }
+            sendCtrlAltDel={ () => {
+              vncScreenRef?.current?.sendCtrlAltDel()
+              vncScreenRef?.current?.focus()
+            } }
           />
           <ClipboardMenu clipboardText={ clipboardText } sendClipboardText={ sendClipboardText }/>
           { havePowerCapability && <SendMachineCommandsMenu sendMachineCommand={ sendMachineCommand }/> }

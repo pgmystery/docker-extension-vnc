@@ -3,7 +3,7 @@
 History of all released versions and changes
 
 ## v1.2.0
-**WIP**
+- Fix bug with "Toggle keys" under a windows machine.
 
 ## v1.1.0
 - VNC settings for scaling the viewport.
