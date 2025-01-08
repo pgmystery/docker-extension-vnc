@@ -68,4 +68,5 @@ This extension supports 2 different kind of connections.
 5. Click on "Connect".
 
 ![Remote Host connection](docs/imgs/screenshot5.png)
+![Remote Host connection windows machine](docs/imgs/screenshot8.png)
 ![Remote Host connection Linux Mint](docs/imgs/screenshot7.png)
