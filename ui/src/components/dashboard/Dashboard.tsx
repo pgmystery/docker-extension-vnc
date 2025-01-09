@@ -152,7 +152,7 @@ export default function Dashboard({ ddUIToast, connect, sessionStore }: Dashboar
       await sessionStore.add(exampleSession)
     }
 
-    connect(exampleSession)
+    await connect(exampleSession)
   }
 
   function getExampleContainer(dockerCli: DockerCli) {

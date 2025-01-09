@@ -1,4 +1,4 @@
-import React, { useEffect, useMemo, useState } from 'react'
+import React, { useEffect, useMemo, useRef, useState } from 'react'
 import { createDockerDesktopClient } from '@docker/extension-api-client'
 import { Divider, Stack } from '@mui/material'
 import VNCView, { VNCCredentials } from './components/VNCView/VNCView'
@@ -27,13 +27,12 @@ export function App() {
   const ddClient = useMemo(createDockerDesktopClient, [])
   const sessionStore = useMemo(getSessionStore, [])
   const vnc = useVNC(ddClient)
+  const tryToConnect = useRef<boolean>(true)
   const [connectedData, setConnectedData] = useState<ConnectedData>()
   const dialogs = useDialogs()
   const { showBackdrop: backdrop, isBackdropShowing } = useBackdrop({
     sx: (theme) => ({ zIndex: theme.zIndex.drawer + 1 }),
   })
-
-  console.log('isBackdropShowing 1', isBackdropShowing)
 
   useEffect(() => {
     if (!sessionStore) return
@@ -41,8 +40,10 @@ export function App() {
     reconnect()
   }, [sessionStore, vnc])
 
-  function reconnect() {
-    return backdrop(async () => {
+  async function reconnect() {
+    tryToConnect.current = true
+
+    await backdrop(async () => {
       try {
         await vnc.reconnect(sessionStore)
         if (!vnc.connected || !vnc.connection) return
@@ -73,6 +74,8 @@ export function App() {
         await vnc.disconnect()
       }
     })
+
+    tryToConnect.current = false
   }
 
   async function connect(session: Session) {
@@ -104,14 +107,15 @@ export function App() {
       }
     }
 
-    console.log('isBackdropShowing 2', isBackdropShowing)
-
-    debugger
-    if (isBackdropShowing)
+    if (tryToConnect.current || connectedData !== undefined)
       return
+
+    tryToConnect.current = true
 
     const connectData = await backdrop(_connect)
     setConnectedData(connectData)
+
+    tryToConnect.current = false
   }
 
   async function disconnect() {
