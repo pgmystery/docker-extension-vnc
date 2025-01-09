@@ -43,8 +43,6 @@ export default function VNCView({ sessionName, url, onCancel, ddUIToast, openBro
   const [isClippedViewport, setIsClippedViewport] = useState<boolean>(false)
   const dialogs = useDialogs()
 
-  console.log('URL', url)
-
   useEffect(() => {
     if ('load' in vncSettingsStore)
       vncSettingsStore.load().finally(() => setReady(true))
