@@ -4,6 +4,7 @@ History of all released versions and changes
 
 ## v1.2.0
 - Fix bug with "Toggle keys" under a windows machine.
+- Add a new button for copy the url of the proxy-websocket.
 
 ## v1.1.0
 - VNC settings for scaling the viewport.
