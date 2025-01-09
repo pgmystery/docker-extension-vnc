@@ -8,20 +8,22 @@ import ClipboardMenu from './ClipboardMenu'
 import SendMachineCommandsMenu, { MachineCommand } from './SendMachineCommandsMenu'
 import DragViewportButton from './DragViewportButton'
 import { RefObject, useEffect } from 'react'
+import PowerIcon from '@mui/icons-material/Power'
 
 
 export interface VNCSessionBarProps {
-  vncScreenRef: RefObject<VncScreenHandle> | null,
-  clippedViewport: boolean,
-  clipToWindowActive: boolean,
-  onDragWindowChange: (state: boolean) => void,
-  onFullscreenClicked: () => void,
-  onSettingsClicked: () => void,
-  onOpenInBrowserClicked: () => void,
+  vncScreenRef: RefObject<VncScreenHandle> | null
+  clippedViewport: boolean
+  clipToWindowActive: boolean
+  onDragWindowChange: (state: boolean) => void
+  onFullscreenClicked: () => void
+  onSettingsClicked: () => void
+  onOpenInBrowserClicked: () => void
+  onWebsocketUrlCopyClick: () => void
   clipboardText: string,
-  sendClipboardText?: (text: string) => void,
-  sendMachineCommand: (command: MachineCommand) => void,
-  havePowerCapability: boolean,
+  sendClipboardText?: (text: string) => void
+  sendMachineCommand: (command: MachineCommand) => void
+  havePowerCapability: boolean
   viewOnly: boolean
 }
 
@@ -34,6 +36,7 @@ export default function VNCSessionBar({
   onFullscreenClicked,
   onSettingsClicked,
   onOpenInBrowserClicked,
+  onWebsocketUrlCopyClick,
   clipboardText,
   sendClipboardText,
   sendMachineCommand,
@@ -81,6 +84,11 @@ export default function VNCSessionBar({
 
       <Box sx={ {flexGrow: 1} }/>
 
+      <Tooltip title="Copy websocket url to clipboard" arrow>
+        <IconButton onClick={ onWebsocketUrlCopyClick }>
+          <PowerIcon/>
+        </IconButton>
+      </Tooltip>
       <Tooltip title="Open in Browser" arrow>
         <IconButton onClick={ onOpenInBrowserClicked }>
           <OpenInBrowserIcon/>
