@@ -5,7 +5,8 @@ on:
     branches:
       - main
     paths:
-      - docker/novnc_proxy/**
+      - docker/novnc_proxy/novnc_proxy.Dockerfile
+      - docker/novnc_proxy/entrypoint.sh
 
 jobs:
   build_and_push_to_hub:
