@@ -36,13 +36,12 @@ export default function Dashboard({ ddUIToast, connect, sessionStore }: Dashboar
   const [{ proxyContainerPassword }] = useConfig()
 
   useEffect(() => {
-    checkIfExampleContainerExist()
+    checkIfExampleContainerExist().finally(() => setLoading(false))
   }, [])
 
   async function checkIfExampleContainerExist() {
     const dockerCli = new DockerCli()
     const exampleContainer = await getExampleContainer(dockerCli)
-    setLoading(false)
 
     if (exampleContainer) {
       setExampleContainer(exampleContainer)
@@ -56,6 +55,7 @@ export default function Dashboard({ ddUIToast, connect, sessionStore }: Dashboar
   }
 
   async function handleRunCmdClick() {
+    setLoading(true)
     setStarted(true)
 
     const dockerCli = new DockerCli()
@@ -124,6 +124,7 @@ export default function Dashboard({ ddUIToast, connect, sessionStore }: Dashboar
     }
 
     setExampleContainer(exampleContainer)
+    setLoading(false)
 
     if (exampleContainer.State.Status !== 'running')
       return ddUIToast.error('The example container is not running...')
@@ -151,7 +152,7 @@ export default function Dashboard({ ddUIToast, connect, sessionStore }: Dashboar
       await sessionStore.add(exampleSession)
     }
 
-    connect(exampleSession)
+    await connect(exampleSession)
   }
 
   function getExampleContainer(dockerCli: DockerCli) {
@@ -171,7 +172,6 @@ export default function Dashboard({ ddUIToast, connect, sessionStore }: Dashboar
 
     let exampleContainerExist = await checkIfExampleContainerExist()
     if (!exampleContainerExist) return
-    setLoading(true)
 
     const dockerCli = new DockerCli()
     const execResult = await dockerCli.rm(exampleContainer.Id, {force: true})
@@ -192,13 +192,10 @@ export default function Dashboard({ ddUIToast, connect, sessionStore }: Dashboar
 
     const exampleContainerExist = await checkIfExampleContainerExist()
     if (!exampleContainerExist) return
-    setLoading(true)
 
     try {
       const dockerCli = new DockerCli()
       const execResult = await dockerCli.start(exampleContainer.Id)
-
-      setLoading(false)
 
       if (execResult.stderr)
         return ddUIToast?.error(execResult.stderr)
@@ -207,12 +204,14 @@ export default function Dashboard({ ddUIToast, connect, sessionStore }: Dashboar
     }
     catch (e: any) {
       console.error(e)
-      setLoading(false)
 
       if (e instanceof Error)
         ddUIToast.error(e.message)
       else if (isRawExecResult(e))
         ddUIToast.error(e.stderr)
+    }
+    finally {
+      setLoading(false)
     }
   }
 
@@ -272,6 +271,7 @@ export default function Dashboard({ ddUIToast, connect, sessionStore }: Dashboar
         <ExampleContainerButton
           exampleContainer={exampleContainer}
           disabled={started || loading}
+          loading={loading}
           tryExampleClick={handleRunCmdClick}
           deleteExampleClick={handleDeleteExampleContainerClick}
           startExampleClick={handleStartExampleContainerClick}
