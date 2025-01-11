@@ -12,7 +12,7 @@ It is using [noVNC](https://github.com/novnc/noVNC) and [websockify](https://git
 | Build-Variable          | Default   | Description                                                      |
 |-------------------------|-----------|------------------------------------------------------------------|
 | `NOVNC_VERSION`         | v1.5.0    | The version of [noVNC](https://github.com/novnc/noVNC).          |
-| `WEBSOCKIFY_VERSION`    | v0.12.0   | The version of [websockify](https://github.com/novnc/websockify) |
+| `WEBSOCKIFY_VERSION`    | v0.12.0   | The version of [websockify](https://github.com/novnc/websockify). |
 
 
 ## Environment Variables
