@@ -26,7 +26,6 @@ export default function ConnectBar({ connectedSession, sessionStore, ddUIToast, 
   const [loading, setLoading] = useState<boolean>(true)
   const sessions = useSyncExternalStore(sessionStore.subscribe, sessionStore.getSnapshot)
   const [selectedSessionName, setSelectedSessionName] = useState<string>('')
-  const [changeSession, setChangeSession] = useState<string | null>(null)
   const dialogs = useDialogs()
   const [currentDialog, setCurrentDialog] = useState<null | Promise<any>>(null)
 
@@ -35,16 +34,13 @@ export default function ConnectBar({ connectedSession, sessionStore, ddUIToast, 
   }, [])
 
   useEffect(() => {
-    if (!sessions.find(session => session.name === selectedSessionName)) {
+    if (!sessions.find(session => session.name === selectedSessionName))
       setSelectedSessionName('')
-      setChangeSession(null)
-    }
   }, [sessions])
 
   useEffect(() => {
     if (connectedSession) {
       setSelectedSessionName(connectedSession)
-      setChangeSession(connectedSession)
 
       if (currentDialog)
         dialogs.close(currentDialog, null).finally(() => setCurrentDialog(null))
@@ -81,7 +77,6 @@ export default function ConnectBar({ connectedSession, sessionStore, ddUIToast, 
     }
 
     setSelectedSessionName(sessionData.name)
-    setChangeSession(sessionData.name)
   }
 
   async function sendUpdateSessionData(sessionData: SessionUpdateData) {
@@ -98,7 +93,6 @@ export default function ConnectBar({ connectedSession, sessionStore, ddUIToast, 
     }
 
     setSelectedSessionName(sessionData.name)
-    setChangeSession(sessionData.name)
   }
 
   async function sendDeleteSession(sessionId: string) {
@@ -115,7 +109,6 @@ export default function ConnectBar({ connectedSession, sessionStore, ddUIToast, 
     }
 
     setSelectedSessionName('')
-    setChangeSession(null)
   }
 
   function getSelectedSession() {
@@ -179,7 +172,6 @@ export default function ConnectBar({ connectedSession, sessionStore, ddUIToast, 
           sessions={sessions}
           selectedSessionName={selectedSessionName}
           setSelectedSessionName={setSelectedSessionName}
-          changeSelection={changeSession}
         />
         <Tooltip title="Edit selected Session">
           <IconButton disabled={selectedSessionName === '' || !!connectedSession} onClick={handleEditSessionClick}>
