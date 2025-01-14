@@ -5,6 +5,7 @@ History of all released versions and changes
 ## v1.2.0
 - Fix bug with "Toggle keys" under a windows machine.
 - Add a new button for copy the url of the proxy-websocket.
+- Fix a bug when a docker image has the name as the example container.
 
 ## v1.1.0
 - VNC settings for scaling the viewport.

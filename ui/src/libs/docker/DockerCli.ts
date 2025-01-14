@@ -39,6 +39,7 @@ export default class DockerCli extends DockerCliExec {
   async getContainerFromInspect(containerName: string, options: {throwError: boolean} = {throwError: true}) {
     try {
       const execResult = await this.exec('inspect', {
+        '--type': '"container"',
         '--format': '"json"',
       }, containerName)
 
@@ -59,6 +60,7 @@ export default class DockerCli extends DockerCliExec {
 
   async inspect(containerId: string): Promise<ContainerExtended> {
     const execResult = await this.exec('inspect', {
+      '--type': '"container"',
       '--format': '"json"',
     }, containerId)
 
