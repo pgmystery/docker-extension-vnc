@@ -4,7 +4,9 @@ A VNC Viewer [extension](https://www.docker.com/products/extensions/) for [Docke
 
 ## Table of Contents
 - [Description](#description)
-- [Manual Installation](#manual-installation)
+- [Installation](#installation)
+  - [Docker Desktop Marketplace](#over-docker-desktop-marketplace)
+  - [Manual Installation](#manual-installation)
 - [Usage](#usage)
   - [Example Container](#the-example-container)
   - [Sessions](#sessions)
@@ -22,7 +24,11 @@ It uses [noVNC](https://github.com/novnc/noVNC) as the JavaScript client package
 
 It also comes with an example VNC Server as a docker container. So you can test things out very easily.
 
-## Manual Installation
+## Installation
+### Over Docker Desktop Marketplace
+**Install via Docker Desktop https://open.docker.com/extensions/marketplace?extensionId=pgmystery/docker-extension-vnc**
+
+### Manual Installation
 You can install the extension by using the command:
 
 ```shell
