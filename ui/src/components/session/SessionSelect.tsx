@@ -44,12 +44,21 @@ export default function SessionSelect({
   return (
     <Autocomplete
       value={value}
-      onChange={(_, value) => setSelectedSessionName(value?.name || '')}
+      onChange={(_, value) => {
+        console.log('onChange', value)
+        setSelectedSessionName(value?.name || '')
+      }}
       disabled={disabled}
       options={ options.sort((a, b) => -b.firstLetter.localeCompare(a.firstLetter)) }
       getOptionLabel={(option) => option.name}
       renderInput={ params => <TextField { ...params } label="Sessions"/> }
       inputValue={selectedSessionName}
+      onInputChange={(_, newValue) => {
+        if (value === null && newValue === '') return
+        else if (value?.name === newValue) return
+
+        setSelectedSessionName(newValue)
+      }}
       groupBy={(option) => option.firstLetter.toUpperCase()}
       noOptionsText="No Sessions"
       sx={ {width: 300} }
