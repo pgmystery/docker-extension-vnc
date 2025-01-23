@@ -12,6 +12,7 @@ import { VNCCredentials } from './VNCView'
 import Button from '@mui/material/Button'
 import { FormEvent } from 'react'
 import { DialogProps } from '@toolpad/core'
+import InputPassword from '../inputs/InputPassword'
 
 
 interface VNCCredentialsDialogData extends VNCCredentials {
@@ -55,10 +56,9 @@ export default function VNCCredentialsDialog({ open, onClose }: DialogProps<unde
             label="Username"
             fullWidth
           />
-          <TextField
+          <InputPassword
             name="password"
             label="Password"
-            type="password"
             fullWidth
           />
           <FormControlLabel control={<Checkbox name="saveCredentials" />} label="Save credentials (not encrypted)" />
