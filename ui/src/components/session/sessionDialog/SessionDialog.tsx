@@ -39,9 +39,11 @@ export default function SessionDialog({ open, onClose, payload }: DialogProps<Se
       onClose={() => onClose(null)}
       maxWidth="sm"
       fullWidth={true}
-      PaperProps={{
-        component: 'form',
-        onSubmit: handleSubmit,
+      slotProps={{
+        paper: {
+          component: 'form',
+          onSubmit: handleSubmit,
+        }
       }}
     >
       <DialogTitle>{ title }</DialogTitle>

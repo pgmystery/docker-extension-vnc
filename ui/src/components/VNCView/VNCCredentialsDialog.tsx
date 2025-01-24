@@ -42,9 +42,11 @@ export default function VNCCredentialsDialog({ open, onClose }: DialogProps<unde
     <Dialog
       open={open}
       onClose={() => onClose(null)}
-      PaperProps={{
-        component: 'form',
-        onSubmit: handleSubmit,
+      slotProps={{
+        paper: {
+          component: 'form',
+          onSubmit: handleSubmit,
+        }
       }}
     >
       <DialogTitle>VNC Session Credentials</DialogTitle>

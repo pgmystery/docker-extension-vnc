@@ -39,21 +39,26 @@ export default function VNCSettingsDialog({ open, onClose, payload }: DialogProp
     })
   }
 
+  function handleSubmit(event: FormEvent<HTMLFormElement>) {
+    event.preventDefault()
+
+    const formData = new FormData(event.currentTarget)
+    const formJson = Object.fromEntries((formData as any).entries()) as VNCSettingsSaveData
+
+    save(formJson)
+  }
+
   return (
     <Dialog
       open={open}
       onClose={() => onClose(null)}
       maxWidth="sm"
       fullWidth={true}
-      PaperProps={{
-        component: 'form',
-        onSubmit: (event: FormEvent<HTMLFormElement>) => {
-          event.preventDefault();
-          const formData = new FormData(event.currentTarget)
-          const formJson = Object.fromEntries((formData as any).entries()) as VNCSettingsSaveData
-
-          save(formJson)
-        },
+      slotProps={{
+        paper: {
+          component: 'form',
+          onSubmit: handleSubmit,
+        }
       }}
     >
       <DialogTitle>VNC Settings</DialogTitle>
@@ -69,6 +74,7 @@ export default function VNCSettingsDialog({ open, onClose, payload }: DialogProp
       >
         <CloseIcon />
       </IconButton>
+      <Divider />
       <DialogContent>
         <Stack spacing={1}>
           <QualityLevel
@@ -95,9 +101,9 @@ export default function VNCSettingsDialog({ open, onClose, payload }: DialogProp
             initValue={payload.scaling}
             reset={reset}
           />
-          <Divider />
         </Stack>
       </DialogContent>
+      <Divider />
       <DialogActions>
         <Button onClick={() => setReset(true)} color="error">Reset</Button>
         <Button color="success" type="submit">Save & Reconnect</Button>

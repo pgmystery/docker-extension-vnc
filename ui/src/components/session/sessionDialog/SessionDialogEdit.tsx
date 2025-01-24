@@ -97,9 +97,11 @@ export default function SessionDialogEdit({ open, onClose, payload }: DialogProp
       onClose={() => onClose(null)}
       maxWidth="sm"
       fullWidth={true}
-      PaperProps={{
-        component: 'form',
-        onSubmit: handleEditSubmit,
+      slotProps={{
+        paper: {
+          component: 'form',
+          onSubmit: handleEditSubmit,
+        }
       }}
     >
       <DialogTitle>Edit Session</DialogTitle>
