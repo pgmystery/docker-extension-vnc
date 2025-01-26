@@ -105,6 +105,15 @@ export default function SessionDataForm({ session, onReady, children }: SessionD
       <SessionDialogCredentials
         credentials={session?.credentials}
       />
+      {/*<Divider />*/}
+      {/*<Accordion>*/}
+      {/*  <AccordionSummary expandIcon={<ExpandMoreIcon />} >*/}
+      {/*    <Typography component="span">Advanced Settings</Typography>*/}
+      {/*  </AccordionSummary>*/}
+      {/*  <AccordionDetails>*/}
+      {/*    <SessionExtraDataForm />*/}
+      {/*  </AccordionDetails>*/}
+      {/*</Accordion>*/}
       { children }
     </Stack>
   )

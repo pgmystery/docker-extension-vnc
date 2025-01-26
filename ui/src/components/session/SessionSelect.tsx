@@ -44,10 +44,7 @@ export default function SessionSelect({
   return (
     <Autocomplete
       value={value}
-      onChange={(_, value) => {
-        console.log('onChange', value)
-        setSelectedSessionName(value?.name || '')
-      }}
+      onChange={(_, value) => setSelectedSessionName(value?.name || '')}
       disabled={disabled}
       options={ options.sort((a, b) => -b.firstLetter.localeCompare(a.firstLetter)) }
       getOptionLabel={(option) => option.name}
