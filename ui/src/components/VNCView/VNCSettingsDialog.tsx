@@ -105,7 +105,7 @@ export default function VNCSettingsDialog({ open, onClose, payload }: DialogProp
       </DialogContent>
       <Divider />
       <DialogActions>
-        <Button onClick={() => setReset(true)} color="error">Reset</Button>
+        <Button variant="outlined" onClick={() => setReset(true)} color="error">Reset</Button>
         <Button color="success" type="submit">Save & Reconnect</Button>
       </DialogActions>
     </Dialog>

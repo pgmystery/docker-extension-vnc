@@ -126,7 +126,7 @@ export default function SessionDialogEdit({ open, onClose, payload }: DialogProp
                 <Divider />
                 <FormControl>
                   <FormLabel sx={{marginBottom: '10px'}}>Delete Session</FormLabel>
-                  <Button color="error" onClick={handleDeleteSessionClick} sx={{width: '200px'}} endIcon={<DeleteIcon />}>
+                  <Button variant="outlined" color="error" onClick={handleDeleteSessionClick} sx={{width: '200px'}} endIcon={<DeleteIcon />}>
                     Delete Session
                   </Button>
                 </FormControl>
@@ -138,7 +138,7 @@ export default function SessionDialogEdit({ open, onClose, payload }: DialogProp
       </DialogContent>
       <Divider />
       <DialogActions>
-        <Button onClick={() => onClose(null)}>Close</Button>
+        <Button variant="outlined" onClick={() => onClose(null)}>Close</Button>
         <Button
           color="success"
           disabled={!sessionDataFormReady}
