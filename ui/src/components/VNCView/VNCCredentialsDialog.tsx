@@ -68,7 +68,7 @@ export default function VNCCredentialsDialog({ open, onClose }: DialogProps<unde
       </DialogContent>
       <DialogActions>
         <Button variant="outlined" onClick={() => onClose(null)}>Cancel</Button>
-        <Button type="submit" color="success">OK</Button>
+        <Button type="submit" color="success">Connect</Button>
       </DialogActions>
     </Dialog>
   )
