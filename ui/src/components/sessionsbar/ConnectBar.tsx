@@ -123,6 +123,7 @@ export default function ConnectBar({ connectedSession, sessionStore, ddUIToast, 
       title: 'Edit Session',
       submitButtonText: 'Edit Session',
       editSession: selectedSession,
+      getSessions: () => sessions,
     })
 
     setCurrentDialog(sessionEditDialogPromise)
@@ -135,11 +136,14 @@ export default function ConnectBar({ connectedSession, sessionStore, ddUIToast, 
     switch (result.type) {
       case 'update':
         await sendUpdateSessionData(result.data)
-
         break
+
+      case 'create':
+        await sendCreateSessionData(result.data)
+        break
+
       case 'delete':
         await sendDeleteSession(result.data)
-
         break
     }
   }

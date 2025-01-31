@@ -50,6 +50,7 @@ export default function ContainerSelect({ containers, disabled, selectedContaine
         name="connection.data.container"
         color={initContainerExistColor}
         error={initContainerExistColor === 'error'}
+        helperText={initContainerExistColor === 'error' && 'No Container found with this Name/ID.'}
       />}
       inputValue={selectedContainerName}
       onInputChange={handleInputChange}
