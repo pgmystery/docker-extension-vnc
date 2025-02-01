@@ -7,6 +7,7 @@ on:
     paths:
       - docker/vnc_ubuntu/vnc_ubuntu.Dockerfile
       - docker/vnc_ubuntu/start-vnc.sh
+  workflow_dispatch:
 
 jobs:
   build_and_push_to_hub:
