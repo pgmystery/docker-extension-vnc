@@ -45,11 +45,11 @@ jobs:
           images: pgmystery/ubuntu_vnc
 
       - name: Build and push Docker images
-        uses: docker/build-push-action@v5
+        uses: docker/build-push-action@v6
         with:
           context: ./docker/vnc_ubuntu
           platforms: linux/amd64,linux/arm64
           file: ./docker/vnc_ubuntu/vnc_ubuntu.Dockerfile
           push: true
-          tags: pgmystery/ubuntu_vnc:latest
+          tags: pgmystery/ubuntu_vnc:latest,pgmystery/ubuntu_vnc:xfce
           labels: ${{ steps.meta.outputs.labels }}
