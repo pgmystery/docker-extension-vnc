@@ -18,7 +18,7 @@ This Docker Image is part of the project [docker-extension-vnc](https://github.c
 
 
 ## Knowing Issues
-- The Desktop don't show any icons and is not responsible.
+- The Desktop don't show any icons and is not interactable.
 
 ## Screenshot
 ![cinnamon.png](docs/cinnamon.png)
