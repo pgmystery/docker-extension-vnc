@@ -23,7 +23,7 @@ jobs:
       - name: Build and push Docker images (xfce)
         uses: docker/build-push-action@v6
         with:
-          context: ./docker/vnc_ubuntu
+          context: ./docker/vnc_ubuntu/xfce
           platforms: linux/amd64,linux/arm64
           file: ./docker/vnc_ubuntu/xfce/Dockerfile
           push: true
