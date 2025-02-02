@@ -15,9 +15,6 @@ jobs:
     outputs:
       output1: ${{ steps.meta.outputs.labels }}
     steps:
-      - name: Check out the repo
-        uses: actions/checkout@v4
-
       - name: Set up QEMU
         uses: docker/setup-qemu-action@v3
 
