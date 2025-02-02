@@ -1,21 +1,19 @@
-name: Publish Docker Image ubuntu_vnc
+name: Init ubuntu_vnc docker build and publish
 
 on:
-  push:
-    branches:
-      - main
-    paths:
-      - docker/vnc_ubuntu/vnc_ubuntu.Dockerfile
-      - docker/vnc_ubuntu/start-vnc.sh
-  workflow_dispatch:
+  workflow_call:
+    secrets:
+      DOCKERHUB_USERNAME:
+        required: true
+      DOCKERHUB_ACCESS_TOKEN:
+        required: true
+      GITHUB_TOKEN:
+        required: true
 
 jobs:
-  build_and_push_to_hub:
+  init_ubuntu_vnc_docker_build_and_publish:
     name: Build docker image and push it to docker hub
     runs-on: ubuntu-latest
-    permissions:
-      packages: write
-      contents: read
     steps:
       - name: Check out the repo
         uses: actions/checkout@v4
@@ -44,13 +42,3 @@ jobs:
         uses: docker/metadata-action@v5
         with:
           images: pgmystery/ubuntu_vnc
-
-      - name: Build and push Docker images
-        uses: docker/build-push-action@v6
-        with:
-          context: ./docker/vnc_ubuntu
-          platforms: linux/amd64,linux/arm64
-          file: ./docker/vnc_ubuntu/vnc_ubuntu.Dockerfile
-          push: true
-          tags: pgmystery/ubuntu_vnc:latest,pgmystery/ubuntu_vnc:xfce
-          labels: ${{ steps.meta.outputs.labels }}

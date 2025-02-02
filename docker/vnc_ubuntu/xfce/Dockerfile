@@ -14,7 +14,10 @@ ENV RESOLUTION=1920x1080
 # Set port of VNC Server
 ENV PORT=5901
 
-# Install XFCE, VNC server, dbus-x11, and xfonts-base
+# Set Display env for dbus
+ENV DISPLAY=:0.0
+
+# Install XFCE, VNC server, dbus-x11, xfonts-base and firefox
 RUN apt-get update && apt-get install -y --no-install-recommends \
     xfce4 \
     xfce4-goodies \

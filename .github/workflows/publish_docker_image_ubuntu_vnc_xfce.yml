@@ -1,0 +1,33 @@
+name: Publish Docker Image ubuntu_vnc (xfce)
+
+on:
+  push:
+    branches:
+      - main
+    paths:
+      - docker/vnc_ubuntu/xfce/Dockerfile
+      - docker/vnc_ubuntu/xfce/start-vnc.sh
+  workflow_dispatch:
+
+jobs:
+  build_and_push_to_hub_xfce:
+    name: Build docker image and push it to docker hub
+    runs-on: ubuntu-latest
+    permissions:
+      packages: write
+      contents: read
+    uses: ./.github/workflows/publish_docker_image_ubuntu_vnc.yml
+    secrets:
+      DOCKERHUB_USERNAME: ${{ secrets.DOCKERHUB_USERNAME }}
+      DOCKERHUB_ACCESS_TOKEN: ${{ secrets.DOCKERHUB_ACCESS_TOKEN }}
+      GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+    steps:
+      - name: Build and push Docker images (xfce)
+        uses: docker/build-push-action@v6
+        with:
+          context: ./docker/vnc_ubuntu
+          platforms: linux/amd64,linux/arm64
+          file: ./docker/vnc_ubuntu/xfce/Dockerfile
+          push: true
+          tags: pgmystery/ubuntu_vnc:latest,pgmystery/ubuntu_vnc:xfce
+          labels: ${{ steps.meta.outputs.labels }}
