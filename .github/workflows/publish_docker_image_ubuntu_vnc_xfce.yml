@@ -19,6 +19,7 @@ jobs:
   build_and_push_to_hub_xfce:
     name: Build docker image and push it to docker hub
     runs-on: ubuntu-latest
+    needs: init
     steps:
       - name: Build and push Docker images (xfce)
         uses: docker/build-push-action@v6
