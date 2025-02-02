@@ -1,4 +1,4 @@
-import { useEffect, useReducer, useRef, useState, useSyncExternalStore } from 'react'
+import { useEffect, useMemo, useReducer, useRef, useState, useSyncExternalStore } from 'react'
 import { FormControl, IconButton, InputAdornment, OutlinedInput, Stack, Tooltip, Typography } from '@mui/material'
 import ContentCopyIcon from '@mui/icons-material/ContentCopy'
 import TextStreamOutput from '../utils/TextStreamOutput'
@@ -20,7 +20,8 @@ interface DashboardProps {
 
 const UbuntuVNCDockerSessionName = 'example vnc container'
 const UbuntuVNCDockerContainerName = 'ubuntu_vnc'
-const UbuntuVNCDockerImage = 'pgmystery/ubuntu_vnc:latest'
+const UbuntuVNCDockerImage = 'pgmystery/ubuntu_vnc'
+const UbuntuVNCDockerImageDefaultTag = 'xfce'
 const UbuntuVNCDockerImageLabel = 'pgmystery.vnc.extension.example'
 const UbuntuVNCDockerImagePort = 5901
 
@@ -34,6 +35,8 @@ export default function Dashboard({ ddUIToast, connect, sessionStore }: Dashboar
   const [pullFinished, setPullFinished] = useState<boolean>(false)
   const [exampleContainer, setExampleContainer] = useState<ContainerExtended | null>(null)
   const [{ proxyContainerPassword }] = useConfig()
+  const [exampleContainerTag, setExampleContainerTag] = useState<string>(UbuntuVNCDockerImageDefaultTag)
+  const ubuntuVNCDockerImage = useMemo(() => UbuntuVNCDockerImage + ':' + exampleContainerTag, [exampleContainerTag])
 
   useEffect(() => {
     checkIfExampleContainerExist().finally(() => setLoading(false))
@@ -60,9 +63,9 @@ export default function Dashboard({ ddUIToast, connect, sessionStore }: Dashboar
 
     const dockerCli = new DockerCli()
 
-    if (!await dockerCli.imageExist(UbuntuVNCDockerImage)) {
+    if (!await dockerCli.imageExist(ubuntuVNCDockerImage)) {
       try {
-        await dockerCli.pull(UbuntuVNCDockerImage, dispatch)
+        await dockerCli.pull(ubuntuVNCDockerImage, dispatch)
         setPullFinished(true)
         await connectToExampleContainer(dockerCli)
       }
@@ -96,7 +99,7 @@ export default function Dashboard({ ddUIToast, connect, sessionStore }: Dashboar
   }
 
   async function runExampleContainer(dockerCli: DockerCli) {
-    const execResult = await dockerCli.run(UbuntuVNCDockerImage, {
+    const execResult = await dockerCli.run(ubuntuVNCDockerImage, {
       '--detach': null,
       '--name': UbuntuVNCDockerContainerName,
       '--label': [
@@ -233,7 +236,7 @@ export default function Dashboard({ ddUIToast, connect, sessionStore }: Dashboar
           <OutlinedInput
             inputRef={exampleRunInputRef}
             disabled
-            value={ `docker run --name ${UbuntuVNCDockerContainerName} ${UbuntuVNCDockerImage}` }
+            value={ `docker run --name ${UbuntuVNCDockerContainerName} ${ubuntuVNCDockerImage}` }
             endAdornment={
               <InputAdornment position="end">
                 <Tooltip title="Copy to clipboard">
@@ -275,6 +278,7 @@ export default function Dashboard({ ddUIToast, connect, sessionStore }: Dashboar
           tryExampleClick={handleRunCmdClick}
           deleteExampleClick={handleDeleteExampleContainerClick}
           startExampleClick={handleStartExampleContainerClick}
+          onTagChange={tag => setExampleContainerTag(tag)}
         />
 
       </Stack>

@@ -1,4 +1,4 @@
-import React, { ReactElement, useRef, useState } from 'react'
+import React, { ReactElement, ReactNode, useRef, useState } from 'react'
 import { Box, ButtonGroup, ButtonGroupProps, ClickAwayListener, Grow, MenuList, Paper, Popper } from '@mui/material'
 import Button from '@mui/material/Button'
 import ArrowDropDownIcon from '@mui/icons-material/ArrowDropDown'
@@ -10,10 +10,11 @@ import { SelectChangeEvent } from '@mui/material/Select/SelectInput'
 interface SelectButtonProps extends Omit<ButtonGroupProps, 'onChange'> {
   children?: ReactElement<SelectButtonItemProps, typeof SelectButtonItem> | ReactElement<SelectButtonItemProps, typeof SelectButtonItem>[]
   onChange?: (event: SelectChangeEvent, child: React.ReactNode)=>void
+  endIcon?: ReactNode
 }
 
 export default function SelectButton(props: SelectButtonProps) {
-  const { children, onChange } = props
+  const {children, onChange} = props
   const [open, setOpen] = useState(false)
   const anchorRef = useRef<HTMLDivElement>(null)
   const [selected, setSelected] = useState(0)
@@ -57,6 +58,7 @@ export default function SelectButton(props: SelectButtonProps) {
           writable: true,
           value: {
             index,
+            value: child?.props.value,
           }
         })
 
@@ -112,50 +114,51 @@ export default function SelectButton(props: SelectButtonProps) {
     <>
       <ButtonGroup
         { ...props }
-        onChange={undefined}
-        ref={anchorRef}
+        onChange={ undefined }
+        ref={ anchorRef }
       >
         <Button
-          onClick={handleClick}
+          endIcon={ props.endIcon }
+          onClick={ handleClick }
         >
-          { !(items) || items[selected].props.children || <Box />}
+          { !(items) || items[selected].props.children || <Box/> }
         </Button>
         <Button
           size="small"
-          aria-controls={open ? 'select-button-menu' : undefined}
-          aria-expanded={open ? 'true' : undefined}
+          aria-controls={ open ? 'select-button-menu' : undefined }
+          aria-expanded={ open ? 'true' : undefined }
           aria-haspopup="menu"
-          onClick={toggleMenu}
+          onClick={ toggleMenu }
         >
-          <ArrowDropDownIcon />
+          <ArrowDropDownIcon/>
         </Button>
       </ButtonGroup>
 
       <Popper
-        sx={{ zIndex: 1 }}
-        open={open}
-        anchorEl={anchorRef.current}
-        role={undefined}
+        sx={ {zIndex: 1} }
+        open={ open }
+        anchorEl={ anchorRef.current }
+        role={ undefined }
         transition
         disablePortal
       >
-        {({ TransitionProps, placement }) => (
+        { ({TransitionProps, placement}) => (
           <Grow
-            {...TransitionProps}
-            style={{
+            { ...TransitionProps }
+            style={ {
               transformOrigin:
                 placement === 'bottom' ? 'center top' : 'center bottom',
-            }}
+            } }
           >
             <Paper>
-              <ClickAwayListener onClickAway={handleClose}>
+              <ClickAwayListener onClickAway={ handleClose }>
                 <MenuList id="select-button-menu" autoFocusItem>
                   { items }
                 </MenuList>
               </ClickAwayListener>
             </Paper>
           </Grow>
-        )}
+        ) }
       </Popper>
     </>
   )
