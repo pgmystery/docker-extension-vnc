@@ -80,6 +80,10 @@ export default function ExampleContainerButton({
         onTrigger={tryExampleClick}
       >Try example container (cinnamon)</SelectButtonItem>
       <SelectButtonItem
+        value="mate"
+        onTrigger={tryExampleClick}
+      >Try example container (mate)</SelectButtonItem>
+      <SelectButtonItem
         value="xterm"
         onTrigger={tryExampleClick}
       >Try example container (xterm)</SelectButtonItem>
