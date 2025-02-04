@@ -37,15 +37,8 @@ jobs:
           context: ./docker/vnc_ubuntu/mate
           platforms: linux/amd64
           file: ./docker/vnc_ubuntu/mate/Dockerfile
-          push: false
+          push: true
           tags: pgmystery/ubuntu_vnc:mate-amd64
-          outputs: type=docker,dest=${{ runner.temp }}/ubuntu_vnc_mate_amd64.tar
-
-      - name: Upload artifact
-        uses: actions/upload-artifact@v4
-        with:
-          name: ubuntu_vnc-mate-amd64
-          path: ${{ runner.temp }}/ubuntu_vnc_mate_amd64.tar
 
   build_mate_arm64:
     name: Build docker image on arm64
@@ -72,15 +65,8 @@ jobs:
           context: ./docker/vnc_ubuntu/mate
           platforms: linux/arm64
           file: ./docker/vnc_ubuntu/mate/Dockerfile
-          push: false
+          push: true
           tags: pgmystery/ubuntu_vnc:mate-arm64
-          outputs: type=docker,dest=${{ runner.temp }}/ubuntu_vnc_mate_arm64.tar
-
-      - name: Upload artifact
-        uses: actions/upload-artifact@v4
-        with:
-          name: ubuntu_vnc-mate-arm64
-          path: ${{ runner.temp }}/ubuntu_vnc_mate_arm64.tar
 
   create_docker_manifest_and_push_to_dockerhub:
     name: Create Docker manifest and push docker images to DockerHub
@@ -103,23 +89,6 @@ jobs:
         with:
           username: ${{ secrets.DOCKERHUB_USERNAME }}
           password: ${{ secrets.DOCKERHUB_ACCESS_TOKEN }}
-
-      - name: Download artifact (amd64)
-        uses: actions/download-artifact@v4
-        with:
-          name: ubuntu_vnc-mate-amd64
-          path: ${{ runner.temp }}
-
-      - name: Download artifact (arm64)
-        uses: actions/download-artifact@v4
-        with:
-          name: ubuntu_vnc-mate-arm64
-          path: ${{ runner.temp }}
-
-      - name: Load images
-        run: |
-          docker load --input ${{ runner.temp }}/ubuntu_vnc_mate_amd64.tar
-          docker load --input ${{ runner.temp }}/ubuntu_vnc_mate_arm64.tar
 
       - name: Create SHA manifest and push to DockerHub
         run: |
