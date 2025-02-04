@@ -44,7 +44,7 @@ jobs:
       - name: Upload artifact
         uses: actions/upload-artifact@v4
         with:
-          name: pgmystery/ubuntu_vnc:mate-amd64
+          name: ubuntu_vnc-mate-amd64
           path: ${{ runner.temp }}/ubuntu_vnc_mate_amd64.tar
 
   build_mate_arm64:
@@ -79,7 +79,7 @@ jobs:
       - name: Upload artifact
         uses: actions/upload-artifact@v4
         with:
-          name: pgmystery/ubuntu_vnc:mate-arm64
+          name: ubuntu_vnc-mate-arm64
           path: ${{ runner.temp }}/ubuntu_vnc_mate_arm64.tar
 
   create_docker_manifest_and_push_to_dockerhub:
@@ -107,13 +107,13 @@ jobs:
       - name: Download artifact (amd64)
         uses: actions/download-artifact@v4
         with:
-          name: pgmystery/ubuntu_vnc:mate-amd64
+          name: ubuntu_vnc-mate-amd64
           path: ${{ runner.temp }}
 
       - name: Download artifact (arm64)
         uses: actions/download-artifact@v4
         with:
-          name: pgmystery/ubuntu_vnc:mate-arm64
+          name: ubuntu_vnc-mate-arm64
           path: ${{ runner.temp }}
 
       - name: Load images
