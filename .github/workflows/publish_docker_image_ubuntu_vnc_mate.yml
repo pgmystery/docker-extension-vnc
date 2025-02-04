@@ -39,6 +39,7 @@ jobs:
           file: ./docker/vnc_ubuntu/mate/Dockerfile
           push: true
           tags: pgmystery/ubuntu_vnc:mate-amd64
+          provenance: false
 
   build_mate_arm64:
     name: Build docker image on arm64
@@ -67,6 +68,7 @@ jobs:
           file: ./docker/vnc_ubuntu/mate/Dockerfile
           push: true
           tags: pgmystery/ubuntu_vnc:mate-arm64
+          provenance: false
 
   create_docker_manifest_and_push_to_dockerhub:
     name: Create Docker manifest and push docker images to DockerHub
