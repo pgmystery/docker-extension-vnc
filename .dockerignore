@@ -1,3 +1,4 @@
 data/
 ui/node_modules
 ui/libs/**/node_modules
+.secrets/
