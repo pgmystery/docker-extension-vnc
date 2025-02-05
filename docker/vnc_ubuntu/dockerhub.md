@@ -10,4 +10,5 @@ Documentations:
 - [mate](https://github.com/pgmystery/docker-extension-vnc/tree/main/docker/vnc_ubuntu/mate)
 - [kde-plasma](https://github.com/pgmystery/docker-extension-vnc/tree/main/docker/vnc_ubuntu/kde-plasma)
 - [lxde](https://github.com/pgmystery/docker-extension-vnc/tree/main/docker/vnc_ubuntu/lxde)
+- [lxqt](https://github.com/pgmystery/docker-extension-vnc/tree/main/docker/vnc_ubuntu/lxqt)
 - [xterm](https://github.com/pgmystery/docker-extension-vnc/tree/main/docker/vnc_ubuntu/xterm)
