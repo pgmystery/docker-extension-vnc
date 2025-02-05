@@ -29,6 +29,8 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
     update-locale --reset LANG=$LANG \
     && apt-get clean && rm -rf /var/lib/apt/lists/* /tmp/* /var/tmp/*
 
+RUN dpkg --configure -a
+
 # Install necessary packages
 RUN apt-get update && apt-get install -y --no-install-recommends \
     tightvncpasswd  \
