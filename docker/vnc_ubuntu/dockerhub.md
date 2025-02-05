@@ -9,4 +9,5 @@ Documentations:
 - [cinnamon](https://github.com/pgmystery/docker-extension-vnc/tree/main/docker/vnc_ubuntu/cinnamon)
 - [mate](https://github.com/pgmystery/docker-extension-vnc/tree/main/docker/vnc_ubuntu/mate)
 - [kde-plasma](https://github.com/pgmystery/docker-extension-vnc/tree/main/docker/vnc_ubuntu/kde-plasma)
+- [lxde](https://github.com/pgmystery/docker-extension-vnc/tree/main/docker/vnc_ubuntu/lxde)
 - [xterm](https://github.com/pgmystery/docker-extension-vnc/tree/main/docker/vnc_ubuntu/xterm)
