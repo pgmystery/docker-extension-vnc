@@ -88,6 +88,10 @@ export default function ExampleContainerButton({
         onTrigger={tryExampleClick}
       >Try example container (kde-plasma)</SelectButtonItem>
       <SelectButtonItem
+        value="lxqt"
+        onTrigger={tryExampleClick}
+      >Try example container (lxqt)</SelectButtonItem>
+      <SelectButtonItem
         value="lxde"
         onTrigger={tryExampleClick}
       >Try example container (lxde)</SelectButtonItem>
