@@ -84,6 +84,10 @@ export default function ExampleContainerButton({
         onTrigger={tryExampleClick}
       >Try example container (mate)</SelectButtonItem>
       <SelectButtonItem
+        value="kde-plasma"
+        onTrigger={tryExampleClick}
+      >Try example container (kde-plasma)</SelectButtonItem>
+      <SelectButtonItem
         value="xterm"
         onTrigger={tryExampleClick}
       >Try example container (xterm)</SelectButtonItem>
