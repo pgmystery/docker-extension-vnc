@@ -51,6 +51,7 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
 COPY ./.config/xfce4/xfconf/xfce-perchannel-xml/xfce4-desktop.xml /root/.config/xfce4/xfconf/xfce-perchannel-xml/xfce4-desktop.xml
 RUN chmod 0644 /root/.config/xfce4/xfconf/xfce-perchannel-xml/xfce4-desktop.xml
 
+# Remove Snap and install firefox
 RUN apt remove --purge -y snapd
 RUN add-apt-repository -y ppa:mozillateam/ppa \
     && apt update \
