@@ -38,7 +38,8 @@ RUN apt-get update && dpkg --configure -a && apt-get install -y --no-install-rec
     tightvncpasswd  \
     tigervnc-common \
     tigervnc-standalone-server \
-    dbus-x11 \
+    dbus-x11
+RUN dpkg --configure -a && apt-get install -y --no-install-recommends \
     software-properties-common
 
 # Install desktop
