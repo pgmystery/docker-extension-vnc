@@ -2,6 +2,7 @@ import React, { ReactElement, ReactNode, useRef, useState } from 'react'
 import { Box, ButtonGroup, ButtonGroupProps, ClickAwayListener, Grow, MenuList, Paper, Popper } from '@mui/material'
 import Button from '@mui/material/Button'
 import ArrowDropDownIcon from '@mui/icons-material/ArrowDropDown'
+import ArrowDropUpIcon from '@mui/icons-material/ArrowDropUp'
 import { isFragment } from 'react-is'
 import SelectButtonItem, { SelectButtonItemProps } from './SelectButtonItem'
 import { SelectChangeEvent } from '@mui/material/Select/SelectInput'
@@ -130,7 +131,9 @@ export default function SelectButton(props: SelectButtonProps) {
           aria-haspopup="menu"
           onClick={ toggleMenu }
         >
-          <ArrowDropDownIcon/>
+          {
+            open ? <ArrowDropUpIcon/> : <ArrowDropDownIcon/>
+          }
         </Button>
       </ButtonGroup>
 

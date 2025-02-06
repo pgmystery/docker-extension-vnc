@@ -1,5 +1,14 @@
 import { useEffect, useMemo, useReducer, useRef, useState, useSyncExternalStore } from 'react'
-import { FormControl, IconButton, InputAdornment, OutlinedInput, Stack, Tooltip, Typography } from '@mui/material'
+import {
+  FormControl,
+  IconButton,
+  InputAdornment,
+  OutlinedInput,
+  Stack,
+  Tooltip,
+  Typography,
+  TypographyProps
+} from '@mui/material'
 import ContentCopyIcon from '@mui/icons-material/ContentCopy'
 import TextStreamOutput from '../utils/TextStreamOutput'
 import { Toast } from '@docker/extension-api-client-types/dist/v1'
@@ -24,6 +33,18 @@ const UbuntuVNCDockerImage = 'pgmystery/ubuntu_vnc'
 const UbuntuVNCDockerImageDefaultTag = 'xfce'
 const UbuntuVNCDockerImageLabel = 'pgmystery.vnc.extension.example'
 const UbuntuVNCDockerImagePort = 5901
+
+
+function InfoText(props: TypographyProps) {
+  return <Typography
+    sx={{
+      textAlign: 'left',
+      marginLeft: '14px',
+      marginRight: '14px',
+    }}
+    { ...props }
+  >{ props.children }</Typography>
+}
 
 
 export default function Dashboard({ ddUIToast, connect, sessionStore }: DashboardProps) {
@@ -257,21 +278,9 @@ export default function Dashboard({ ddUIToast, connect, sessionStore }: Dashboar
               maxWidth: '600px',
             }}
           />
-          <Typography sx={{
-            textAlign: 'left',
-            marginLeft: '14px',
-            marginRight: '14px',
-          }}>VNC connect Password = { proxyContainerPassword }</Typography>
-          <Typography sx={{
-            textAlign: 'left',
-            marginLeft: '14px',
-            marginRight: '14px',
-          }}>Docker Container Name = ubuntu_vnc</Typography>
-          <Typography sx={{
-            textAlign: 'left',
-            marginLeft: '14px',
-            marginRight: '14px',
-          }}>VNC Port = 5901</Typography>
+          <InfoText>VNC connect Password = { proxyContainerPassword }</InfoText>
+          <InfoText>Docker Container Name = ubuntu_vnc</InfoText>
+          <InfoText>VNC Port = 5901</InfoText>
         </FormControl>
 
         <ExampleContainerButton
