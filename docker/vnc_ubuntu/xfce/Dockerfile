@@ -1,5 +1,5 @@
 # Use an official Ubuntu base image
-FROM ubuntu:20.04
+FROM ubuntu:24.04
 
 ENV VNC_PASSWORD="foobar"
 
@@ -17,16 +17,47 @@ ENV PORT=5901
 # Set Display env for dbus
 ENV DISPLAY=:0.0
 
-# Install XFCE, VNC server, dbus-x11, xfonts-base and firefox
+# Set default lang
+ENV LANG="en_US.UTF-8"
+ENV LC_ALL=$LANG
+
+# Install locales and set it up
 RUN apt-get update && apt-get install -y --no-install-recommends \
-    xfce4 \
-    xfce4-goodies \
+    && echo $LANG UTF-8 > /etc/locale.gen && \
+    env DEBIAN_FRONTEND=noninteractive apt-get install -y \
+      locales && \
+    update-locale --reset LANG=$LANG \
+    && apt-get clean && rm -rf /var/lib/apt/lists/* /tmp/* /var/tmp/*
+
+# Copy settings to avoid snap
+COPY apt/preferences.d/ /etc/apt/preferences.d/
+COPY apt/apt.conf.d/ /etc/apt/apt.conf.d/
+
+# Install necessary packages
+RUN apt-get update && dpkg --configure -a && apt-get install -y --no-install-recommends \
+    tightvncpasswd  \
     tigervnc-common \
     tigervnc-standalone-server \
-    dbus-x11 \
-    xfonts-base \
-    firefox \
-    && apt-get clean && rm -rf /var/lib/apt/lists/* /tmp/* /var/tmp/*
+    dbus-x11
+RUN dpkg --configure -a && apt-get install -y --no-install-recommends \
+    software-properties-common
+
+# Install desktop
+RUN apt-get update && apt-get install -y --no-install-recommends \
+    xfce4 \
+    xfce4-goodies
+
+# Config
+COPY ./.config/xfce4/xfconf/xfce-perchannel-xml/xfce4-desktop.xml /root/.config/xfce4/xfconf/xfce-perchannel-xml/xfce4-desktop.xml
+RUN chmod 0644 /root/.config/xfce4/xfconf/xfce-perchannel-xml/xfce4-desktop.xml
+
+RUN apt remove --purge -y snapd
+RUN add-apt-repository -y ppa:mozillateam/ppa \
+    && apt update \
+    && apt install -y firefox
+
+# Clean apt caches
+RUN apt-get clean && rm -rf /var/lib/apt/lists/* /tmp/* /var/tmp/*
 
 # Create .vnc directory
 RUN mkdir /root/.vnc
