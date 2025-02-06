@@ -1,6 +1,7 @@
 .old.backend/
 data/
 .cert/
+.secrets/
 
 ### VisualStudioCode template
 .vscode/*
