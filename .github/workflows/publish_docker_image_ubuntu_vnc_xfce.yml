@@ -7,6 +7,8 @@ on:
     paths:
       - docker/vnc_ubuntu/xfce/Dockerfile
       - docker/vnc_ubuntu/xfce/start-vnc.sh
+      - docker/vnc_ubuntu/xfce/apt/**
+      - docker/vnc_ubuntu/xfce/.config/**
   workflow_dispatch:
 
 jobs:
@@ -36,4 +38,5 @@ jobs:
           platforms: linux/amd64,linux/arm64
           file: ./docker/vnc_ubuntu/xfce/Dockerfile
           push: true
-          tags: pgmystery/ubuntu_vnc:latest,pgmystery/ubuntu_vnc:xfce
+#          tags: pgmystery/ubuntu_vnc:latest,pgmystery/ubuntu_vnc:xfce
+          tags: pgmystery/ubuntu_vnc:xfce
