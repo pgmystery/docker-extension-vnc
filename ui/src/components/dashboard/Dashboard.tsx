@@ -47,6 +47,9 @@ export default function Dashboard({ ddUIToast, connect, sessionStore }: Dashboar
     const exampleContainer = await getExampleContainer(dockerCli)
 
     if (exampleContainer) {
+      const exampleContainerImageTag = exampleContainer.Config.Image.split(':')[1]
+
+      setExampleContainerTag(exampleContainerImageTag)
       setExampleContainer(exampleContainer)
 
       return true
