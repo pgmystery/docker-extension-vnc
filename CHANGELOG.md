@@ -5,10 +5,10 @@ History of all released versions and changes
 ## v1.2.0
 - Fix bug with "Toggle keys" under a windows machine.
 - Add a new button for copy the url of the proxy-websocket.
-- Fix a bug when a docker image has the name as the example container.
-- Add a toggle button for showing the password in credentials in plaintext.
+- Fix a bug when a docker image has the same name as the example container.
+- Add a toggle button for showing the password in credentials as plaintext.
 - Change variants of some buttons.
-- Update packages.
+- Update packages for security reasons.
 - Fix bug where the session name in the bar is not getting deleted after deleting the session.
 - Add a new option to clone a session in the edit session dialog.
 - Change the Example Container button in the Dashboard and add more GUI Environments to try out:
