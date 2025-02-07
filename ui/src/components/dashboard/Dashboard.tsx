@@ -18,12 +18,12 @@ import { ContainerExtended } from '../../types/docker/cli/inspect'
 import useConfig from '../../hooks/useConfig'
 import { Session } from '../../types/session'
 import { SessionStore } from '../../stores/sessionStore'
-import ExampleContainerButton from './ExampleContainerButton'
+import ExampleContainerButton, { ExampleContainerImageTag } from './ExampleContainerButton'
 
 
 interface DashboardProps {
   ddUIToast: Toast
-  connect: (session: Session)=>void
+  connect: (session: Session)=>Promise<void>
   sessionStore: SessionStore
 }
 
@@ -56,7 +56,7 @@ export default function Dashboard({ ddUIToast, connect, sessionStore }: Dashboar
   const [pullFinished, setPullFinished] = useState<boolean>(false)
   const [exampleContainer, setExampleContainer] = useState<ContainerExtended | null>(null)
   const [{ proxyContainerPassword }] = useConfig()
-  const [exampleContainerTag, setExampleContainerTag] = useState<string>(UbuntuVNCDockerImageDefaultTag)
+  const [exampleContainerTag, setExampleContainerTag] = useState<ExampleContainerImageTag>(UbuntuVNCDockerImageDefaultTag)
   const ubuntuVNCDockerImage = useMemo(() => UbuntuVNCDockerImage + ':' + exampleContainerTag, [exampleContainerTag])
 
   useEffect(() => {
@@ -68,7 +68,7 @@ export default function Dashboard({ ddUIToast, connect, sessionStore }: Dashboar
     const exampleContainer = await getExampleContainer(dockerCli)
 
     if (exampleContainer) {
-      const exampleContainerImageTag = exampleContainer.Config.Image.split(':')[1]
+      const exampleContainerImageTag = exampleContainer.Config.Image.split(':')[1] as ExampleContainerImageTag
 
       setExampleContainerTag(exampleContainerImageTag)
       setExampleContainer(exampleContainer)

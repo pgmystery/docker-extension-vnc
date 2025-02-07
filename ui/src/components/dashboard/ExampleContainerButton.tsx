@@ -8,6 +8,16 @@ import { SelectChangeEvent } from '@mui/material'
 import { useEffect, useState } from 'react'
 
 
+export type ExampleContainerImageTag =
+    'xfce'
+  | 'cinnamon'
+  | 'mate'
+  | 'kde-plasma'
+  | 'lxqt'
+  | 'lxde'
+  | 'xterm'
+
+
 interface ExampleContainerButtonProps {
   exampleContainer: ContainerExtended | null
   tryExampleClick: ()=>void
@@ -15,7 +25,7 @@ interface ExampleContainerButtonProps {
   startExampleClick: ()=>void
   disabled?: boolean
   loading: boolean
-  onTagChange?: (tag: string)=>void
+  onTagChange?: (tag: ExampleContainerImageTag)=>void
 }
 
 
@@ -38,7 +48,7 @@ export default function ExampleContainerButton({
   }, [exampleContainer])
 
   function handleSelectButtonChange(event: SelectChangeEvent) {
-    onTagChange?.(event.target.value)
+    onTagChange?.(event.target.value as ExampleContainerImageTag)
   }
 
   if (exampleContainer) {
