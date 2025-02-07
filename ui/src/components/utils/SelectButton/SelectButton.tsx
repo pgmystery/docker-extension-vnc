@@ -1,4 +1,4 @@
-import React, { ReactElement, ReactNode, useRef, useState } from 'react'
+import React, { ReactElement, ReactNode, useEffect, useRef, useState } from 'react'
 import { Box, ButtonGroup, ButtonGroupProps, ClickAwayListener, Grow, MenuList, Paper, Popper } from '@mui/material'
 import Button from '@mui/material/Button'
 import ArrowDropDownIcon from '@mui/icons-material/ArrowDropDown'
@@ -12,10 +12,11 @@ interface SelectButtonProps extends Omit<ButtonGroupProps, 'onChange'> {
   children?: ReactElement<SelectButtonItemProps, typeof SelectButtonItem> | ReactElement<SelectButtonItemProps, typeof SelectButtonItem>[]
   onChange?: (event: SelectChangeEvent, child: React.ReactNode)=>void
   endIcon?: ReactNode
+  selectValue?: string
 }
 
 export default function SelectButton(props: SelectButtonProps) {
-  const {children, onChange} = props
+  const {children, onChange, selectValue} = props
   const [open, setOpen] = useState(false)
   const anchorRef = useRef<HTMLDivElement>(null)
   const [selected, setSelected] = useState(0)
@@ -68,6 +69,7 @@ export default function SelectButton(props: SelectButtonProps) {
     }
 
     return React.cloneElement(child, {
+      index,
       'aria-selected': selected === index ? 'true' : 'false',
       onClick: handleItemClick,
       onKeyUp: event => {
@@ -86,6 +88,15 @@ export default function SelectButton(props: SelectButtonProps) {
       selected: selected === index,
     })
   })
+
+  useEffect(() => {
+    if (!selectValue) return
+
+    const item = items?.find(item => item.props.value === selectValue)
+    if (!item || item.props.index === undefined) return
+
+    setSelected(item.props.index)
+  }, [selectValue])
 
   function handleClick(event: React.MouseEvent<HTMLElement, MouseEvent>) {
     if (!items)

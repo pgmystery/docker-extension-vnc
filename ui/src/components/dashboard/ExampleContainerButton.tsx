@@ -5,6 +5,7 @@ import LoadingButton from '@mui/lab/LoadingButton'
 import SelectButton from '../utils/SelectButton/SelectButton'
 import SelectButtonItem from '../utils/SelectButton/SelectButtonItem'
 import { SelectChangeEvent } from '@mui/material'
+import { useEffect, useState } from 'react'
 
 
 interface ExampleContainerButtonProps {
@@ -27,6 +28,14 @@ export default function ExampleContainerButton({
   loading,
   onTagChange,
 }: ExampleContainerButtonProps) {
+  const [selectedTag, setSelectedTag] = useState<string | undefined>()
+
+  useEffect(() => {
+    if (!exampleContainer)
+      return
+
+    setSelectedTag(exampleContainer.Config.Image.split(':')[1])
+  }, [exampleContainer])
 
   function handleSelectButtonChange(event: SelectChangeEvent) {
     onTagChange?.(event.target.value)
@@ -70,6 +79,7 @@ export default function ExampleContainerButton({
       sx={{height: '55px'}}
       disabled={disabled || loading}
       onChange={handleSelectButtonChange}
+      selectValue={selectedTag}
     >
       <SelectButtonItem
         value="xfce"

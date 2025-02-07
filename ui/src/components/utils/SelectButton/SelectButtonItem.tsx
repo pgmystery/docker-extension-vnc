@@ -3,6 +3,7 @@ import React from 'react'
 
 
 export interface SelectButtonItemProps extends MenuItemProps {
+  index?: number
   onTrigger: (event: React.MouseEvent<HTMLElement, MouseEvent>)=>void
 }
 
