@@ -11,6 +11,18 @@ import { createDockerDesktopClient } from '@docker/extension-api-client'
 import { CliExecOptions } from '../../types/docker/cli'
 import { MultipleContainersFoundError } from './Container'
 
+interface AbortEventTarget extends EventTarget {
+  reason?: string
+}
+
+interface AbortEvent extends Event {
+  target: AbortEventTarget | null
+}
+
+interface PullOptions {
+  abortSignal?: AbortSignal
+}
+
 export default class DockerCli extends DockerCliExec {
   public network: DockerCliNetwork
 
@@ -80,9 +92,17 @@ export default class DockerCli extends DockerCliExec {
     return images.length === 1
   }
 
-  pull(image: string, addStdout: (stdout: string)=>void) {
-    return new Promise<void>((resolve, reject) => (
-      this.client.cli.exec('pull', [image], {
+  pull(image: string, addStdout: (stdout: string)=>void, options?: PullOptions) {
+    return new Promise<void>((resolve, reject) => {
+      function abortListener({ target }: AbortEvent) {
+        options?.abortSignal?.removeEventListener('abort', abortListener)
+
+        reject(target?.reason || 'Unknown error')
+      }
+
+      options?.abortSignal?.addEventListener('abort', abortListener)
+
+      return this.client.cli.exec('pull', [image], {
         stream: {
           onOutput(data) {
             if (data.stdout) {
@@ -105,7 +125,7 @@ export default class DockerCli extends DockerCliExec {
           splitOutputLines: true,
         },
       })
-    ))
+    })
   }
 
   run(image: string, options: CliExecOptions) {

@@ -53,6 +53,7 @@ export default function Dashboard({ ddUIToast, connect, sessionStore }: Dashboar
   const exampleRunInputRef = useRef<HTMLInputElement>(null)
   const [started, setStarted] = useState<boolean>(false)
   const [pullStdout, dispatch] = useReducer(addPullStdout, [])
+  const pullAbortController = useMemo(() => new AbortController(), [])
   const [pullFinished, setPullFinished] = useState<boolean>(false)
   const [exampleContainer, setExampleContainer] = useState<ContainerExtended | null>(null)
   const [{ proxyContainerPassword }] = useConfig()
@@ -61,6 +62,12 @@ export default function Dashboard({ ddUIToast, connect, sessionStore }: Dashboar
 
   useEffect(() => {
     checkIfExampleContainerExist().finally(() => setLoading(false))
+  }, [])
+
+  useEffect(() => {
+    return () => {
+      pullAbortController.abort(`Cancel pulling image "${ubuntuVNCDockerImage}"...`)
+    }
   }, [])
 
   async function checkIfExampleContainerExist() {
@@ -89,7 +96,9 @@ export default function Dashboard({ ddUIToast, connect, sessionStore }: Dashboar
 
     if (!await dockerCli.imageExist(ubuntuVNCDockerImage)) {
       try {
-        await dockerCli.pull(ubuntuVNCDockerImage, dispatch)
+        await dockerCli.pull(ubuntuVNCDockerImage, dispatch, {
+          abortSignal: pullAbortController.signal,
+        })
         setPullFinished(true)
         await connectToExampleContainer(dockerCli)
       }
