@@ -1,4 +1,4 @@
-import { Dialog, DialogActions, DialogContent, DialogTitle, Divider, IconButton, Stack } from '@mui/material'
+import { Box, Dialog, DialogActions, DialogContent, DialogTitle, Divider, IconButton, Stack } from '@mui/material'
 import Button from '@mui/material/Button'
 import QualityLevel from './VNCSettingForms/QualityLevel'
 import { FormEvent, useEffect, useState } from 'react'
@@ -104,8 +104,14 @@ export default function VNCSettingsDialog({ open, onClose, payload }: DialogProp
         </Stack>
       </DialogContent>
       <Divider />
-      <DialogActions>
+      <DialogActions
+        sx={{
+          justifyContent: 'flex-start',
+        }}
+      >
         <Button variant="outlined" onClick={() => setReset(true)} color="error">Reset</Button>
+        <Box sx={ {flexGrow: 1} }/>
+        <Button variant="outlined" onClick={() => onClose(null)}>Cancel</Button>
         <Button color="success" type="submit">Save & Reconnect</Button>
       </DialogActions>
     </Dialog>
