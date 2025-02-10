@@ -17,7 +17,7 @@ export default class BackendRoute {
     this.route = `/api/${route}`
   }
 
-  async get<T>(url: string, opts?: RequestOpts) {
+  async get<T>(url: string = '', opts?: RequestOpts) {
     return await this.request<T>({
       url,
       method: "GET",
@@ -26,16 +26,16 @@ export default class BackendRoute {
     })
   }
 
-  async post<T>(url: string, data: any, opts?: RequestOpts) {
+  async post<T>(url: string = '', data: any, opts?: RequestOpts) {
     return await this.request<T>({
       url,
       method: "POST",
-      data: data,
+      data,
       headers: opts?.headers || {}
     })
   }
 
-  async delete<T>(url: string, opts?: RequestOpts) {
+  async delete<T>(url: string = '', opts?: RequestOpts) {
     return await this.request<T>({
       url,
       method: 'DELETE',

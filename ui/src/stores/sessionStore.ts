@@ -30,7 +30,7 @@ export function getSessionStore(backendHttpService?: HttpService): SessionStore 
 
     async refresh() {
       const newSessions: SessionList = []
-      const newSessionList = await this.api.get<SessionList>('')
+      const newSessionList = await this.api.get<SessionList>()
 
       for (const sessionItem of newSessionList) {
         newSessions.push({
