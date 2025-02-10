@@ -34,7 +34,7 @@ export default function useOpenDialog(dialogProperties: DialogProperties = {}) {
   })
 
   function showOpenDialog(dialogProps: DialogProperties = {}) {
-    return showBackdrop(async () => ddClient.desktopUI.dialog.showOpenDialog({
+    return showBackdrop(() => ddClient.desktopUI.dialog.showOpenDialog({
       ...dialogProperties,
       ...dialogProps,
     }))
