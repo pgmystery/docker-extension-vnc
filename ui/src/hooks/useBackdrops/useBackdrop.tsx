@@ -26,7 +26,7 @@ export default function useBackdrop(backdropProps?: BackdropComponentProps): Use
 
 export function UseBackdropComponent({ backdropProps }: { backdropProps?: BackdropComponentProps }) {
   return (
-    <Backdrop { ...backdropProps } open={true}>
+    <Backdrop { ...backdropProps } open>
       <CircularProgress />
     </Backdrop>
   )
