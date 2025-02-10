@@ -52,6 +52,7 @@ RUN apt-get clean && rm -rf /var/lib/apt/lists/* /tmp/* /var/tmp/*
 
 # Some cinnamon configs
 RUN eval $(dbus-launch --sh-syntax) \
+    && gsettings set org.nemo.preferences treat-root-as-normal true \
     && gsettings set org.cinnamon.desktop.background picture-uri "file:///usr/share/backgrounds/gnome/adwaita-l.jpg"
 
 # Create .vnc directory
