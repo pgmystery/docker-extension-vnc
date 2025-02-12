@@ -83,13 +83,13 @@ export function getVNCSettingsStore(backendHttpService?: HttpService): VNCSettin
     api: new BackendRoute(backendHttpService, '/settings'),
 
     async load() {
-      vncSettings = await this.api.get<VNCSettings>('')
+      vncSettings = await this.api.get<VNCSettings>()
 
       emitChange()
     },
 
     save() {
-      return this.api?.post<void>('', vncSettings)
+      return this.api.post<void>('', vncSettings)
     },
 
     async set(newVNCSettings: VNCSettings) {

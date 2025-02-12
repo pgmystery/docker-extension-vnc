@@ -1,4 +1,4 @@
-import { Dialog, DialogActions, DialogContent, DialogTitle, Divider, IconButton, Stack } from '@mui/material'
+import { Box, Dialog, DialogActions, DialogContent, DialogTitle, Divider, IconButton, Stack } from '@mui/material'
 import Button from '@mui/material/Button'
 import QualityLevel from './VNCSettingForms/QualityLevel'
 import { FormEvent, useEffect, useState } from 'react'
@@ -39,21 +39,26 @@ export default function VNCSettingsDialog({ open, onClose, payload }: DialogProp
     })
   }
 
+  function handleSubmit(event: FormEvent<HTMLFormElement>) {
+    event.preventDefault()
+
+    const formData = new FormData(event.currentTarget)
+    const formJson = Object.fromEntries((formData as any).entries()) as VNCSettingsSaveData
+
+    save(formJson)
+  }
+
   return (
     <Dialog
       open={open}
       onClose={() => onClose(null)}
       maxWidth="sm"
       fullWidth={true}
-      PaperProps={{
-        component: 'form',
-        onSubmit: (event: FormEvent<HTMLFormElement>) => {
-          event.preventDefault();
-          const formData = new FormData(event.currentTarget)
-          const formJson = Object.fromEntries((formData as any).entries()) as VNCSettingsSaveData
-
-          save(formJson)
-        },
+      slotProps={{
+        paper: {
+          component: 'form',
+          onSubmit: handleSubmit,
+        }
       }}
     >
       <DialogTitle>VNC Settings</DialogTitle>
@@ -69,6 +74,7 @@ export default function VNCSettingsDialog({ open, onClose, payload }: DialogProp
       >
         <CloseIcon />
       </IconButton>
+      <Divider />
       <DialogContent>
         <Stack spacing={1}>
           <QualityLevel
@@ -95,11 +101,17 @@ export default function VNCSettingsDialog({ open, onClose, payload }: DialogProp
             initValue={payload.scaling}
             reset={reset}
           />
-          <Divider />
         </Stack>
       </DialogContent>
-      <DialogActions>
-        <Button onClick={() => setReset(true)} color="error">Reset</Button>
+      <Divider />
+      <DialogActions
+        sx={{
+          justifyContent: 'flex-start',
+        }}
+      >
+        <Button variant="outlined" onClick={() => setReset(true)} color="error">Reset</Button>
+        <Box sx={ {flexGrow: 1} }/>
+        <Button variant="outlined" onClick={() => onClose(null)}>Cancel</Button>
         <Button color="success" type="submit">Save & Reconnect</Button>
       </DialogActions>
     </Dialog>

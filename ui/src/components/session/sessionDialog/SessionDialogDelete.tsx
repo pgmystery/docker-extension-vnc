@@ -25,7 +25,7 @@ export default function SessionDialogDelete({ open, onClose, payload }: DialogPr
         </DialogContentText>
       </DialogContent>
       <DialogActions>
-        <Button onClick={() => onClose(false)} autoFocus>Cancel</Button>
+        <Button variant="outlined" onClick={() => onClose(false)} autoFocus>Cancel</Button>
         <Button onClick={() => onClose(true)} color="error">
           Delete Session
         </Button>

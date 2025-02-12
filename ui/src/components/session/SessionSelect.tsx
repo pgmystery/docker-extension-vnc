@@ -8,7 +8,6 @@ interface SessionSelectProps {
   disabled?: boolean
   selectedSessionName: string
   setSelectedSessionName: (name: string)=>void
-  changeSelection: string | null
 }
 
 interface SessionSelectOption {
@@ -22,14 +21,14 @@ export default function SessionSelect({
   disabled,
   selectedSessionName,
   setSelectedSessionName,
-  changeSelection,
 }: SessionSelectProps) {
   const [value, setValue] = useState<SessionSelectOption | null>(null)
   const options = sessions.map(option => getOptionFromSessionName(option.name) as SessionSelectOption)
 
   useEffect(() => {
-    setValue(getOptionFromSessionName(changeSelection))
-  }, [changeSelection])
+    if (value?.name !== selectedSessionName)
+      setValue(getOptionFromSessionName(selectedSessionName))
+  }, [selectedSessionName])
 
   function getOptionFromSessionName(sessionName?: string | null): SessionSelectOption | null {
     if (!sessionName) return null
@@ -45,13 +44,18 @@ export default function SessionSelect({
   return (
     <Autocomplete
       value={value}
-      onChange={(_, value) => setValue(getOptionFromSessionName(value?.name))}
+      onChange={(_, value) => setSelectedSessionName(value?.name || '')}
       disabled={disabled}
       options={ options.sort((a, b) => -b.firstLetter.localeCompare(a.firstLetter)) }
       getOptionLabel={(option) => option.name}
       renderInput={ params => <TextField { ...params } label="Sessions"/> }
       inputValue={selectedSessionName}
-      onInputChange={(_, value) => setSelectedSessionName(value)}
+      onInputChange={(_, newValue) => {
+        if (value === null && newValue === '') return
+        else if (value?.name === newValue) return
+
+        setSelectedSessionName(newValue)
+      }}
       groupBy={(option) => option.firstLetter.toUpperCase()}
       noOptionsText="No Sessions"
       sx={ {width: 300} }

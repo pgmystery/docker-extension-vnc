@@ -11,18 +11,23 @@ import {
   IconButton
 } from '@mui/material'
 import DeleteIcon from '@mui/icons-material/Delete'
-import { FormEvent, useEffect, useState } from 'react'
-import { Session, SessionItem, SessionUpdateData } from '../../../types/session'
+import { useEffect, useState } from 'react'
+import { Session, SessionCreateData, SessionItem, SessionList, SessionUpdateData } from '../../../types/session'
 import Button from '@mui/material/Button'
 import SessionDialogDelete from './SessionDialogDelete'
 import { DialogProps, useDialogs } from '@toolpad/core'
 import SessionDataForm, { serializeSessionFormData } from '../forms/SessionDataForm'
 import BackdropContainer from '../../utils/BackdropContainer'
 import CloseIcon from '@mui/icons-material/Close'
+import SelectButton from '../../utils/SelectButton/SelectButton'
+import SelectButtonItem from '../../utils/SelectButton/SelectButtonItem'
+import useFormSubmit, { UseFormSubmitEvent } from '../../../hooks/useFormSubmit'
+import useBackdrop from '../../../hooks/useBackdrops/useBackdrop'
 
 
 interface SessionDialogEditProps extends Omit<SessionDialogProps, 'open' | 'onSubmit'> {
   editSession: SessionItem
+  getSessions: ()=>SessionList
 }
 
 interface SessionDialogEditReturnUpdate {
@@ -30,16 +35,28 @@ interface SessionDialogEditReturnUpdate {
   data: SessionUpdateData
 }
 
+interface SessionDialogEditReturnCreate {
+  type: 'create'
+  data: SessionCreateData
+}
+
 interface SessionDialogEditReturnDelete {
   type: 'delete'
   data: string
 }
 
-type SessionDialogEditReturnProps = SessionDialogEditReturnUpdate | SessionDialogEditReturnDelete
+type SessionDialogEditReturnProps =
+  SessionDialogEditReturnUpdate
+  | SessionDialogEditReturnCreate
+  | SessionDialogEditReturnDelete
 
 
 export default function SessionDialogEdit({ open, onClose, payload }: DialogProps<SessionDialogEditProps, null | SessionDialogEditReturnProps>) {
-  const { editSession } = payload
+  const { editSession, getSessions } = payload
+  const [dialogFormRef, dialogFormSubmit] = useFormSubmit()
+  const { showBackdrop, isBackdropShowing } = useBackdrop({
+    sx: { zIndex: 9999 },
+  })
   const [currentSession, setCurrentSession] = useState<Session | undefined>()
   const dialogs = useDialogs()
   const [sessionDataFormReady, setSessionDataFormReady] = useState<boolean>(false)
@@ -56,20 +73,58 @@ export default function SessionDialogEdit({ open, onClose, payload }: DialogProp
     editSession.getInfo().then(session => setCurrentSession(session))
   }, [editSession])
 
-  function handleEditSubmit(event: FormEvent<HTMLFormElement>) {
-    event.preventDefault()
-
+  function handleEditSession(sessionData: SessionCreateData) {
     if (!currentSession) return
 
-    const formData = new FormData(event.currentTarget)
-    const sessionFormDataJson = serializeSessionFormData(formData)
-
-    onClose({
+    return onClose({
       type: 'update',
       data: {
-        ...sessionFormDataJson,
+        ...sessionData,
         id: currentSession.id,
       },
+    })
+  }
+
+  function handleCreateSession(sessionData: SessionCreateData) {
+    function setUniqueSessionName(sessionData: SessionCreateData, sessions: SessionList) {
+      if (!sessions.some(session => session.name === sessionData.name))
+        return
+
+      sessionData.name += ' (copy)'
+
+      return setUniqueSessionName(sessionData, sessions)
+    }
+
+    setUniqueSessionName(sessionData, getSessions())
+
+    return onClose({
+      type: 'create',
+      data: sessionData,
+    })
+  }
+
+  function getFormData(event: UseFormSubmitEvent) {
+    event.preventDefault()
+
+    const formData = new FormData(event.currentTarget)
+
+    return {
+      data: serializeSessionFormData(formData),
+      submitter: event.nativeEvent.detail,
+    }
+  }
+
+  function handleSubmit(event: UseFormSubmitEvent) {
+    return showBackdrop(async () => {
+      const formData = getFormData(event)
+
+      switch (formData.submitter) {
+        case 'edit':
+          return handleEditSession(formData.data)
+
+        case 'create':
+          return handleCreateSession(formData.data)
+      }
     })
   }
 
@@ -97,9 +152,12 @@ export default function SessionDialogEdit({ open, onClose, payload }: DialogProp
       onClose={() => onClose(null)}
       maxWidth="sm"
       fullWidth={true}
-      PaperProps={{
-        component: 'form',
-        onSubmit: handleEditSubmit,
+      slotProps={{
+        paper: {
+          component: 'form',
+          onSubmit: handleSubmit,
+          ref: dialogFormRef,
+        }
       }}
     >
       <DialogTitle>Edit Session</DialogTitle>
@@ -120,11 +178,14 @@ export default function SessionDialogEdit({ open, onClose, payload }: DialogProp
         {
           currentSession
             ? <>
-                <SessionDataForm session={currentSession} onReady={state => setSessionDataFormReady(state)} />
+                <SessionDataForm
+                  session={currentSession}
+                  onReady={state => setSessionDataFormReady(state)}
+                />
                 <Divider />
                 <FormControl>
                   <FormLabel sx={{marginBottom: '10px'}}>Delete Session</FormLabel>
-                  <Button color="error" onClick={handleDeleteSessionClick} sx={{width: '200px'}} endIcon={<DeleteIcon />}>
+                  <Button variant="outlined" color="error" onClick={handleDeleteSessionClick} sx={{width: '200px'}} endIcon={<DeleteIcon />}>
                     Delete Session
                   </Button>
                 </FormControl>
@@ -136,12 +197,18 @@ export default function SessionDialogEdit({ open, onClose, payload }: DialogProp
       </DialogContent>
       <Divider />
       <DialogActions>
-        <Button onClick={() => onClose(null)}>Close</Button>
-        <Button
+        <Button variant="outlined" onClick={() => onClose(null)}>Close</Button>
+        <SelectButton
           color="success"
-          disabled={!sessionDataFormReady}
-          type="submit"
-        >Edit Session</Button>
+          disabled={!sessionDataFormReady || isBackdropShowing}
+        >
+          <SelectButtonItem
+            onTrigger={() => dialogFormSubmit('edit')}
+          >Edit Session</SelectButtonItem>
+          <SelectButtonItem
+            onTrigger={() => dialogFormSubmit('create')}
+          >Clone Session</SelectButtonItem>
+        </SelectButton>
       </DialogActions>
     </Dialog>
   )

@@ -129,6 +129,10 @@ export default function SessionConnectionDockerContainer({ ddClient, connectionD
             <IconButton
               size="small"
               onClick={setRunningContainersState}
+              sx={{
+                alignSelf: 'start',
+                marginTop: '2px',
+              }}
             >
               <RefreshIcon />
             </IconButton>

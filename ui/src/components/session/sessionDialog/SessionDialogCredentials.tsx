@@ -1,6 +1,7 @@
 import { Checkbox, FormControl, FormControlLabel, FormGroup, FormLabel, TextField } from '@mui/material'
 import { useEffect, useState } from 'react'
 import { SessionCredentials } from '../../../types/session'
+import InputPassword from '../../inputs/InputPassword'
 
 
 interface SessionDialogCredentialsProps{
@@ -70,7 +71,7 @@ export default function SessionDialogCredentials({ credentials }: SessionDialogC
           value={username}
           onChange={e => setUsername(e.target.value)}
         />
-        <TextField
+        <InputPassword
           disabled={!credentialsChecked}
           name="credentials.password"
           label="Password"

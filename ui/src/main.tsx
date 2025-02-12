@@ -6,6 +6,7 @@ import { DockerMuiV6ThemeProvider } from "@docker/docker-mui-theme";
 import MainStyle from './style/MainStyle'
 import { App } from './App';
 import { DialogsProvider } from '@toolpad/core'
+import BackdropProvider from './hooks/useBackdrops/BackdropProvider'
 
 ReactDOM.createRoot(document.getElementById("root") as HTMLElement).render(
   <React.StrictMode>
@@ -17,9 +18,11 @@ ReactDOM.createRoot(document.getElementById("root") as HTMLElement).render(
     <DockerMuiV6ThemeProvider>
       <CssBaseline />
       <MainStyle />
-      <DialogsProvider>
-        <App />
-      </DialogsProvider>
+      <BackdropProvider>
+        <DialogsProvider>
+          <App />
+        </DialogsProvider>
+      </BackdropProvider>
     </DockerMuiV6ThemeProvider>
   </React.StrictMode>
 );

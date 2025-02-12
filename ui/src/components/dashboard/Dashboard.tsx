@@ -1,5 +1,14 @@
-import { useEffect, useReducer, useRef, useState, useSyncExternalStore } from 'react'
-import { FormControl, IconButton, InputAdornment, OutlinedInput, Stack, Tooltip, Typography } from '@mui/material'
+import { useEffect, useMemo, useReducer, useRef, useState, useSyncExternalStore } from 'react'
+import {
+  FormControl,
+  IconButton,
+  InputAdornment,
+  OutlinedInput,
+  Stack,
+  Tooltip,
+  Typography,
+  TypographyProps
+} from '@mui/material'
 import ContentCopyIcon from '@mui/icons-material/ContentCopy'
 import TextStreamOutput from '../utils/TextStreamOutput'
 import { Toast } from '@docker/extension-api-client-types/dist/v1'
@@ -9,20 +18,33 @@ import { ContainerExtended } from '../../types/docker/cli/inspect'
 import useConfig from '../../hooks/useConfig'
 import { Session } from '../../types/session'
 import { SessionStore } from '../../stores/sessionStore'
-import ExampleContainerButton from './ExampleContainerButton'
+import ExampleContainerButton, { ExampleContainerImageTag } from './ExampleContainerButton'
 
 
 interface DashboardProps {
   ddUIToast: Toast
-  connect: (session: Session)=>void
+  connect: (session: Session)=>Promise<void>
   sessionStore: SessionStore
 }
 
 const UbuntuVNCDockerSessionName = 'example vnc container'
 const UbuntuVNCDockerContainerName = 'ubuntu_vnc'
-const UbuntuVNCDockerImage = 'pgmystery/ubuntu_vnc:latest'
+const UbuntuVNCDockerImage = 'pgmystery/ubuntu_vnc'
+const UbuntuVNCDockerImageDefaultTag = 'xfce'
 const UbuntuVNCDockerImageLabel = 'pgmystery.vnc.extension.example'
 const UbuntuVNCDockerImagePort = 5901
+
+
+function InfoText(props: TypographyProps) {
+  return <Typography
+    sx={{
+      textAlign: 'left',
+      marginLeft: '14px',
+      marginRight: '14px',
+    }}
+    { ...props }
+  >{ props.children }</Typography>
+}
 
 
 export default function Dashboard({ ddUIToast, connect, sessionStore }: DashboardProps) {
@@ -31,20 +53,31 @@ export default function Dashboard({ ddUIToast, connect, sessionStore }: Dashboar
   const exampleRunInputRef = useRef<HTMLInputElement>(null)
   const [started, setStarted] = useState<boolean>(false)
   const [pullStdout, dispatch] = useReducer(addPullStdout, [])
+  const pullAbortController = useMemo(() => new AbortController(), [])
   const [pullFinished, setPullFinished] = useState<boolean>(false)
   const [exampleContainer, setExampleContainer] = useState<ContainerExtended | null>(null)
   const [{ proxyContainerPassword }] = useConfig()
+  const [exampleContainerTag, setExampleContainerTag] = useState<ExampleContainerImageTag>(UbuntuVNCDockerImageDefaultTag)
+  const ubuntuVNCDockerImage = useMemo(() => UbuntuVNCDockerImage + ':' + exampleContainerTag, [exampleContainerTag])
 
   useEffect(() => {
-    checkIfExampleContainerExist()
+    checkIfExampleContainerExist().finally(() => setLoading(false))
+  }, [])
+
+  useEffect(() => {
+    return () => {
+      pullAbortController.abort(`Cancel pulling image "${ubuntuVNCDockerImage}"...`)
+    }
   }, [])
 
   async function checkIfExampleContainerExist() {
     const dockerCli = new DockerCli()
     const exampleContainer = await getExampleContainer(dockerCli)
-    setLoading(false)
 
     if (exampleContainer) {
+      const exampleContainerImageTag = exampleContainer.Config.Image.split(':')[1] as ExampleContainerImageTag
+
+      setExampleContainerTag(exampleContainerImageTag)
       setExampleContainer(exampleContainer)
 
       return true
@@ -56,13 +89,16 @@ export default function Dashboard({ ddUIToast, connect, sessionStore }: Dashboar
   }
 
   async function handleRunCmdClick() {
+    setLoading(true)
     setStarted(true)
 
     const dockerCli = new DockerCli()
 
-    if (!await dockerCli.imageExist(UbuntuVNCDockerImage)) {
+    if (!await dockerCli.imageExist(ubuntuVNCDockerImage)) {
       try {
-        await dockerCli.pull(UbuntuVNCDockerImage, dispatch)
+        await dockerCli.pull(ubuntuVNCDockerImage, dispatch, {
+          abortSignal: pullAbortController.signal,
+        })
         setPullFinished(true)
         await connectToExampleContainer(dockerCli)
       }
@@ -96,7 +132,7 @@ export default function Dashboard({ ddUIToast, connect, sessionStore }: Dashboar
   }
 
   async function runExampleContainer(dockerCli: DockerCli) {
-    const execResult = await dockerCli.run(UbuntuVNCDockerImage, {
+    const execResult = await dockerCli.run(ubuntuVNCDockerImage, {
       '--detach': null,
       '--name': UbuntuVNCDockerContainerName,
       '--label': [
@@ -124,6 +160,7 @@ export default function Dashboard({ ddUIToast, connect, sessionStore }: Dashboar
     }
 
     setExampleContainer(exampleContainer)
+    setLoading(false)
 
     if (exampleContainer.State.Status !== 'running')
       return ddUIToast.error('The example container is not running...')
@@ -151,7 +188,7 @@ export default function Dashboard({ ddUIToast, connect, sessionStore }: Dashboar
       await sessionStore.add(exampleSession)
     }
 
-    connect(exampleSession)
+    await connect(exampleSession)
   }
 
   function getExampleContainer(dockerCli: DockerCli) {
@@ -171,7 +208,6 @@ export default function Dashboard({ ddUIToast, connect, sessionStore }: Dashboar
 
     let exampleContainerExist = await checkIfExampleContainerExist()
     if (!exampleContainerExist) return
-    setLoading(true)
 
     const dockerCli = new DockerCli()
     const execResult = await dockerCli.rm(exampleContainer.Id, {force: true})
@@ -192,13 +228,10 @@ export default function Dashboard({ ddUIToast, connect, sessionStore }: Dashboar
 
     const exampleContainerExist = await checkIfExampleContainerExist()
     if (!exampleContainerExist) return
-    setLoading(true)
 
     try {
       const dockerCli = new DockerCli()
       const execResult = await dockerCli.start(exampleContainer.Id)
-
-      setLoading(false)
 
       if (execResult.stderr)
         return ddUIToast?.error(execResult.stderr)
@@ -207,12 +240,14 @@ export default function Dashboard({ ddUIToast, connect, sessionStore }: Dashboar
     }
     catch (e: any) {
       console.error(e)
-      setLoading(false)
 
       if (e instanceof Error)
         ddUIToast.error(e.message)
       else if (isRawExecResult(e))
         ddUIToast.error(e.stderr)
+    }
+    finally {
+      setLoading(false)
     }
   }
 
@@ -234,7 +269,7 @@ export default function Dashboard({ ddUIToast, connect, sessionStore }: Dashboar
           <OutlinedInput
             inputRef={exampleRunInputRef}
             disabled
-            value={ `docker run --name ${UbuntuVNCDockerContainerName} ${UbuntuVNCDockerImage}` }
+            value={ `docker run --name ${UbuntuVNCDockerContainerName} ${ubuntuVNCDockerImage}` }
             endAdornment={
               <InputAdornment position="end">
                 <Tooltip title="Copy to clipboard">
@@ -252,29 +287,19 @@ export default function Dashboard({ ddUIToast, connect, sessionStore }: Dashboar
               maxWidth: '600px',
             }}
           />
-          <Typography sx={{
-            textAlign: 'left',
-            marginLeft: '14px',
-            marginRight: '14px',
-          }}>VNC connect Password = { proxyContainerPassword }</Typography>
-          <Typography sx={{
-            textAlign: 'left',
-            marginLeft: '14px',
-            marginRight: '14px',
-          }}>Docker Container Name = ubuntu_vnc</Typography>
-          <Typography sx={{
-            textAlign: 'left',
-            marginLeft: '14px',
-            marginRight: '14px',
-          }}>VNC Port = 5901</Typography>
+          <InfoText>VNC connect Password = { proxyContainerPassword }</InfoText>
+          <InfoText>Docker Container Name = ubuntu_vnc</InfoText>
+          <InfoText>VNC Port = 5901</InfoText>
         </FormControl>
 
         <ExampleContainerButton
           exampleContainer={exampleContainer}
           disabled={started || loading}
+          loading={loading}
           tryExampleClick={handleRunCmdClick}
           deleteExampleClick={handleDeleteExampleContainerClick}
           startExampleClick={handleStartExampleContainerClick}
+          onTagChange={tag => setExampleContainerTag(tag)}
         />
 
       </Stack>

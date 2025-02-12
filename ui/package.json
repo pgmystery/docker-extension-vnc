@@ -1,6 +1,6 @@
 {
   "name": "ui",
-  "version": "1.1.0",
+  "version": "1.2.0",
   "private": true,
   "type": "module",
   "dependencies": {
@@ -13,6 +13,7 @@
     "@toolpad/core": "^0.11.0",
     "react": "^18.3.1",
     "react-dom": "^18.3.1",
+    "react-is": "^19.0.0",
     "react-vnc": "file:libs/react-vnc"
   },
   "overrides": {
@@ -23,19 +24,17 @@
   },
   "scripts": {
     "dev": "vite",
-    "build": "tsc && vite build",
-    "test": "jest src"
+    "build": "tsc && vite build"
   },
   "devDependencies": {
     "@docker/extension-api-client-types": "0.3.4",
-    "@types/jest": "^29.5.14",
     "@types/node": "^22.9.0",
     "@types/react": "^18.3.12",
     "@types/react-dom": "^18.3.1",
+    "@types/react-is": "^19.0.0",
     "@vitejs/plugin-react": "^4.3.3",
-    "jest": "^29.7.0",
     "typescript": "^5.6.3",
-    "vite": "^5.4.11",
+    "vite": "^5.4.12",
     "vite-plugin-svgr": "^4.3.0"
   }
 }

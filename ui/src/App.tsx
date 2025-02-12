@@ -1,7 +1,6 @@
-import React, { useEffect, useMemo, useState } from 'react'
+import React, { useEffect, useMemo, useRef, useState } from 'react'
 import { createDockerDesktopClient } from '@docker/extension-api-client'
-import { Backdrop, CircularProgress, Divider, Stack } from '@mui/material'
-import useConnectionQueue from './hooks/useConnectionQueue'
+import { Divider, Stack } from '@mui/material'
 import VNCView, { VNCCredentials } from './components/VNCView/VNCView'
 import useVNC from './hooks/useVNC'
 import { isRawExecResult } from './libs/docker/cli/Exec'
@@ -13,6 +12,7 @@ import ConnectBar from './components/sessionsbar/ConnectBar'
 import { getSessionStore } from './stores/sessionStore'
 import { Session } from './types/session'
 import { useDialogs } from '@toolpad/core'
+import useBackdrop from './hooks/useBackdrops/useBackdrop'
 
 
 export interface ConnectedData {
@@ -27,13 +27,12 @@ export function App() {
   const ddClient = useMemo(createDockerDesktopClient, [])
   const sessionStore = useMemo(getSessionStore, [])
   const vnc = useVNC(ddClient)
-  const [loading, setLoading] = useState(true)
+  const tryToConnect = useRef<boolean>(true)
   const [connectedData, setConnectedData] = useState<ConnectedData>()
-  const { connect, disconnect } = useConnectionQueue({
-    onConnect: handleConnectClicked,
-    onDisconnect: handleDisconnectClicked,
-  })
   const dialogs = useDialogs()
+  const { showBackdrop: backdrop, isBackdropShowing } = useBackdrop({
+    sx: (theme) => ({ zIndex: theme.zIndex.drawer + 1 }),
+  })
 
   useEffect(() => {
     if (!sessionStore) return
@@ -42,44 +41,45 @@ export function App() {
   }, [sessionStore, vnc])
 
   async function reconnect() {
-    try {
-      await vnc.reconnect(sessionStore)
-      if (!vnc.connected || !vnc.connection) return setLoading(false)
+    tryToConnect.current = true
 
-      const sessionName = vnc.connection.proxy.getSessionName()
-      const session = await sessionStore?.getSessionByName(sessionName)
+    await backdrop(async () => {
+      try {
+        await vnc.reconnect(sessionStore)
+        if (!vnc.connected || !vnc.connection) return
 
-      if (!session) {
-        ddClient.desktopUI.toast.error(`Try to connect to the session "${sessionName}", but the session don't exist anymore.`)
-        await vnc.disconnect()
+        const sessionName = vnc.connection.proxy.getSessionName()
+        const session = await sessionStore?.getSessionByName(sessionName)
 
-        return setLoading(false)
+        if (!session) {
+          ddClient.desktopUI.toast.error(`Try to connect to the session "${sessionName}", but the session don't exist anymore.`)
+          return await vnc.disconnect()
+        }
+
+        setConnectedData({
+          sessionName: sessionName,
+          url: vnc.connection.proxy.url,
+          connection: vnc.connection,
+          credentials: session.credentials,
+        })
       }
+      catch (e: any) {
+        console.error(e)
 
-      setConnectedData({
-        sessionName: sessionName,
-        url: vnc.connection.proxy.url,
-        connection: vnc.connection,
-        credentials: session.credentials,
-      })
-    }
-    catch (e: any) {
-      console.error(e)
+        if (e instanceof Error)
+          ddClient.desktopUI.toast.error(e.message)
+        else if (isRawExecResult(e))
+          ddClient.desktopUI.toast.error(e.stderr)
 
-      if (e instanceof Error)
-        ddClient.desktopUI.toast.error(e.message)
-      else if (isRawExecResult(e))
-        ddClient.desktopUI.toast.error(e.stderr)
+        await vnc.disconnect()
+      }
+    })
 
-      await vnc.disconnect()
-    }
-
-
-    setLoading(false)
+    tryToConnect.current = false
   }
 
-  async function handleConnectClicked(session: Session) {
-    async function connect() {
+  async function connect(session: Session) {
+    async function _connect(): Promise<ConnectedData | undefined> {
       const proxyDockerImageExist = await vnc.dockerProxyImageExist()
 
       if (!proxyDockerImageExist)
@@ -97,92 +97,79 @@ export function App() {
         await vnc.disconnect()
       }
 
-      setLoading(false)
       if (!vnc.connected || !vnc.connection) return
 
-      setConnectedData({
+      return {
         sessionName: vnc.connection.proxy.getSessionName(),
         url: vnc.connection.proxy.url,
         connection: vnc.connection,
         credentials: session.credentials,
-      })
+      }
     }
 
-    if (loading)
+    if (tryToConnect.current || connectedData !== undefined)
       return
 
-    setLoading(true)
+    tryToConnect.current = true
 
-    return connect
+    const connectData = await backdrop(_connect)
+    setConnectedData(connectData)
+
+    tryToConnect.current = false
   }
 
-  async function handleDisconnectClicked() {
-    async function disconnect() {
-      try {
-        await vnc.disconnect()
+  async function disconnect() {
+    try {
+      await backdrop(() => vnc.disconnect())
+    }
+    catch (e: any) {
+      console.error(e)
 
-        setConnectedData(undefined)
-      }
-      catch (e: any) {
-        console.error(e)
-
-        if (e instanceof Error)
-          ddClient.desktopUI.toast.error(e.message)
-        else if (isRawExecResult(e))
-          ddClient.desktopUI.toast.error(e.stderr)
-      }
-
-      setLoading(false)
+      if (e instanceof Error)
+        ddClient.desktopUI.toast.error(e.message)
+      else if (isRawExecResult(e))
+        ddClient.desktopUI.toast.error(e.stderr)
     }
 
-    setLoading(true)
-
-    return disconnect
+    setConnectedData(undefined)
   }
 
   return (
-    <>
+    sessionStore &&
+    <Stack alignItems="start" spacing={2} sx={{
+      height: '100%',
+      alignItems: 'stretch',
+    }}>
+
+      <ConnectBar
+        connectedSession={connectedData?.sessionName}
+        onConnect={connect}
+        onDisconnect={disconnect}
+        sessionStore={sessionStore}
+        ddUIToast={ddClient.desktopUI.toast}
+        disabled={isBackdropShowing}
+      />
+
+      <Divider />
+
       {
-        sessionStore &&
-        <Stack alignItems="start" spacing={2} sx={{
-          height: '100%',
-          alignItems: 'stretch',
-        }}>
-
-          <ConnectBar
-            connectedSession={connectedData?.sessionName}
-            onConnect={connect}
-            onDisconnect={disconnect}
-            sessionStore={sessionStore}
-            ddUIToast={ddClient.desktopUI.toast}
-            disabled={loading}
-          />
-          <Divider />
-
-          {
-            loading || !connectedData
-            ? <Dashboard
-              ddUIToast={ddClient.desktopUI.toast}
-              connect={connect}
-              sessionStore={sessionStore}
-            />
-            : <VNCView
-              sessionName={connectedData.sessionName}
-              url={connectedData.url}
-              credentials={connectedData.credentials}
-              onCancel={disconnect}
-              ddUIToast={ddClient.desktopUI.toast}
-              openBrowserURL={ddClient.host.openExternal}
-              sessionStore={sessionStore}
-            />
-          }
-
-        </Stack>
+        isBackdropShowing || !connectedData
+        ? <Dashboard
+          ddUIToast={ddClient.desktopUI.toast}
+          connect={connect}
+          sessionStore={sessionStore}
+        />
+        : <VNCView
+          sessionName={connectedData.sessionName}
+          url={connectedData.url}
+          credentials={connectedData.credentials}
+          onCancel={disconnect}
+          ddUIToast={ddClient.desktopUI.toast}
+          openBrowserURL={ddClient.host.openExternal}
+          sessionStore={sessionStore}
+        />
       }
 
-      <Backdrop sx={(theme) => ({ color: '#fff', zIndex: theme.zIndex.drawer + 1 })} open={loading}>
-        <CircularProgress />
-      </Backdrop>
-    </>
+    </Stack>
   )
 }
