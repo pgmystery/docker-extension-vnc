@@ -84,7 +84,7 @@ export default function VNCSessionBar({
 
       <Box sx={ {flexGrow: 1} }/>
 
-      <Tooltip title="Copy websocket url to clipboard" arrow>
+      <Tooltip title="Copy Websocket-URL to Clipboard" arrow>
         <IconButton onClick={ onWebsocketUrlCopyClick }>
           <PowerIcon/>
         </IconButton>
