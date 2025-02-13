@@ -2,6 +2,9 @@
 
 History of all released versions and changes
 
+## v1.3.0
+- TODO
+
 ## v1.2.0
 - Fix bug with "Toggle keys" under a windows machine.
 - Add a new button for copy the url of the proxy-websocket.
