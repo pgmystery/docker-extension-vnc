@@ -157,6 +157,7 @@ export function App() {
           ddUIToast={ddClient.desktopUI.toast}
           connect={connect}
           sessionStore={sessionStore}
+          openUrl={ddClient.host.openExternal}
         />
         : <VNCView
           sessionName={connectedData.sessionName}

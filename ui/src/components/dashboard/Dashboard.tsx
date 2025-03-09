@@ -3,7 +3,7 @@ import {
   CircularProgress,
   FormControl,
   IconButton,
-  InputAdornment,
+  InputAdornment, Link,
   OutlinedInput,
   Stack,
   Tooltip,
@@ -28,6 +28,7 @@ interface DashboardProps {
   ddUIToast: Toast
   connect: (session: Session)=>Promise<void>
   sessionStore: SessionStore
+  openUrl: (url: string)=>void
 }
 
 interface InfoTextImageSizeProps extends TypographyProps {
@@ -82,12 +83,12 @@ function InfoTextImageSize(props: InfoTextImageSizeProps) {
           width: '50px',
           verticalAlign: 'middle',
         }} />
-      : <Typography sx={{display: 'inline-block', textDecoration: 'underline'}}>{ imageSize }</Typography>
+      : <Typography component="span" sx={{display: 'inline-block', textDecoration: 'underline'}}>{ imageSize }</Typography>
   }</InfoText>
 }
 
 
-export default function Dashboard({ ddUIToast, connect, sessionStore }: DashboardProps) {
+export default function Dashboard({ ddUIToast, openUrl, connect, sessionStore }: DashboardProps) {
   const [loading, setLoading] = useState<boolean>(true)
   const sessions = useSyncExternalStore(sessionStore.subscribe, sessionStore.getSnapshot)
   const exampleRunInputRef = useRef<HTMLInputElement>(null)
@@ -331,6 +332,13 @@ export default function Dashboard({ ddUIToast, connect, sessionStore }: Dashboar
           <InfoText>Docker Container Name = ubuntu_vnc</InfoText>
           <InfoText>VNC Port = 5901</InfoText>
           <InfoTextImageSize image={ubuntuVNCDockerImage} />
+          <InfoText>
+            GitHub ={" "}
+            <Link
+              component="button"
+              onClick={() => openUrl(`https://github.com/pgmystery/docker-extension-vnc/tree/main/docker/vnc_ubuntu/${exampleContainerTag}`)}
+            >{ubuntuVNCDockerImage}</Link>
+          </InfoText>
         </FormControl>
 
         <ExampleContainerButton
