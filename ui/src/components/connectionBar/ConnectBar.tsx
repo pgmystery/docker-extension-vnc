@@ -8,7 +8,7 @@ import SessionDialogEdit from '../session/sessionDialog/SessionDialogEdit'
 import { Session, SessionCreateData, SessionUpdateData } from '../../types/session'
 import { SessionStore } from '../../stores/sessionStore'
 import { Toast } from '@docker/extension-api-client-types/dist/v1'
-import ConnectButton from '../connectbar/ConnectButton'
+import ConnectButton from './ConnectButton'
 import { useDialogs } from '@toolpad/core'
 
 

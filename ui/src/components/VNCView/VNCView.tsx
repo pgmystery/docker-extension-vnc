@@ -34,6 +34,7 @@ export default function VNCView({ sessionName, url, onCancel, ddUIToast, openBro
   })
   const [ready, setReady] = useState<boolean>(false)
   const vncContainerRef = useRef<HTMLDivElement>(null)
+  const [canvasElement, setCanvasElement] = useState<HTMLCanvasElement | undefined>()
   const vncScreenRef = useRef<React.ElementRef<typeof VncScreen>>(null)
   const vncSettingsStore = useMemo(getVNCSettingsStore, [])
   const vncSettings = useSyncExternalStore(vncSettingsStore.subscribe, vncSettingsStore.getSnapshot)
@@ -67,19 +68,11 @@ export default function VNCView({ sessionName, url, onCancel, ddUIToast, openBro
       setCurrentCredentials(credentials)
   }, [credentials])
 
-  useEffect(() => {
-    const { getCapabilities } = vncScreenRef.current ?? {}
-
-    if (!getCapabilities)
-      return setHavePowerCapability(false)
-
-    const capabilities = getCapabilities()
-
-    setHavePowerCapability(capabilities?.power || false)
-  }, [vncContainerRef.current])
-
   function onVNCConnect() {
     if (!vncContainerRef.current) return
+
+    const vncCanvasElement = vncContainerRef.current.getElementsByTagName('canvas').item(0)
+    setCanvasElement(vncCanvasElement || undefined)
 
     const bodyElement = document.getElementsByTagName('body').item(0)
     if (!bodyElement) return
@@ -96,11 +89,13 @@ export default function VNCView({ sessionName, url, onCancel, ddUIToast, openBro
     }
 
     if (!bodyCanvasElement) return
-
-    const vncCanvasElement = vncContainerRef.current.getElementsByTagName('canvas').item(0)
     if (!vncCanvasElement) return
 
     vncCanvasElement.parentElement?.appendChild(bodyCanvasElement)
+  }
+
+  function onVNCDisconnect() {
+    setCanvasElement(undefined)
   }
 
   async function handleCredentialRequest() {
@@ -248,6 +243,7 @@ export default function VNCView({ sessionName, url, onCancel, ddUIToast, openBro
         sendMachineCommand={sendMachineCommand}
         havePowerCapability={havePowerCapability}
         viewOnly={vncSettings.viewOnly}
+        canvas={canvasElement}
       />
       <Box ref={vncContainerRef} sx={{
         width: '100%',
@@ -266,6 +262,7 @@ export default function VNCView({ sessionName, url, onCancel, ddUIToast, openBro
             }}
             ref={vncScreenRef}
             onConnect={onVNCConnect}
+            onDisconnect={onVNCDisconnect}
             onCredentialsRequired={handleCredentialRequest}
             onSecurityFailure={handleSecurityFailure}
             rfbOptions={{

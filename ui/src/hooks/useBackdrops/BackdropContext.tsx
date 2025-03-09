@@ -1,5 +1,5 @@
-import { createContext } from 'react'
-import { CreateUseBackdropHook } from './useBackdrop'
+import { createContext, Dispatch } from 'react'
+import { BackdropHandlerAction } from './useBackdropHandler'
 
 
-export const BackdropContext = createContext<CreateUseBackdropHook | null>(null)
+export const BackdropContext = createContext<Dispatch<BackdropHandlerAction> | null>(null)

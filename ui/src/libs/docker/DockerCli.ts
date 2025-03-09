@@ -10,6 +10,7 @@ import {
 import { createDockerDesktopClient } from '@docker/extension-api-client'
 import { CliExecOptions } from '../../types/docker/cli'
 import { MultipleContainersFoundError } from './Container'
+import DockerCliManifest from './cli/Manifest'
 
 interface AbortEventTarget extends EventTarget {
   reason?: string
@@ -23,8 +24,17 @@ interface PullOptions {
   abortSignal?: AbortSignal
 }
 
+interface DockerHubImage {
+  Description: string
+  IsAutomated: 'false' | 'true'
+  IsOfficial: 'false' | 'true'
+  Name: string
+  StarCount: string
+}
+
 export default class DockerCli extends DockerCliExec {
   public network: DockerCliNetwork
+  public manifest: DockerCliManifest
 
   constructor(dockerClient?: DockerClient) {
     if (!dockerClient)
@@ -33,6 +43,7 @@ export default class DockerCli extends DockerCliExec {
     super(dockerClient)
 
     this.network = new DockerCliNetwork(dockerClient)
+    this.manifest = new DockerCliManifest(dockerClient)
   }
 
   async getContainer(filters: DockerListContainersFilters): Promise<ContainerInfo | undefined> {
@@ -140,5 +151,26 @@ export default class DockerCli extends DockerCliExec {
 
   start(containerId: string, options: CliExecOptions = {}) {
     return this.exec('start', options, containerId)
+  }
+
+  async search(searchString: string, limit: number = 10) {
+    const searchResult = await this.exec(
+      'search',
+      {
+        '--format': 'json',
+        '--no-trunc': null,
+        '--limit': limit,
+      },
+      searchString
+    )
+
+    return searchResult.parseJsonLines() as DockerHubImage[]
+  }
+
+  listImages(options?: any) {
+    return this.client.listImages({
+      ...options,
+      format: 'json',
+    }) as Promise<DockerImage[]>
   }
 }

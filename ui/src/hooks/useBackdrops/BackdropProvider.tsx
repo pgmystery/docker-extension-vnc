@@ -1,32 +1,36 @@
 import { BackdropContext } from './BackdropContext'
-import React, { ReactNode, useCallback, useId, useState } from 'react'
-import { BackdropComponentProps, CreateUseBackdropHook, UseBackdropComponent } from './useBackdrop'
+import React, { ReactNode, useMemo } from 'react'
+import { UseBackdropComponent } from './useBackdrop'
+import useBackdropHandler from './useBackdropHandler'
 
 
 interface BackdropProviderProps {
   children?: ReactNode
 }
 
-
 export default function BackdropProvider({ children }: BackdropProviderProps) {
-  const [openWithProps, setOpenWithProps] = useState<BackdropComponentProps | null>(null)
-  const keyPrefix = useId()
+  const [backdropHandlerData, backdropHandlerDispatch] = useBackdropHandler()
 
-  const createBackdrop: CreateUseBackdropHook = useCallback((backdropProps: BackdropComponentProps = {}) => ({
-    showBackdrop: function showBackdrop<T>(asyncCallback: ()=>Promise<T>) {
-      setOpenWithProps(backdropProps)
+  const backdropComponents = useMemo(() => {
+    const components = []
 
-      return asyncCallback().finally(() => setOpenWithProps(null))
-    },
-    isBackdropShowing: openWithProps !== null
-  }), [keyPrefix, openWithProps])
+    for (const [id, backdrops] of Object.entries(backdropHandlerData)) {
+      components.push(backdrops.map((backdropProps, index) => {
+        return <UseBackdropComponent
+          {...backdropProps}
+          key={`${id}-${index}`}
+        />
+      }))
+    }
+
+    return components
+  }, [backdropHandlerData])
 
   return (
-    <BackdropContext.Provider value={createBackdrop}>
+    <BackdropContext.Provider value={backdropHandlerDispatch}>
       { children }
       {
-        openWithProps &&
-        <UseBackdropComponent backdropProps={openWithProps ?? undefined} />
+        ...backdropComponents
       }
     </BackdropContext.Provider>
   )

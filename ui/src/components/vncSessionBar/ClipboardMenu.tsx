@@ -7,9 +7,10 @@ import Button from '@mui/material/Button'
 interface ClipboardMenuProps {
   clipboardText: string
   sendClipboardText?: (text: string)=>void
+  disabled?: boolean
 }
 
-export default function ClipboardMenu({ clipboardText, sendClipboardText }: ClipboardMenuProps) {
+export default function ClipboardMenu({ clipboardText, sendClipboardText, disabled }: ClipboardMenuProps) {
   const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null)
   const open = Boolean(anchorEl)
   const [textareaValue, setTextareaValue] = useState<string>('')
@@ -35,6 +36,7 @@ export default function ClipboardMenu({ clipboardText, sendClipboardText }: Clip
           aria-controls={ open ? 'clipboard-menu' : undefined }
           aria-haspopup="true"
           aria-expanded={ open ? 'true' : undefined }
+          disabled={ disabled }
         >
           <ContentPasteIcon/>
         </IconButton>

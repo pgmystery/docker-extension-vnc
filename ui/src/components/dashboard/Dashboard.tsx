@@ -1,5 +1,6 @@
 import { useEffect, useMemo, useReducer, useRef, useState, useSyncExternalStore } from 'react'
 import {
+  CircularProgress,
   FormControl,
   IconButton,
   InputAdornment,
@@ -19,12 +20,18 @@ import useConfig from '../../hooks/useConfig'
 import { Session } from '../../types/session'
 import { SessionStore } from '../../stores/sessionStore'
 import ExampleContainerButton, { ExampleContainerImageTag } from './ExampleContainerButton'
+import {filesize} from "filesize"
+import DockerHubApi from '../../libs/dockerHub/DockerHubApi'
 
 
 interface DashboardProps {
   ddUIToast: Toast
   connect: (session: Session)=>Promise<void>
   sessionStore: SessionStore
+}
+
+interface InfoTextImageSizeProps extends TypographyProps {
+  image: string
 }
 
 const UbuntuVNCDockerSessionName = 'example vnc container'
@@ -44,6 +51,39 @@ function InfoText(props: TypographyProps) {
     }}
     { ...props }
   >{ props.children }</Typography>
+}
+
+
+function InfoTextImageSize(props: InfoTextImageSizeProps) {
+  const dockerHubApi = new DockerHubApi()
+  const [imageSize, setImageSize] = useState<string | undefined>()
+  const { image: imageWithTag } = props
+
+  useEffect(() => {
+    setImageSize(undefined)
+
+    if (imageWithTag === '') {
+      setImageSize('ERROR')
+
+      return
+    }
+
+    const [image, tag] = imageWithTag.split(':')
+    const dockerRepo = dockerHubApi.repository(image)
+    dockerRepo.getTag(tag)
+              .then(imageInfo => setImageSize(filesize(imageInfo.full_size, {standard: 'jedec'})))
+  }, [imageWithTag])
+
+  return <InfoText>Image sizes = {
+    imageSize === undefined
+      ? <CircularProgress size={20} sx={{
+          display: 'inline-block',
+          maxWidth: '50px',
+          width: '50px',
+          verticalAlign: 'middle',
+        }} />
+      : <Typography sx={{display: 'inline-block', textDecoration: 'underline'}}>{ imageSize }</Typography>
+  }</InfoText>
 }
 
 
@@ -290,6 +330,7 @@ export default function Dashboard({ ddUIToast, connect, sessionStore }: Dashboar
           <InfoText>VNC connect Password = { proxyContainerPassword }</InfoText>
           <InfoText>Docker Container Name = ubuntu_vnc</InfoText>
           <InfoText>VNC Port = 5901</InfoText>
+          <InfoTextImageSize image={ubuntuVNCDockerImage} />
         </FormControl>
 
         <ExampleContainerButton
