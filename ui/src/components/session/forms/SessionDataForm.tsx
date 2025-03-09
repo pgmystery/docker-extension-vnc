@@ -5,6 +5,7 @@ import { ReactNode, useEffect, useState } from 'react'
 import { Session, SessionCreateData } from '../../../types/session'
 import { serializeConnectionDataRemoteHost } from '../sessionDialog/connections/SessionConnectionRemoteHost'
 import { serializeConnectionDataDockerContainer } from '../sessionDialog/connections/SessionConnectionDockerContainer'
+import { serializeConnectionDataDockerImage } from '../sessionDialog/connections/SessionConnectionDockerImage'
 
 
 interface SessionDataFormProps {
@@ -61,6 +62,9 @@ export function serializeSessionFormData(formData: FormData) {
   switch (formJson.connection?.type) {
     case 'remote':
       formJson.connection.data = serializeConnectionDataRemoteHost(formData)
+      break
+    case 'image':
+      formJson.connection.data = serializeConnectionDataDockerImage(formData)
       break
     case 'container':
       formJson.connection.data = serializeConnectionDataDockerContainer(formData)

@@ -6,6 +6,7 @@ import SessionConnectionDockerContainer, {
   ConnectionDataDockerContainer
 } from './connections/SessionConnectionDockerContainer'
 import SessionConnectionRemoteHost, { ConnectionDataRemoteHost } from './connections/SessionConnectionRemoteHost'
+import SessionConnectionDockerImage, { ConnectionDataDockerImage } from './connections/SessionConnectionDockerImage'
 
 
 interface SessionDialogConnectionProps {
@@ -32,6 +33,11 @@ export default function SessionDialogConnection({ connection, setSubmitReady }: 
           connectionData={ connection?.type === 'container' ? connection.data as ConnectionDataDockerContainer : undefined}
           setSubmitReady={setSubmitReady}
         />
+      case 'image':
+        return <SessionConnectionDockerImage
+          connectionData={ connection?.type === 'image' ? connection.data as ConnectionDataDockerImage : undefined}
+          setSubmitReady={setSubmitReady}
+        />
       case 'remote':
         return <SessionConnectionRemoteHost
           connectionData={ connection?.type === 'remote' ? connection.data as ConnectionDataRemoteHost : undefined}
@@ -55,6 +61,7 @@ export default function SessionDialogConnection({ connection, setSubmitReady }: 
           }}
         >
           <MenuItem value="container">Docker Container</MenuItem>
+          <MenuItem value="image">Docker Image</MenuItem>
           <MenuItem value="remote">Remote Host</MenuItem>
         </Select>
         {
