@@ -7,6 +7,7 @@ History of all released versions and changes
 - Add a screenshot-button for making a screenshot from the canvas and save it on the user's computer.
 - Add a record-button to record the canvas as a video and save it on the user's computer.
 - Disable some session buttons if there is no session (disconnected).
+- NoVNC-Proxy: Update Websockify version from v0.12.0 -> v0.13.0.
 
 ## v1.2.0
 - Fix bug with "Toggle keys" under a windows machine.
