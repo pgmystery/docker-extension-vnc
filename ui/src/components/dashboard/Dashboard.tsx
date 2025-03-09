@@ -82,7 +82,7 @@ function InfoTextImageSize(props: InfoTextImageSizeProps) {
           width: '50px',
           verticalAlign: 'middle',
         }} />
-      : <Typography sx={{display: 'inline-block', textDecoration: 'underline'}}>{ imageSize }</Typography>
+      : <Typography component="span" sx={{display: 'inline-block', textDecoration: 'underline'}}>{ imageSize }</Typography>
   }</InfoText>
 }
 
