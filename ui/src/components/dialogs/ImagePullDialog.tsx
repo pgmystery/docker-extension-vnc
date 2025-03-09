@@ -1,21 +1,21 @@
 import { CircularProgress, Dialog, DialogContent, DialogContentText, DialogTitle, Typography } from '@mui/material'
-import { useEffect, useMemo, useReducer, useRef, useState } from 'react'
-import { isRawExecResult } from '../../libs/docker/cli/Exec'
-import useVNC from '../../hooks/useVNC'
-import { createDockerDesktopClient } from '@docker/extension-api-client'
 import { DialogProps } from '@toolpad/core'
+import { useEffect, useMemo, useReducer, useRef, useState } from 'react'
+import { createDockerDesktopClient } from '@docker/extension-api-client'
+import { isRawExecResult } from '../../libs/docker/cli/Exec'
+import DockerCli from '../../libs/docker/DockerCli'
 
 
-interface VNCProxyImagePullDialogProps {
-  onSuccess?: ()=>void,
-  onError?: (error: any)=>void,
+interface ImagePullDialogProps {
+  image: string
+  onSuccess?: ()=>void
+  onError?: (error: any)=>void
 }
 
 
-export default function VNCProxyImagePullDialog({open, onClose, payload}: DialogProps<VNCProxyImagePullDialogProps>) {
-  const { onSuccess, onError } = payload
+export default function ImagePullDialog({ open, onClose, payload }: DialogProps<ImagePullDialogProps>) {
+  const { image, onSuccess, onError } = payload
   const ddClient = useMemo(createDockerDesktopClient, [])
-  const vnc = useVNC(ddClient)
   const [stdout, dispatch] = useReducer(addStdout, [])
   const dialogContentElementRef = useRef<HTMLElement>(null)
   const descriptionElementRef = useRef<HTMLElement>(null)
@@ -30,28 +30,29 @@ export default function VNCProxyImagePullDialog({open, onClose, payload}: Dialog
       descriptionElement.focus()
     }
 
-    vnc.pullProxyDockerImage(dispatch)
-       .then(() => {
-         setFinished(true)
+    const dockerCli = new DockerCli()
+    dockerCli.pull(image, dispatch)
+      .then(() => {
+        setFinished(true)
 
-         if (onSuccess)
-           onSuccess()
-       })
-       .catch(e => {
-         console.error(e)
+        if (onSuccess)
+          onSuccess()
+      })
+      .catch(e => {
+        console.error(e)
 
-         if (e instanceof Error)
-           ddClient.desktopUI.toast.error(e.message)
-         else if (isRawExecResult(e))
-           ddClient.desktopUI.toast.error(e.stderr)
-         else {
-           ddClient.desktopUI.toast.error(e)
-         }
+        if (e instanceof Error)
+          ddClient.desktopUI.toast.error(e.message)
+        else if (isRawExecResult(e))
+          ddClient.desktopUI.toast.error(e.stderr)
+        else {
+          ddClient.desktopUI.toast.error(e)
+        }
 
-         if (onError)
-           onError(e)
-       })
-       .finally(onClose)
+        if (onError)
+          onError(e)
+      })
+      .finally(onClose)
   }, [open])
 
   useEffect(() => {
@@ -69,7 +70,7 @@ export default function VNCProxyImagePullDialog({open, onClose, payload}: Dialog
 
   return (
     <Dialog open={ open } scroll="paper">
-      <DialogTitle>Pull VNC-Proxy docker image (Please Wait)</DialogTitle>
+      <DialogTitle>Pull Docker Image "${image}" (Please Wait)</DialogTitle>
       <DialogContent dividers ref={dialogContentElementRef}>
         <DialogContentText ref={descriptionElementRef} tabIndex={-1} sx={{margin: '10px'}}>
           {stdout.map((stdout, index) =>

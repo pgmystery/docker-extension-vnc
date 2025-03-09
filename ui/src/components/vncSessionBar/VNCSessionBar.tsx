@@ -9,6 +9,9 @@ import SendMachineCommandsMenu, { MachineCommand } from './SendMachineCommandsMe
 import DragViewportButton from './DragViewportButton'
 import { RefObject, useEffect } from 'react'
 import PowerIcon from '@mui/icons-material/Power'
+import ScreenshotButton from './ScreenshotButton'
+import RecordButton from './RecordButton'
+// import InventoryIcon from '@mui/icons-material/Inventory'
 
 
 export interface VNCSessionBarProps {
@@ -25,6 +28,7 @@ export interface VNCSessionBarProps {
   sendMachineCommand: (command: MachineCommand) => void
   havePowerCapability: boolean
   viewOnly: boolean
+  canvas?: HTMLCanvasElement
 }
 
 
@@ -42,6 +46,7 @@ export default function VNCSessionBar({
   sendMachineCommand,
   havePowerCapability,
   viewOnly,
+  canvas,
 }: VNCSessionBarProps) {
   useEffect(() => {
     if (!vncScreenRef || !vncScreenRef.current?.rfb)
@@ -71,20 +76,29 @@ export default function VNCSessionBar({
       {
         !viewOnly && <>
           <SendKeysMenu
+            disabled={!canvas}
             sendKey={ (keysym: number, code: string, down?: boolean) => vncScreenRef?.current?.sendKey(keysym, code, down) }
             sendCtrlAltDel={ () => {
               vncScreenRef?.current?.sendCtrlAltDel()
               vncScreenRef?.current?.focus()
             } }
           />
-          <ClipboardMenu clipboardText={ clipboardText } sendClipboardText={ sendClipboardText }/>
+          <ClipboardMenu disabled={!canvas} clipboardText={ clipboardText } sendClipboardText={ sendClipboardText }/>
           { havePowerCapability && <SendMachineCommandsMenu sendMachineCommand={ sendMachineCommand }/> }
         </>
       }
+      <ScreenshotButton canvas={canvas} />
+      <RecordButton canvas={canvas} />
 
       <Box sx={ {flexGrow: 1} }/>
 
-      <Tooltip title="Copy websocket url to clipboard" arrow>
+      {/*<Tooltip title="Create a Docker Image from the Container" arrow>*/}
+      {/*  /!*  TODO: https://stackoverflow.com/a/52006170 *!/*/}
+      {/*  <IconButton  >*/}
+      {/*    <InventoryIcon />*/}
+      {/*  </IconButton>*/}
+      {/*</Tooltip>*/}
+      <Tooltip title="Copy Websocket-URL to Clipboard" arrow>
         <IconButton onClick={ onWebsocketUrlCopyClick }>
           <PowerIcon/>
         </IconButton>

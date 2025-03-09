@@ -4,15 +4,14 @@ import { Divider, Stack } from '@mui/material'
 import VNCView, { VNCCredentials } from './components/VNCView/VNCView'
 import useVNC from './hooks/useVNC'
 import { isRawExecResult } from './libs/docker/cli/Exec'
-import VNCProxyImagePullDialog from './components/VNCView/VNCProxyImagePullDialog'
 import Dashboard from './components/dashboard/Dashboard'
 import { VNCConnectionType } from './libs/vnc/VNC'
 import { ProxyURL } from './libs/vnc/proxies/Proxy'
-import ConnectBar from './components/sessionsbar/ConnectBar'
+import ConnectBar from './components/connectionBar/ConnectBar'
 import { getSessionStore } from './stores/sessionStore'
 import { Session } from './types/session'
-import { useDialogs } from '@toolpad/core'
 import useBackdrop from './hooks/useBackdrops/useBackdrop'
+import useImagePullDialog from './hooks/useImagePullDialog'
 
 
 export interface ConnectedData {
@@ -29,8 +28,8 @@ export function App() {
   const vnc = useVNC(ddClient)
   const tryToConnect = useRef<boolean>(true)
   const [connectedData, setConnectedData] = useState<ConnectedData>()
-  const dialogs = useDialogs()
-  const { showBackdrop: backdrop, isBackdropShowing } = useBackdrop({
+  const pullDockerImage = useImagePullDialog()
+  const backdrop = useBackdrop({
     sx: (theme) => ({ zIndex: theme.zIndex.drawer + 1 }),
   })
 
@@ -43,7 +42,7 @@ export function App() {
   async function reconnect() {
     tryToConnect.current = true
 
-    await backdrop(async () => {
+    await backdrop.open(async () => {
       try {
         await vnc.reconnect(sessionStore)
         if (!vnc.connected || !vnc.connection) return
@@ -83,7 +82,7 @@ export function App() {
       const proxyDockerImageExist = await vnc.dockerProxyImageExist()
 
       if (!proxyDockerImageExist)
-        await dialogs.open(VNCProxyImagePullDialog, {})
+        await pullDockerImage(vnc.proxyDockerImage)
 
       try {
         await vnc.connect(session.name, session.connection)
@@ -112,7 +111,7 @@ export function App() {
 
     tryToConnect.current = true
 
-    const connectData = await backdrop(_connect)
+    const connectData = await backdrop.open(_connect)
     setConnectedData(connectData)
 
     tryToConnect.current = false
@@ -120,7 +119,7 @@ export function App() {
 
   async function disconnect() {
     try {
-      await backdrop(() => vnc.disconnect())
+      await backdrop.open(() => vnc.disconnect())
     }
     catch (e: any) {
       console.error(e)
@@ -147,13 +146,13 @@ export function App() {
         onDisconnect={disconnect}
         sessionStore={sessionStore}
         ddUIToast={ddClient.desktopUI.toast}
-        disabled={isBackdropShowing}
+        disabled={backdrop.isOpen}
       />
 
       <Divider />
 
       {
-        isBackdropShowing || !connectedData
+        backdrop.isOpen || !connectedData
         ? <Dashboard
           ddUIToast={ddClient.desktopUI.toast}
           connect={connect}

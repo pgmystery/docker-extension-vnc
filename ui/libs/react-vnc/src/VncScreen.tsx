@@ -38,7 +38,7 @@ export interface Props {
     debug?: boolean;
     loadingUI?: React.ReactNode;
     onConnect?: (rfb?: RFB) => void;
-    onDisconnect?: (rfb?: RFB) => void;
+    onDisconnect?: (rfb?: RFB) => (void | boolean);
     onCredentialsRequired?: (rfb?: RFB) => void;
     onSecurityFailure?: (e?: { detail: { status: number, reason: string } }) => void;
     onClipboard?: (e?: { detail: { text: string } }) => void;
@@ -154,10 +154,8 @@ const VncScreen: React.ForwardRefRenderFunction<VncScreenHandle, Props> = (props
 
     const _onDisconnect = () => {
         const rfb = getRfb();
-        if (onDisconnect) {
-            onDisconnect(rfb ?? undefined);
-            setLoading(true);
-            return;
+        if (onDisconnect && onDisconnect(rfb ?? undefined)) {
+          return;
         }
 
         const connected = getConnected();

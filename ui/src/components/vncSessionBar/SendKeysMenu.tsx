@@ -22,7 +22,9 @@ import { VncScreenHandle } from 'react-vnc'
 import { Check } from '@mui/icons-material'
 
 
-interface SendKeysMenuProps extends Partial<Pick<VncScreenHandle, 'sendKey' | 'sendCtrlAltDel'>> {}
+interface SendKeysMenuProps extends Partial<Pick<VncScreenHandle, 'sendKey' | 'sendCtrlAltDel'>> {
+  disabled?: boolean
+}
 interface SendKeysMenuItemToggleProps {
   label: string
   icon: ReactNode
@@ -31,7 +33,7 @@ interface SendKeysMenuItemToggleProps {
 
 
 // https://docs.rs/x11-dl/1.0.1/x11_dl/keysym/
-export default function SendKeysMenu({ sendKey, sendCtrlAltDel }: SendKeysMenuProps) {
+export default function SendKeysMenu({ sendKey, sendCtrlAltDel, disabled }: SendKeysMenuProps) {
   const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null)
   const open = Boolean(anchorEl)
   const [ctrlKeyDown, setCtrlKeyDown] = useState<boolean>(false)
@@ -85,6 +87,7 @@ export default function SendKeysMenu({ sendKey, sendCtrlAltDel }: SendKeysMenuPr
           aria-controls={open ? 'key-menu' : undefined}
           aria-haspopup="true"
           aria-expanded={open ? 'true' : undefined}
+          disabled={disabled}
         >
           <KeyboardHideIcon />
         </IconButton>
