@@ -3,7 +3,10 @@
 History of all released versions and changes
 
 ## v1.3.0
-- TODO
+- Show the Image size from the selected Example Docker Image on Dashboard.
+- Add a screenshot-button for making a screenshot from the canvas and save it on the user's computer.
+- Add a record-button to record the canvas as a video and save it on the user's computer.
+- Disable some session buttons if there is no session (disconnected).
 
 ## v1.2.0
 - Fix bug with "Toggle keys" under a windows machine.
