@@ -75,7 +75,7 @@ function InfoTextImageSize(props: InfoTextImageSizeProps) {
               .then(imageInfo => setImageSize(filesize(imageInfo.full_size, {standard: 'jedec'})))
   }, [imageWithTag])
 
-  return <InfoText>Image sizes = {
+  return <InfoText>Image size = {
     imageSize === undefined
       ? <CircularProgress size={20} sx={{
           display: 'inline-block',
