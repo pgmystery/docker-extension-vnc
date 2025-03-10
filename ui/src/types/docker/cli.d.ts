@@ -1,5 +1,5 @@
 export interface CliExecOptions {
-  [key: string]: CliExecOptionsTypes| CliExecOptionsTypes[] | undefined | null
+  [key: string]: CliExecOptionsTypes | CliExecOptionsTypes[] | undefined | null
 }
 
 type CliExecOptionsTypes = string | number | boolean

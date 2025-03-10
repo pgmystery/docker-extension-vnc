@@ -3,7 +3,7 @@ import RefreshIcon from '@mui/icons-material/Refresh'
 import React, { useEffect, useState } from 'react'
 import { DockerDesktopClient } from '@docker/extension-api-client-types/dist/v1'
 import { ContainerInfo } from '../../../../types/docker/extension'
-import ContainerSelect from '../../../connectbar/ContainerSelect'
+import ContainerSelect from '../../../inputs/docker/ContainerSelect'
 import { serializeConnectionData } from '../../forms/SessionDataForm'
 
 

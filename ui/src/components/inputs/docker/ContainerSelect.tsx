@@ -1,7 +1,7 @@
 import { Autocomplete, TextField } from '@mui/material'
 import React, { useEffect, useState } from 'react'
-import { ContainerInfo } from '../../types/docker/extension'
-import DockerCli from '../../libs/docker/DockerCli'
+import { ContainerInfo } from '../../../types/docker/extension'
+import DockerCli from '../../../libs/docker/DockerCli'
 import { Docker } from '@docker/extension-api-client-types/dist/v1'
 import { BaseTextFieldProps } from '@mui/material/TextField/TextField'
 

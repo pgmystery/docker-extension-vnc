@@ -29,12 +29,12 @@ type DialogPropertiesProperties =
 
 export default function useOpenDialog(dialogProperties: DialogProperties = {}) {
   const ddClient = createDockerDesktopClient()
-  const { showBackdrop, isBackdropShowing } = useBackdrop({
+  const backdrop = useBackdrop({
     sx: { zIndex: 9999 },
   })
 
   function showOpenDialog(dialogProps: DialogProperties = {}) {
-    return showBackdrop(() => ddClient.desktopUI.dialog.showOpenDialog({
+    return backdrop.open(() => ddClient.desktopUI.dialog.showOpenDialog({
       ...dialogProperties,
       ...dialogProps,
     }))
@@ -42,6 +42,6 @@ export default function useOpenDialog(dialogProperties: DialogProperties = {}) {
 
   return useMemo(() => ({
     showOpenDialog,
-    isOpenDialogShowing: isBackdropShowing,
-  }), [dialogProperties, isBackdropShowing])
+    isOpenDialogShowing: backdrop.isOpen,
+  }), [dialogProperties, backdrop.isOpen])
 }

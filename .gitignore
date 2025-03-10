@@ -2,6 +2,7 @@
 data/
 .cert/
 .secrets/
+.db/
 
 ### VisualStudioCode template
 .vscode/*

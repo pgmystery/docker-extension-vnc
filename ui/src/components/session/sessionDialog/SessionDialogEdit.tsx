@@ -54,7 +54,7 @@ type SessionDialogEditReturnProps =
 export default function SessionDialogEdit({ open, onClose, payload }: DialogProps<SessionDialogEditProps, null | SessionDialogEditReturnProps>) {
   const { editSession, getSessions } = payload
   const [dialogFormRef, dialogFormSubmit] = useFormSubmit()
-  const { showBackdrop, isBackdropShowing } = useBackdrop({
+  const backdrop = useBackdrop({
     sx: { zIndex: 9999 },
   })
   const [currentSession, setCurrentSession] = useState<Session | undefined>()
@@ -115,7 +115,7 @@ export default function SessionDialogEdit({ open, onClose, payload }: DialogProp
   }
 
   function handleSubmit(event: UseFormSubmitEvent) {
-    return showBackdrop(async () => {
+    return backdrop.open(async () => {
       const formData = getFormData(event)
 
       switch (formData.submitter) {
@@ -200,7 +200,7 @@ export default function SessionDialogEdit({ open, onClose, payload }: DialogProp
         <Button variant="outlined" onClick={() => onClose(null)}>Close</Button>
         <SelectButton
           color="success"
-          disabled={!sessionDataFormReady || isBackdropShowing}
+          disabled={!sessionDataFormReady || backdrop.isOpen}
         >
           <SelectButtonItem
             onTrigger={() => dialogFormSubmit('edit')}
