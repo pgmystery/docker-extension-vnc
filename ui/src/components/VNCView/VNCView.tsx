@@ -13,6 +13,7 @@ import { SessionStore } from '../../stores/sessionStore'
 import { getVNCSettingsStore } from '../../stores/vncSettingsStore'
 import useWindowFocus from '../../hooks/useWindowFocus'
 import { useDialogs } from '@toolpad/core'
+import bellSoundFile from '../../resources/audio/bell.mp3'
 
 
 interface VNCViewProps {
@@ -42,6 +43,7 @@ export default function VNCView({ sessionName, url, onCancel, ddUIToast, openBro
   const [clipboardText, setClipboardText] = useState<string>('')
   const [havePowerCapability, setHavePowerCapability] = useState<boolean>(false)
   const [isClippedViewport, setIsClippedViewport] = useState<boolean>(false)
+  const bellSound = useMemo(() => new Audio(bellSoundFile), [])
   const dialogs = useDialogs()
 
   useEffect(() => {
@@ -285,6 +287,7 @@ export default function VNCView({ sessionName, url, onCancel, ddUIToast, openBro
                 setHavePowerCapability(e?.detail.capabilities.power || false)
               }
             }}
+            onBell={() => bellSound.play()}
           />
           : <VNCViewSkeleton />
         }

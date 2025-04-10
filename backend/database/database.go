@@ -50,12 +50,22 @@ func Connect() {
 		panic(err)
 	}
 
+	//err = db.AutoMigrate(&model.Environment{})
+	//if err != nil {
+	//	panic(err)
+	//}
+
 	err = db.AutoMigrate(&connections.RemoteHost{})
 	if err != nil {
 		panic(err)
 	}
 
 	err = db.AutoMigrate(&connections.DockerContainer{})
+	if err != nil {
+		panic(err)
+	}
+
+	err = db.AutoMigrate(&connections.DockerImage{})
 	if err != nil {
 		panic(err)
 	}

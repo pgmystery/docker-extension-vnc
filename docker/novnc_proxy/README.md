@@ -9,10 +9,10 @@ It is using [noVNC](https://github.com/novnc/noVNC) and [websockify](https://git
 
 ## Build Variables
 
-| Build-Variable          | Default   | Description                                                      |
-|-------------------------|-----------|------------------------------------------------------------------|
-| `NOVNC_VERSION`         | v1.5.0    | The version of [noVNC](https://github.com/novnc/noVNC).          |
-| `WEBSOCKIFY_VERSION`    | v0.12.0   | The version of [websockify](https://github.com/novnc/websockify). |
+| Build-Variable          | Default | Description                                                      |
+|-------------------------|---------|------------------------------------------------------------------|
+| `NOVNC_VERSION`         | v1.6.0  | The version of [noVNC](https://github.com/novnc/noVNC).          |
+| `WEBSOCKIFY_VERSION`    | v0.13.0 | The version of [websockify](https://github.com/novnc/websockify). |
 
 
 ## Environment Variables
@@ -21,4 +21,4 @@ It is using [noVNC](https://github.com/novnc/noVNC) and [websockify](https://git
 |-----------------------|---------|---------------------------------------|
 | `NOVNC_LISTEN_HOST`   | 0.0.0.0 | The listening interface of the Proxy. |
 | `NOVNC_LISTEN_PORT`   | 6081    | The listening Port of the Proxy.      |
-| `NONVC_REMOTE_SERVER` |         | The remote VNC Server.                |
+| `NOVNC_REMOTE_SERVER` |         | The remote VNC Server.                |

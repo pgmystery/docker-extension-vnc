@@ -1,6 +1,5 @@
 import { useEffect, useMemo, useReducer, useRef, useState, useSyncExternalStore } from 'react'
 import {
-  CircularProgress,
   FormControl,
   IconButton,
   InputAdornment, Link,
@@ -8,7 +7,6 @@ import {
   Stack,
   Tooltip,
   Typography,
-  TypographyProps
 } from '@mui/material'
 import ContentCopyIcon from '@mui/icons-material/ContentCopy'
 import TextStreamOutput from '../utils/TextStreamOutput'
@@ -22,6 +20,9 @@ import { SessionStore } from '../../stores/sessionStore'
 import ExampleContainerButton, { ExampleContainerImageTag } from './ExampleContainerButton'
 import {filesize} from "filesize"
 import DockerHubApi from '../../libs/dockerHub/DockerHubApi'
+import InfoText from './InfoText'
+import InfoTextImageSize from './InfoTextImageSize'
+import InfoTextUpdateAvailable from './InfoTextUpdateAvailable'
 
 
 interface DashboardProps {
@@ -29,10 +30,6 @@ interface DashboardProps {
   connect: (session: Session)=>Promise<void>
   sessionStore: SessionStore
   openUrl: (url: string)=>void
-}
-
-interface InfoTextImageSizeProps extends TypographyProps {
-  image: string
 }
 
 const UbuntuVNCDockerSessionName = 'example vnc container'
@@ -43,52 +40,8 @@ const UbuntuVNCDockerImageLabel = 'pgmystery.vnc.extension.example'
 const UbuntuVNCDockerImagePort = 5901
 
 
-function InfoText(props: TypographyProps) {
-  return <Typography
-    sx={{
-      textAlign: 'left',
-      marginLeft: '14px',
-      marginRight: '14px',
-    }}
-    { ...props }
-  >{ props.children }</Typography>
-}
-
-
-function InfoTextImageSize(props: InfoTextImageSizeProps) {
+export default function Dashboard({ ddUIToast, connect, sessionStore, openUrl }: DashboardProps) {
   const dockerHubApi = new DockerHubApi()
-  const [imageSize, setImageSize] = useState<string | undefined>()
-  const { image: imageWithTag } = props
-
-  useEffect(() => {
-    setImageSize(undefined)
-
-    if (imageWithTag === '') {
-      setImageSize('ERROR')
-
-      return
-    }
-
-    const [image, tag] = imageWithTag.split(':')
-    const dockerRepo = dockerHubApi.repository(image)
-    dockerRepo.getTag(tag)
-              .then(imageInfo => setImageSize(filesize(imageInfo.full_size, {standard: 'jedec'})))
-  }, [imageWithTag])
-
-  return <InfoText>Image size = {
-    imageSize === undefined
-      ? <CircularProgress size={20} sx={{
-          display: 'inline-block',
-          maxWidth: '50px',
-          width: '50px',
-          verticalAlign: 'middle',
-        }} />
-      : <Typography component="span" sx={{display: 'inline-block', textDecoration: 'underline'}}>{ imageSize }</Typography>
-  }</InfoText>
-}
-
-
-export default function Dashboard({ ddUIToast, openUrl, connect, sessionStore }: DashboardProps) {
   const [loading, setLoading] = useState<boolean>(true)
   const sessions = useSyncExternalStore(sessionStore.subscribe, sessionStore.getSnapshot)
   const exampleRunInputRef = useRef<HTMLInputElement>(null)
@@ -100,16 +53,34 @@ export default function Dashboard({ ddUIToast, openUrl, connect, sessionStore }:
   const [{ proxyContainerPassword }] = useConfig()
   const [exampleContainerTag, setExampleContainerTag] = useState<ExampleContainerImageTag>(UbuntuVNCDockerImageDefaultTag)
   const ubuntuVNCDockerImage = useMemo(() => UbuntuVNCDockerImage + ':' + exampleContainerTag, [exampleContainerTag])
+  const [imageSize, setImageSize] = useState<string | undefined>()
+  const [imageShaDigest, setImageShaDigest] = useState<string | undefined>()
 
   useEffect(() => {
     checkIfExampleContainerExist().finally(() => setLoading(false))
-  }, [])
 
-  useEffect(() => {
     return () => {
       pullAbortController.abort(`Cancel pulling image "${ubuntuVNCDockerImage}"...`)
     }
   }, [])
+
+  useEffect(() => {
+    setImageSize(undefined)
+
+    if (ubuntuVNCDockerImage === '') {
+      setImageSize('ERROR')
+
+      return
+    }
+
+    const [image, tag] = ubuntuVNCDockerImage.split(':')
+    const dockerRepo = dockerHubApi.repository(image)
+    dockerRepo.getTag(tag)
+              .then(imageInfo => {
+                setImageSize(filesize(imageInfo.full_size, {standard: 'jedec'}))
+                setImageShaDigest(imageInfo.digest)
+              })
+  }, [ubuntuVNCDockerImage])
 
   async function checkIfExampleContainerExist() {
     const dockerCli = new DockerCli()
@@ -331,7 +302,7 @@ export default function Dashboard({ ddUIToast, openUrl, connect, sessionStore }:
           <InfoText>VNC connect Password = { proxyContainerPassword }</InfoText>
           <InfoText>Docker Container Name = ubuntu_vnc</InfoText>
           <InfoText>VNC Port = 5901</InfoText>
-          <InfoTextImageSize image={ubuntuVNCDockerImage} />
+          <InfoTextImageSize imageSize={imageSize} />
           <InfoText>
             GitHub ={" "}
             <Link
@@ -339,6 +310,10 @@ export default function Dashboard({ ddUIToast, openUrl, connect, sessionStore }:
               onClick={() => openUrl(`https://github.com/pgmystery/docker-extension-vnc/tree/main/docker/vnc_ubuntu/${exampleContainerTag}`)}
             >{ubuntuVNCDockerImage}</Link>
           </InfoText>
+          <InfoTextUpdateAvailable
+            image={ubuntuVNCDockerImage}
+            digestSha={imageShaDigest}
+          />
         </FormControl>
 
         <ExampleContainerButton

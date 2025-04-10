@@ -4,7 +4,7 @@ import {
   Dialog,
   DialogActions,
   DialogContent,
-  DialogTitle, FormControl, FormGroup, FormLabel,
+  DialogTitle, FormControl, FormGroup, FormLabel, IconButton,
   MenuItem,
   Select, SelectChangeEvent,
   Stack,
@@ -18,14 +18,20 @@ import {
   DEFAULT_TIMESLICE, getMediaRecorderMimeTypeCodecs
 } from '../../hooks/useCanvasRecorder'
 import Button from '@mui/material/Button'
+import InfoIcon from '@mui/icons-material/Info'
+import eventBus from '../../libs/EventBus'
 
 
 function getMimeTypeCodecsItemStyle(mimeTypeCodec: string, mimeTypeCodecs: readonly string[], theme: Theme) {
   return {
     fontWeight: mimeTypeCodecs.includes(mimeTypeCodec)
-                ? theme.typography.fontWeightMedium
-                : theme.typography.fontWeightRegular,
-  };
+                  ? theme.typography.fontWeightMedium
+                  : theme.typography.fontWeightRegular,
+  }
+}
+
+function getDefaultMimeType(mimeType: string): string[] {
+  return MediaRecorder.isTypeSupported(`video/${mimeType};codecs=vp9`) ? ['vp9'] : []
 }
 
 export default function CanvasRecordSettingsDialog({ open, onClose }: DialogProps<undefined, null | CanvasRecorderSettings>) {
@@ -33,7 +39,7 @@ export default function CanvasRecordSettingsDialog({ open, onClose }: DialogProp
   const supportedMimeTypes = useMemo(() => getMediaRecorderMimeTypes(), [])
   const [mimeTypeExtension, setMimeTypeExtension] = useState<string>(supportedMimeTypes[0])
   const [mimeTypeAvailableCodecs, setMimeTypeAvailableCodecs] = useState<string[]>(getMediaRecorderMimeTypeCodecs(supportedMimeTypes[0]))
-  const [mimeTypeCodecs, setMimeTypeCodecs] = useState<string[]>([])
+  const [mimeTypeCodecs, setMimeTypeCodecs] = useState<string[]>(getDefaultMimeType(supportedMimeTypes[0]))
   const [fps, setFps] = useState<number>(DEFAULT_FPS)
   const [timeslice, setTimeslice] = useState<number | undefined>(DEFAULT_TIMESLICE)
 
@@ -61,7 +67,7 @@ export default function CanvasRecordSettingsDialog({ open, onClose }: DialogProp
     if (mimeTypeCodecs.length === 0)
       return mimeType
 
-    return `${mimeType}; codecs="${mimeTypeCodecs.join(', ')}"`
+    return `${mimeType};codecs="${mimeTypeCodecs.join(', ')}"`
   }
 
   return (
@@ -73,7 +79,20 @@ export default function CanvasRecordSettingsDialog({ open, onClose }: DialogProp
       <DialogContent>
         <Stack spacing={1}>
           <FormGroup sx={{width: '100%'}}>
-            <FormLabel>Mime-Type:</FormLabel>
+            <Box display="flex" sx={{
+              alignItems: 'center',
+            }}>
+              <FormLabel>Try Mime-Type (could fail):</FormLabel>
+              <IconButton
+                size="small"
+                onClick={() => eventBus.emit('openUrl', 'https://developer.mozilla.org/en-US/docs/Web/API/MediaRecorder/isTypeSupported_static#return_value')}
+                sx={{
+                  marginLeft: 'auto',
+                }}
+              >
+                <InfoIcon />
+              </IconButton>
+            </Box>
             <Stack spacing={1}>
               <Select
                 value={mimeTypeExtension}

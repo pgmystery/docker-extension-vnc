@@ -9,6 +9,12 @@ History of all released versions and changes
 - Disable some session buttons if there is no session (disconnected).
 - NoVNC-Proxy: Update Websockify version from v0.12.0 -> v0.13.0.
 - Add GitHub-url on Dashboard for the selected example Docker-Image.
+- Play a bell sound when the server request it.
+- Add a new option in the Clipboard-Menu to change the textfield into a password input.
+- New connection-type: Docker Image.
+- Add a feature to commit the current docker container to a new docker image.
+- Add a update button if the proxy docker image is not the newest version from docker hub.
+- Add a update button if the selected example docker container environment is not the newest version from docker hub.
 
 ## v1.2.0
 - Fix bug with "Toggle keys" under a windows machine.

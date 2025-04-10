@@ -69,13 +69,14 @@ export default class Proxy extends DockerContainer {
   async get(container?: ContainerExtended) {
     if (!container) {
       const gotDockerContainer = await super.get()
-      if (!gotDockerContainer || !this.container) return false
+      if (!gotDockerContainer || !this.container)
+        return false
     }
     else {
       this.container = container
     }
 
-    if (this.container.State.Status !== 'running') {
+    if (!this.isRunning) {
       try {
         await this.start()
       }
@@ -91,20 +92,29 @@ export default class Proxy extends DockerContainer {
     return gotDockerContainer && !!this.container
   }
 
-  async create(sessionName: string, connectionType: ConnectionType, target: Target, _?: unknown) {
-    if (!target.connected || !target.connection) return false
+  async create(sessionName: string, connectionType: ConnectionType, target: Target, _?: unknown, labels?: {[key: string]: string}) {
+    if (!target.connected || !target.connection)
+      return false
+
     await this.get()
 
-    await this.createContainerFromTarget(sessionName, connectionType, target)
+    const additionalLabels = []
+    if (labels) {
+      for (const [key, value] of Object.entries(labels)) {
+        additionalLabels.push('--label', `${key}=${value}`)
+      }
+    }
+
+    await this.createContainerFromTarget(sessionName, connectionType, target, additionalLabels)
 
     return this.get()
   }
 
   protected async createContainerFromTarget(sessionName: string, connectionType: ConnectionType, target: Target, args: string[] = []) {
-    if (!target.connected || !target.connection) return
+    if (!target.connected || !target.connection)
+      return
 
-    const targetIp = target.connection.ip
-    const targetPort = target.connection.port
+    const { host: targetHost, port: targetPort } = target.connection
     const {
       proxyContainerLabelKey,
       proxyContainerName,
@@ -112,55 +122,45 @@ export default class Proxy extends DockerContainer {
       proxyContainerLabelTargetPort,
       proxyContainerLabelConnectionType,
       proxyContainerLabelSessionName,
+      proxyContainerLocalPort,
     } = this.config
-
-    const labelIdentify = `${proxyContainerLabelKey}=""`
-    const labelSessionName = `${proxyContainerLabelSessionName}="${sessionName}"`
-    const labelTargetIp = `${proxyContainerLabelTargetIp}=${targetIp}`
-    const labelTargetPort = `${proxyContainerLabelTargetPort}=${targetPort}`
-    const labelConnectionType = `${proxyContainerLabelConnectionType}=${connectionType}`
 
     const createExecResult = await this.createContainer(this.config.proxyDockerImage, [
       ...args,
       '--detach',
-      '--name', proxyContainerName,
-      '--label', labelSessionName,
-      '--label', labelIdentify,
-      '--label', labelTargetIp,
-      '--label', labelTargetPort,
-      '--label', labelConnectionType,
-      '-p', `"${this.config.proxyContainerLocalPort.toString()}"`,
-      '-e', `"NONVC_REMOTE_SERVER=${targetIp}:${targetPort}"`,
+      '--name', `"${proxyContainerName}"`,
+      '--label', `${proxyContainerLabelSessionName}="${sessionName}"`,
+      '--label', `${proxyContainerLabelKey}=""`,
+      '--label', `${proxyContainerLabelTargetIp}=${targetHost}`,
+      '--label', `${proxyContainerLabelTargetPort}=${targetPort}`,
+      '--label', `${proxyContainerLabelConnectionType}=${connectionType}`,
+      '-p', `"${proxyContainerLocalPort.toString()}"`,
+      '-e', `"NOVNC_REMOTE_SERVER=${targetHost}:${targetPort}"`,
+      '-e', `"NONVC_REMOTE_SERVER=${targetHost}:${targetPort}"`,  // TO HAVE SUPPORT OF A "BROKEN" OLD VERSION OF THE PROXY DOCKER IMAGE
     ])
-    if (createExecResult.stderr) throw new Error(createExecResult.stderr)
+
+    if (createExecResult.stderr)
+      throw new Error(createExecResult.stderr)
   }
 
-  async delete() {
+  async disconnect() {
     const gotDockerContainer = await this.update()
-    if (!gotDockerContainer || !this.exist()) return new MultiExecResult()
+    if (!gotDockerContainer || !this.exist())
+      return new MultiExecResult()
 
-    const execResult = await super.delete({force: true})
+    const execResult = await this.delete({force: true})
     if (execResult.stderr)
       throw new Error(execResult.stderr)
 
-    const gotContainer = await this.get()
+    const containerStillExists = await this.get()
 
-    if (gotContainer)
+    if (containerStillExists)
       throw new ContainerDeleteError('Can\' delete the proxy container')
 
     return execResult
   }
 
-  protected getLabel(labelKey: string) {
-    this.withContainer()
-
-    const labelValue = this.container?.Config.Labels[labelKey]
-
-    if (!labelValue)
-      throw new Error(
-        `The proxy-container "${this.container?.Id}" has no label with the key "${labelKey}"`
-      )
-
-    return labelValue
+  get isRunning(): boolean {
+    return this.container?.State.Status === 'running'
   }
 }

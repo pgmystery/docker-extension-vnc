@@ -56,10 +56,11 @@ export default class Container {
     }
   }
 
-  protected async createContainer(dockerImage: string, args: string[] = [], cmds: string[] = []) {
-    if (this.container) throw new ContainerAlreadyExistError()
+  async createContainer(dockerImage: string, options: string[] = [], args: string[] = []) {
+    if (this.container)
+      throw new ContainerAlreadyExistError()
 
-    return this.docker.cli.exec('run', [...args, dockerImage, ...cmds])
+    return this.docker.cli.exec('run', [...options, dockerImage, ...args])
   }
 
   async start() {
@@ -120,5 +121,18 @@ export default class Container {
     }
 
     if (waitCounter === 0) throw new Error('Wait time exceeded')
+  }
+
+  getLabel(labelKey: string) {
+    this.withContainer()
+
+    const labelValue = this.container?.Config.Labels[labelKey]
+
+    if (!labelValue)
+      throw new Error(
+        `The proxy-container "${this.container?.Id}" has no label with the key "${labelKey}"`
+      )
+
+    return labelValue
   }
 }

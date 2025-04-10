@@ -1,9 +1,10 @@
-import { CircularProgress, Dialog, DialogContent, DialogContentText, DialogTitle, Typography } from '@mui/material'
+import { Typography } from '@mui/material'
 import { DialogProps } from '@toolpad/core'
-import { useEffect, useMemo, useReducer, useRef, useState } from 'react'
+import { useEffect, useMemo, useReducer, useState } from 'react'
 import { createDockerDesktopClient } from '@docker/extension-api-client'
 import { isRawExecResult } from '../../libs/docker/cli/Exec'
 import DockerCli from '../../libs/docker/DockerCli'
+import TextStreamDialog from './TextStreamDialog'
 
 
 interface ImagePullDialogProps {
@@ -17,20 +18,12 @@ export default function ImagePullDialog({ open, onClose, payload }: DialogProps<
   const { image, onSuccess, onError } = payload
   const ddClient = useMemo(createDockerDesktopClient, [])
   const [stdout, dispatch] = useReducer(addStdout, [])
-  const dialogContentElementRef = useRef<HTMLElement>(null)
-  const descriptionElementRef = useRef<HTMLElement>(null)
   const [finished, setFinished] = useState<boolean>(false)
 
   useEffect(() => {
     if (!open) return
 
-    const { current: descriptionElement } = descriptionElementRef
-
-    if (descriptionElement !== null) {
-      descriptionElement.focus()
-    }
-
-    const dockerCli = new DockerCli()
+    const dockerCli = new DockerCli(ddClient.docker)
     dockerCli.pull(image, dispatch)
       .then(() => {
         setFinished(true)
@@ -55,12 +48,6 @@ export default function ImagePullDialog({ open, onClose, payload }: DialogProps<
       .finally(onClose)
   }, [open])
 
-  useEffect(() => {
-    if (!dialogContentElementRef || stdout.length === 0) return
-
-    dialogContentElementRef.current?.scrollTo(0, dialogContentElementRef.current?.scrollHeight)
-  }, [stdout])
-
   function addStdout(stdout: string[], data: string) {
     return [
       ...stdout,
@@ -69,16 +56,14 @@ export default function ImagePullDialog({ open, onClose, payload }: DialogProps<
   }
 
   return (
-    <Dialog open={ open } scroll="paper">
-      <DialogTitle>Pull Docker Image "${image}" (Please Wait)</DialogTitle>
-      <DialogContent dividers ref={dialogContentElementRef}>
-        <DialogContentText ref={descriptionElementRef} tabIndex={-1} sx={{margin: '10px'}}>
-          {stdout.map((stdout, index) =>
-            <Typography sx={{display: 'block'}} component={'span'} key={index}>{ stdout }</Typography>
-          )}
-          {!finished && <CircularProgress size="30px" sx={{marginTop: '10px'}} />}
-        </DialogContentText>
-      </DialogContent>
-    </Dialog>
+    <TextStreamDialog
+      open={open}
+      title={`Pull Docker Image "${image}" (Please Wait)`}
+      finished={finished}
+    >
+      {stdout.map((stdout, index) =>
+        <Typography sx={{display: 'block'}} component={'span'} key={index}>{ stdout }</Typography>
+      )}
+    </TextStreamDialog>
   )
 }

@@ -38,7 +38,7 @@ export default function SessionDialog({ open, onClose, payload }: DialogProps<Se
       open={open}
       onClose={() => onClose(null)}
       maxWidth="sm"
-      fullWidth={true}
+      fullWidth
       slotProps={{
         paper: {
           component: 'form',

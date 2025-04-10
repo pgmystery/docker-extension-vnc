@@ -30,6 +30,11 @@ type RequestCreateSessionDockerContainer struct {
 	ConnectionData connections.DockerContainer `json:"connectionData"`
 }
 
+type RequestCreateSessionDockerImage struct {
+	RequestCreateSession
+	ConnectionData connections.DockerImage `json:"connectionData"`
+}
+
 type ResponseSessionList struct {
 	Id   uuid.UUID `json:"id"`
 	Name string    `json:"name"`
@@ -256,6 +261,18 @@ func getConnection(connectionType string, connectionId uuid.UUID) (interface{}, 
 		connectionData = connectionDataDockerContainer
 
 		break
+
+	case "image":
+		var connectionDataDockerImage connections.DockerImage
+
+		err := db.Find(&connectionDataDockerImage, "id = ?", connectionId).Error
+		if err != nil {
+			return nil, err
+		}
+
+		connectionData = connectionDataDockerImage
+
+		break
 	}
 
 	return connectionData, nil
@@ -283,6 +300,22 @@ func createConnection(connectionType string, connectionData json.RawMessage) (uu
 
 	case "container":
 		var connectionSession connections.DockerContainer
+		err := json.Unmarshal(connectionData, &connectionSession)
+
+		if err != nil {
+			return uuid.Nil, err
+		}
+
+		err = db.Create(&connectionSession).Error
+
+		if err != nil {
+			return uuid.Nil, err
+		}
+
+		return connectionSession.ID, nil
+
+	case "image":
+		var connectionSession connections.DockerImage
 		err := json.Unmarshal(connectionData, &connectionSession)
 
 		if err != nil {
@@ -332,6 +365,23 @@ func deleteConnection(connectionType string, connectionId uuid.UUID) error {
 				return err
 			}
 		}
+
+		break
+
+	case "image":
+		var connectionDataDockerImage connections.DockerImage
+
+		db.Find(&connectionDataDockerImage, "id = ?", connectionId)
+
+		if connectionDataDockerImage.ID != uuid.Nil {
+			err := db.Unscoped().Delete(&connectionDataDockerImage, "id = ?", connectionDataDockerImage.ID).Error
+
+			if err != nil {
+				return err
+			}
+		}
+
+		break
 	}
 
 	return nil

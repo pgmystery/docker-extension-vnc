@@ -107,8 +107,10 @@ export default function SelectButton(props: SelectButtonProps) {
     if (!selectedItemComponent)
       return
 
-    if (selectedItemComponent.props.onTrigger)
+    if (selectedItemComponent.props.onTrigger) {
+      setOpen(false)
       selectedItemComponent.props.onTrigger(event)
+    }
   }
 
   function toggleMenu() {

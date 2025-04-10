@@ -13,3 +13,6 @@ type Enumerate<N extends number, Acc extends number[] = []> = Acc['length'] exte
                                                               : Enumerate<N, [...Acc, Acc['length']]>
 
 export type NumberRange<F extends number, T extends number> = Exclude<Enumerate<T>, Enumerate<F>>
+
+type AbstractConstructorHelper<T> = (new (...args: any) => { [x: string]: any; }) & T;
+export type AbstractConstructorParameters<T> = ConstructorParameters<AbstractConstructorHelper<T>>;

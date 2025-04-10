@@ -3,54 +3,60 @@ import { Docker } from '@docker/extension-api-client-types/dist/v1'
 import { Config, loadConfig } from '../../../hooks/useConfig'
 import { createDockerDesktopClient } from '@docker/extension-api-client'
 import Target from '../targets/Target'
-import { ConnectionData, ConnectionType } from '../VNC'
-import { ContainerExtended } from '../../../types/docker/cli/inspect'
+import { ConnectionData, ConnectionDataActiveSession, ConnectionType } from '../VNC'
 
 
-export default class VNCConnection {
+interface ReconnectDataBase<T extends string, CT extends ConnectionType, D> {
+  type: T
+  data: D
+  connectionType: CT
+}
+type ReconnectDataProxy<T extends ConnectionType> = ReconnectDataBase<'proxy', T, Proxy>
+interface ReconnectDataActiveSession<T extends ConnectionType, D> extends ReconnectDataBase<'activeSession', T, D> {
+  sessionName: string
+}
+export type ReconnectData<T extends ConnectionType, D> = ReconnectDataProxy<T> | ReconnectDataActiveSession<T, D>
+export interface VNCConnectionProps {
+  docker?: Docker
+  config?: Config
+  proxy?: Proxy
+  target?: Target
+}
+
+
+export default abstract class VNCConnection<T extends ConnectionType> {
   protected docker: Docker
   protected config: Config
-  public type: ConnectionType | undefined
+  abstract type: T
   public proxy: Proxy
   public target: Target
+  public data: any
 
-  constructor(docker?: Docker, config?: Config, proxy?: Proxy, target?: Target) {
-    if (!proxy)
-      proxy = new Proxy(docker, config)
+  constructor(props: VNCConnectionProps) {
+    const { docker, config, proxy, target } = props
 
-    if (!target)
-      target = new Target(docker, config)
-
-    if (!docker)
-      docker = createDockerDesktopClient().docker
-
-    if (!config)
-      config = loadConfig()
-
-    this.docker = docker
-    this.config = config
-    this.proxy = proxy
-    this.target = target
+    this.docker = docker || createDockerDesktopClient().docker
+    this.config = config || loadConfig()
+    this.proxy = proxy || new Proxy(docker, config)
+    this.target = target || new Target(docker, config)
   }
 
-  async reconnect(container: ContainerExtended) {
-    const proxyExist = await this.proxy.get(container)
+  abstract connect(sessionName: string, data: ConnectionData, labels?: {[key: string]: string}): Promise<boolean>
+  abstract reconnect(data: ReconnectData<ConnectionType, unknown>): Promise<void>
+  abstract getActiveSessionData(): ConnectionDataActiveSession<ConnectionType, any>
 
-    if (!proxyExist)
-      return await this.disconnect()
-  }
+  async _connect<T extends ConnectionData>(sessionName: string, connectionData: T, labels?: {[key: string]: string}) {
+    if (this.proxy.container)
+      return true
 
-  connect(sessionName: string, connectionData: ConnectionData) {
-    if (this.proxy.container) return true
-
-    return this.proxy.create(sessionName, connectionData.type, this.target, connectionData.data)
+    return this.proxy.create(sessionName, this.type, this.target, connectionData, labels)
   }
 
   async disconnect() {
     await this.target.disconnect()
 
     if (this.proxy.exist())
-      await this.proxy.delete()
+      await this.proxy.disconnect()
   }
 
   get connected(): boolean {
