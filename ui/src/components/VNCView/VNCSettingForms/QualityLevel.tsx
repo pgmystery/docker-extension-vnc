@@ -55,11 +55,13 @@ export default function QualityLevel({ reset, initValue }: QualityLevelProps) {
           size="small"
           onChange={handleInputChange}
           onBlur={handleBlur}
-          inputProps={{
-            step: 1,
-            min: QualityLevelRange.min,
-            max: QualityLevelRange.max,
-            type: 'number',
+          slotProps={{
+            input: {
+              step: 1,
+              min: QualityLevelRange.min,
+              max: QualityLevelRange.max,
+              type: 'number',
+            },
           }}
         />
       </Stack>

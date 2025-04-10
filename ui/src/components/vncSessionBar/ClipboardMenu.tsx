@@ -1,7 +1,16 @@
 import ContentPasteIcon from '@mui/icons-material/ContentPaste'
-import { IconButton, ListSubheader, Menu, styled, TextareaAutosize, Tooltip, Typography } from '@mui/material'
+import {
+  Checkbox,
+  FormControlLabel,
+  IconButton,
+  ListSubheader,
+  Menu,
+  Tooltip,
+  Typography
+} from '@mui/material'
 import { MouseEvent, useEffect, useState } from 'react'
 import Button from '@mui/material/Button'
+import ClipboardField from '../inputs/ClipboardField'
 
 
 interface ClipboardMenuProps {
@@ -14,6 +23,7 @@ export default function ClipboardMenu({ clipboardText, sendClipboardText, disabl
   const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null)
   const open = Boolean(anchorEl)
   const [textareaValue, setTextareaValue] = useState<string>('')
+  const [textIsHidden, setTextIsHidden] = useState<boolean>(false)
 
   useEffect(() => {
     setTextareaValue(clipboardText)
@@ -80,10 +90,17 @@ export default function ClipboardMenu({ clipboardText, sendClipboardText, disabl
       >
         <ListSubheader>Clipboard</ListSubheader>
         <Typography>Edit clipboard content in the textarea below.</Typography>
-        <Textarea
+        <ClipboardField
           autoFocus
           value={textareaValue}
-          onChange={(e) => setTextareaValue(e.currentTarget.value)}
+          setValue={value => setTextareaValue(value)}
+          isPassword={textIsHidden}
+        />
+        <FormControlLabel
+          control={
+            <Checkbox checked={textIsHidden} onChange={event => setTextIsHidden(event.target.checked)} />
+          }
+          label="Password input"
         />
         {
           sendClipboardText &&
@@ -93,8 +110,3 @@ export default function ClipboardMenu({ clipboardText, sendClipboardText, disabl
     </>
   )
 }
-
-const Textarea = styled(TextareaAutosize)(() => `
-  min-height: 50px;
-  margin-bottom: 10px;
-`)
