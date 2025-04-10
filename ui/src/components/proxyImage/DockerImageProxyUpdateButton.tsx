@@ -2,7 +2,7 @@ import { Fab } from '@mui/material'
 import DownloadIcon from '@mui/icons-material/Download';
 import useImagePullDialog from '../../hooks/useImagePullDialog'
 import useConfig from '../../hooks/useConfig'
-import { useEffect, useReducer, useState } from 'react'
+import { useEffect, useState } from 'react'
 import DockerHubApi from '../../libs/dockerHub/DockerHubApi'
 import DockerCli from '../../libs/docker/DockerCli'
 
