@@ -4,11 +4,12 @@ import ProxyNetwork from '../ProxyNetwork'
 import { createDockerDesktopClient } from '@docker/extension-api-client'
 import { Config, loadConfig } from '../../../hooks/useConfig'
 import { Docker } from '@docker/extension-api-client-types/dist/v1'
+import DockerCli from '../../docker/DockerCli'
 
 
 export default class TargetDockerContainer extends Target {
   private readonly proxyNetwork: ProxyNetwork
-  private dockerContainer: DockerContainer | undefined
+  protected dockerContainer: DockerContainer | undefined
 
   constructor(proxyNetwork: ProxyNetwork, docker?: Docker, config?: Config) {
     docker = docker || createDockerDesktopClient().docker
@@ -30,14 +31,19 @@ export default class TargetDockerContainer extends Target {
       throw new Error(`Can't find the target container "${container}"`)
 
     if (this.dockerContainer.container?.State.Status !== 'running') {
-      await this.disconnect()
+      if (!this.dockerContainer.container?.Id)
+        throw new Error(`Can't find the target container "${container}"`)
 
-      throw new Error(`Can't connect to the container "${container}", because the container is not running`)
+      const dockerCli = new DockerCli()
+      const execResult = await dockerCli.start(this.dockerContainer.container.Id)
+
+      if (execResult.stderr)
+        throw new Error(execResult.stderr)
     }
 
     await this.proxyNetwork.addContainer(container)
     await this.dockerContainer.get()
-    const ip = this.dockerContainer.container.NetworkSettings.Networks[this.proxyNetwork.name].IPAddress
+    const ip = this.ip
 
     if (!ip) {
       await this.disconnect()
@@ -62,16 +68,6 @@ export default class TargetDockerContainer extends Target {
     this.dockerContainer = undefined
   }
 
-  get container() {
-    return this.dockerContainer?.container
-  }
-
-  getContainerName() {
-    if (!this.dockerContainer?.exist()) return
-
-    return this.dockerContainer.container?.Name
-  }
-
   getContainerId() {
     if (!this.dockerContainer?.exist()) return
 
@@ -80,5 +76,9 @@ export default class TargetDockerContainer extends Target {
 
   get connected() {
     return this.dockerContainer?.exist() || false
+  }
+
+  get ip() {
+    return this.dockerContainer?.container?.NetworkSettings.Networks[this.proxyNetwork.name].IPAddress
   }
 }

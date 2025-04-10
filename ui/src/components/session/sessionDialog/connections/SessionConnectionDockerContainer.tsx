@@ -5,17 +5,15 @@ import { DockerDesktopClient } from '@docker/extension-api-client-types/dist/v1'
 import { ContainerInfo } from '../../../../types/docker/extension'
 import ContainerSelect from '../../../inputs/docker/ContainerSelect'
 import { serializeConnectionData } from '../../forms/SessionDataForm'
+import {
+  ConnectionDataDockerContainer
+} from '../../../../libs/vnc/connectionTypes/VNCDockerContainer/VNCDockerContainerBase'
 
 
 interface DockerContainerProps {
   ddClient: DockerDesktopClient
   connectionData?: ConnectionDataDockerContainer
   setSubmitReady: (state: boolean)=>void
-}
-
-export interface ConnectionDataDockerContainer {
-  container: string
-  port: number
 }
 
 
@@ -143,7 +141,7 @@ export default function SessionConnectionDockerContainer({ ddClient, connectionD
           options={selectedContainerPorts}
           renderInput={params => <TextField
             { ...params }
-            label="Container internal port*"
+            label="Container internal VPC-Server PORT*"
             type="number"
             name="connection.data.port"
             slotProps={{ htmlInput: { ...params.inputProps, min: 1, max: 65535 } }}

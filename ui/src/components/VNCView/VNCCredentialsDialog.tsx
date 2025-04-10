@@ -41,7 +41,6 @@ export default function VNCCredentialsDialog({ open, onClose }: DialogProps<unde
   return (
     <Dialog
       open={open}
-      onClose={() => onClose(null)}
       slotProps={{
         paper: {
           component: 'form',

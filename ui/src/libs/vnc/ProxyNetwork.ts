@@ -17,14 +17,16 @@ export default class ProxyNetwork extends DockerNetwork {
     const execResult = await super.create([
       "--attachable",
     ])
-    if (execResult.stderr) throw new Error(execResult.stderr)
+    if (execResult.stderr)
+      throw new Error(execResult.stderr)
 
     return execResult
   }
 
   async addContainer(containerId: string) {
     const networkExist = await this.exist()
-    if (!networkExist) await this.create()
+    if (!networkExist)
+      await this.create()
 
     const isInNetwork = await this.hasContainer(containerId)
     if (!isInNetwork) {
@@ -42,7 +44,9 @@ export default class ProxyNetwork extends DockerNetwork {
       try {
         await super.removeContainer(containerId, {force: true})
       }
-      catch {}
+      catch {
+         // Ignore errors if container is not in network
+      }
 
       return new MultiExecResult()
     }

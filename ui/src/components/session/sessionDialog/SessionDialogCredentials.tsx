@@ -61,7 +61,9 @@ export default function SessionDialogCredentials({ credentials }: SessionDialogC
           name="credentials"
           checked={credentialsChecked}
           onChange={e => setCredentialsChecked(e.target.checked)}
-          inputProps={{ 'aria-label': 'controlled' }}
+          slotProps={{
+            input: { 'aria-label': 'controlled' },
+          }}
         />} label="Save Credentials (not encrypted)" />
         <TextField
           disabled={!credentialsChecked}

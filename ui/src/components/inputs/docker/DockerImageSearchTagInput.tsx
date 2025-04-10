@@ -1,7 +1,6 @@
 import { SyntheticEvent, useEffect, useState } from 'react'
-import { Autocomplete, CircularProgress, InputAdornment, TextField } from '@mui/material'
-import SearchIcon from '@mui/icons-material/Search'
 import useDockerRepository from '../../../hooks/docker/useDockerRepository'
+import AutocompleteSearch from '../AutocompleteSearch'
 
 
 interface DockerImageSearchTagInputProps {
@@ -65,7 +64,7 @@ export default function DockerImageSearchTagInput({ repository, tag, setTag, onT
   }
 
   return (
-    <Autocomplete
+    <AutocompleteSearch
       fullWidth
       freeSolo
       options={tags}
@@ -73,28 +72,10 @@ export default function DockerImageSearchTagInput({ repository, tag, setTag, onT
       onInputChange={handleInputChange}
       disabled={!repository}
       inputValue={tag}
-      renderInput={
-        params => <TextField
-          {...params}
-          label="Select a Image-Tag*"
-          name="connection.data.imageTag"
-          color={getValidColor()}
-          error={tag !== '' && !isValidTag}
-          slotProps={{
-            input: {
-              ...params.InputProps,
-              startAdornment: (
-                <InputAdornment position="start">
-                  {
-                    isSearching
-                    ? <CircularProgress size={20.5} color="inherit" />
-                    : <SearchIcon />
-                  }
-                </InputAdornment>
-              ),
-            },
-          }}
-        />}
+      isSearching={ isSearching }
+      label="Select a Image-Tag*"
+      name="connection.data.imageTag"
+      color={ getValidColor() }
     />
   )
 }

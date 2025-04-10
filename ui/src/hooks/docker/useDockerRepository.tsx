@@ -5,7 +5,7 @@ import Repository from '../../libs/dockerHub/dockerHubApi/Repository'
 
 
 export interface DockerImage {
-  where: 'hub' | 'local'
+  where: 'HUB' | 'LOCAL'
   image: string
 }
 

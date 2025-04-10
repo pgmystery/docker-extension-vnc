@@ -1,4 +1,4 @@
-import { Divider, FormControl, FormLabel, Stack, TextField } from '@mui/material'
+import { Divider, Stack, TextField } from '@mui/material'
 import SessionDialogConnection from '../sessionDialog/SessionDialogConnection'
 import SessionDialogCredentials, { serializeCredentials } from '../sessionDialog/SessionDialogCredentials'
 import { ReactNode, useEffect, useState } from 'react'
@@ -6,6 +6,7 @@ import { Session, SessionCreateData } from '../../../types/session'
 import { serializeConnectionDataRemoteHost } from '../sessionDialog/connections/SessionConnectionRemoteHost'
 import { serializeConnectionDataDockerContainer } from '../sessionDialog/connections/SessionConnectionDockerContainer'
 import { serializeConnectionDataDockerImage } from '../sessionDialog/connections/SessionConnectionDockerImage'
+import SessionName from './components/SessionName'
 
 
 interface SessionDataFormProps {
@@ -89,17 +90,10 @@ export default function SessionDataForm({ session, onReady, children }: SessionD
   return (
     <Stack spacing={1}>
       <TextField type="hidden" name="id" value={session?.id || ''} sx={{display: 'none'}} disabled/>
-      {/* Session name */}
-      <FormControl>
-        <FormLabel required>Session Name</FormLabel>
-        <TextField
-          name="name"
-          value={sessionName}
-          onChange={e => setSessionName(e.target.value)}
-          required
-          autoFocus
-        />
-      </FormControl>
+      <SessionName
+        name={sessionName}
+        setName={setSessionName}
+      />
       <Divider />
       <SessionDialogConnection
         setSubmitReady={setConnectionReady}

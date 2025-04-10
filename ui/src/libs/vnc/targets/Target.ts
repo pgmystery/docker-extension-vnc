@@ -2,23 +2,30 @@ import { Docker } from '@docker/extension-api-client-types/dist/v1'
 import { createDockerDesktopClient } from '@docker/extension-api-client'
 import { Config, loadConfig } from '../../../hooks/useConfig'
 
+interface TargetConnection {
+  host: string
+  port: number
+}
 
 export default class Target {
   protected readonly docker: Docker
   protected readonly config: Config
-  public connection: {ip: string, port: number} | undefined
+  public connection: TargetConnection | undefined
 
   constructor(docker?: Docker, config?: Config) {
-    docker = docker || createDockerDesktopClient().docker
-    config = config || loadConfig()
-
-    this.docker = docker
-    this.config = config
+    this.docker = docker || createDockerDesktopClient().docker
+    this.config = config || loadConfig()
   }
 
-  async connect(ip: string, port: number) {
+  async connect(host: string, port: number) {
+    if (!host?.trim())
+      throw new Error('Host cannot be empty')
+
+    if (!this.isValidPort(port))
+      throw new Error('Invalid port number')
+
     this.connection = {
-      ip,
+      host: host.trim(),
       port,
     }
   }
@@ -29,5 +36,9 @@ export default class Target {
 
   get connected() {
     return !!this.connection
+  }
+
+  private isValidPort(port: number): boolean {
+    return Number.isInteger(port) && port >= 1 && port <= 65535
   }
 }

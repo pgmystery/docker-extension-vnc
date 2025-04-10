@@ -7,11 +7,12 @@ import { VncScreenHandle } from 'react-vnc'
 import ClipboardMenu from './ClipboardMenu'
 import SendMachineCommandsMenu, { MachineCommand } from './SendMachineCommandsMenu'
 import DragViewportButton from './DragViewportButton'
-import { RefObject, useEffect } from 'react'
+import { RefObject, useContext, useEffect } from 'react'
 import PowerIcon from '@mui/icons-material/Power'
 import ScreenshotButton from './ScreenshotButton'
 import RecordButton from './RecordButton'
-// import InventoryIcon from '@mui/icons-material/Inventory'
+import DockerCreateImageButton from './DockerCreateImageButton'
+import { VNCContext } from '../../contexts/VNCContext'
 
 
 export interface VNCSessionBarProps {
@@ -48,6 +49,8 @@ export default function VNCSessionBar({
   viewOnly,
   canvas,
 }: VNCSessionBarProps) {
+  const vnc = useContext(VNCContext)
+
   useEffect(() => {
     if (!vncScreenRef || !vncScreenRef.current?.rfb)
       return
@@ -92,12 +95,7 @@ export default function VNCSessionBar({
 
       <Box sx={ {flexGrow: 1} }/>
 
-      {/*<Tooltip title="Create a Docker Image from the Container" arrow>*/}
-      {/*  /!*  TODO: https://stackoverflow.com/a/52006170 *!/*/}
-      {/*  <IconButton  >*/}
-      {/*    <InventoryIcon />*/}
-      {/*  </IconButton>*/}
-      {/*</Tooltip>*/}
+      { vnc?.connectedData?.connection.type !== 'remote' && <DockerCreateImageButton disabled={ !canvas }/> }
       <Tooltip title="Copy Websocket-URL to Clipboard" arrow>
         <IconButton onClick={ onWebsocketUrlCopyClick }>
           <PowerIcon/>

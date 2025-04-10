@@ -11,6 +11,7 @@ import { createDockerDesktopClient } from '@docker/extension-api-client'
 import { CliExecOptions } from '../../types/docker/cli'
 import { MultipleContainersFoundError } from './Container'
 import DockerCliManifest from './cli/Manifest'
+import DockerCliImage from './dockerCli/Image'
 
 interface AbortEventTarget extends EventTarget {
   reason?: string
@@ -20,7 +21,12 @@ interface AbortEvent extends Event {
   target: AbortEventTarget | null
 }
 
-interface PullOptions {
+interface ExecStreamCommand {
+  command: string
+  args?: string[]
+}
+
+interface ExecStreamOptions {
   abortSignal?: AbortSignal
 }
 
@@ -35,6 +41,7 @@ interface DockerHubImage {
 export default class DockerCli extends DockerCliExec {
   public network: DockerCliNetwork
   public manifest: DockerCliManifest
+  public image: DockerCliImage
 
   constructor(dockerClient?: DockerClient) {
     if (!dockerClient)
@@ -44,6 +51,7 @@ export default class DockerCli extends DockerCliExec {
 
     this.network = new DockerCliNetwork(dockerClient)
     this.manifest = new DockerCliManifest(dockerClient)
+    this.image = new DockerCliImage(dockerClient)
   }
 
   async getContainer(filters: DockerListContainersFilters): Promise<ContainerInfo | undefined> {
@@ -103,44 +111,15 @@ export default class DockerCli extends DockerCliExec {
     return images.length === 1
   }
 
-  pull(image: string, addStdout: (stdout: string)=>void, options?: PullOptions) {
-    return new Promise<void>((resolve, reject) => {
-      function abortListener({ target }: AbortEvent) {
-        options?.abortSignal?.removeEventListener('abort', abortListener)
-
-        reject(target?.reason || 'Unknown error')
-      }
-
-      options?.abortSignal?.addEventListener('abort', abortListener)
-
-      return this.client.cli.exec('pull', [image], {
-        stream: {
-          onOutput(data) {
-            if (data.stdout) {
-              addStdout(data.stdout)
-            }
-
-            if (data.stderr) {
-              reject(data.stderr)
-            }
-          },
-          onError(error) {
-            reject(error)
-          },
-          onClose(exitCode) {
-            if (exitCode !== 0)
-              return reject(exitCode)
-
-            resolve()
-          },
-          splitOutputLines: true,
-        },
-      })
-    })
+  pull(image: string, addStdout: (stdout: string)=>void, options?: ExecStreamOptions) {
+    return this.execStream({
+      command: 'pull',
+      args: [image],
+    }, addStdout, options)
   }
 
-  run(image: string, options: CliExecOptions) {
-    return this.exec('run', options, image)
+  run(image: string, options: CliExecOptions, args: string[] = []) {
+    return this.exec('run', options, image, ...args)
   }
 
   rm(containerId: string, options: {force: boolean} = {force: false}) {
@@ -172,5 +151,58 @@ export default class DockerCli extends DockerCliExec {
       ...options,
       format: 'json',
     }) as Promise<DockerImage[]>
+  }
+
+  commit(containerId: string, repository: string) {
+    return this.exec(
+      'commit',
+      {},
+      containerId,
+      repository,
+    )
+  }
+
+  // STEAM IS NOT WORKING :( THE DOCKER-EXEC COMMAND IS BROKEN FROM THE EXTENSION. https://github.com/docker/extensions-sdk/issues/303
+  commitStream(containerId: string, repository: string, addStdout: (stdout: string)=>void, options?: ExecStreamOptions) {
+    return this.execStream({
+      command: 'commit',
+      args: [containerId, repository],
+    }, addStdout, options)
+  }
+
+  private execStream(command: ExecStreamCommand, addStdout: (stdout: string)=>void, options?: ExecStreamOptions) {
+    return new Promise<void>((resolve, reject) => {
+      function abortListener({ target }: AbortEvent) {
+        options?.abortSignal?.removeEventListener('abort', abortListener)
+
+        reject(target?.reason || 'Unknown error')
+      }
+
+      options?.abortSignal?.addEventListener('abort', abortListener)
+
+      return this.client.cli.exec(command.command, command.args || [], {
+        stream: {
+          onOutput(data) {
+            if (data.stdout) {
+              addStdout(data.stdout)
+            }
+
+            if (data.stderr) {
+              reject(data.stderr)
+            }
+          },
+          onError(error) {
+            reject(error)
+          },
+          onClose(exitCode) {
+            if (exitCode !== 0)
+              return reject(exitCode)
+
+            resolve()
+          },
+          splitOutputLines: true,
+        },
+      })
+    })
   }
 }
