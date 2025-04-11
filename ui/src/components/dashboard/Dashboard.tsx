@@ -1,5 +1,6 @@
 import { useEffect, useMemo, useReducer, useRef, useState, useSyncExternalStore } from 'react'
 import {
+  Box,
   FormControl,
   IconButton,
   InputAdornment, Link,
@@ -299,21 +300,23 @@ export default function Dashboard({ ddUIToast, connect, sessionStore, openUrl }:
               maxWidth: '600px',
             }}
           />
-          <InfoText>VNC connect Password = { proxyContainerPassword }</InfoText>
-          <InfoText>Docker Container Name = ubuntu_vnc</InfoText>
-          <InfoText>VNC Port = 5901</InfoText>
-          <InfoTextImageSize imageSize={imageSize} />
-          <InfoText>
-            GitHub ={" "}
-            <Link
-              component="button"
-              onClick={() => openUrl(`https://github.com/pgmystery/docker-extension-vnc/tree/main/docker/vnc_ubuntu/${exampleContainerTag}`)}
-            >{ubuntuVNCDockerImage}</Link>
-          </InfoText>
-          <InfoTextUpdateAvailable
-            image={ubuntuVNCDockerImage}
-            digestSha={imageShaDigest}
-          />
+          <Box sx={{marginTop: '10px'}}>
+            <InfoText>VNC connect Password = { proxyContainerPassword }</InfoText>
+            <InfoText>Docker Container Name = ubuntu_vnc</InfoText>
+            <InfoText>VNC Port = 5901</InfoText>
+            <InfoTextImageSize imageSize={imageSize} />
+            <InfoText>
+              GitHub ={" "}
+              <Link
+                component="button"
+                onClick={() => openUrl(`https://github.com/pgmystery/docker-extension-vnc/tree/main/docker/vnc_ubuntu/${exampleContainerTag}`)}
+              >{ubuntuVNCDockerImage}</Link>
+            </InfoText>
+            <InfoTextUpdateAvailable
+              image={ubuntuVNCDockerImage}
+              digestSha={imageShaDigest}
+            />
+          </Box>
         </FormControl>
 
         <ExampleContainerButton
