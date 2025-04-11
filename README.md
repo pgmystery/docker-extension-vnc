@@ -1,6 +1,6 @@
 # Docker extension: [VNC Viewer](https://hub.docker.com/extensions/pgmystery/docker-extension-vnc)
 
-A [Docker Desktop Extension](https://www.docker.com/products/extensions/) that enables you to connect to VNC servers running inside Docker containers or on remote hosts—directly from [Docker Desktop](https://www.docker.com/products/docker-desktop/).
+A [Docker Desktop Extension](https://www.docker.com/products/extensions/) that enables you to connect to VNC servers running inside Docker containers or on remote hosts — directly from [Docker Desktop](https://www.docker.com/products/docker-desktop/).
 
 ## Table of Contents
 - [Overview](#overview)
