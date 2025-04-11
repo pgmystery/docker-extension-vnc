@@ -34,6 +34,7 @@ export default class TargetDockerContainer extends Target {
       if (!this.dockerContainer.container?.Id)
         throw new Error(`Can't find the target container "${container}"`)
 
+      await this.proxyNetwork.removeContainer(container)
       const dockerCli = new DockerCli()
       const execResult = await dockerCli.start(this.dockerContainer.container.Id)
 

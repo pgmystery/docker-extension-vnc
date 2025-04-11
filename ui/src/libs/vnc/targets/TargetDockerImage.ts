@@ -13,11 +13,31 @@ export const TARGET_LABEL_DELETE_AFTER_DISCONNECT = 'pgmystery.vnc.extension.con
 
 export default class TargetDockerImage extends TargetDockerContainer {
   #imageOptions: TargetDockerImageOptions | null = null
+  private isTryingToConnect: boolean = false
+
+  async connect(container: string, port: number) {
+    this.isTryingToConnect = true
+
+    try {
+      await super.connect(container, port)
+    }
+    catch (e: any) {
+      console.error(e)
+
+      this.isTryingToConnect = false
+      await this.disconnect()
+    }
+
+    this.isTryingToConnect = false
+  }
 
   async disconnect() {
     const dockerContainer = this.dockerContainer
 
     await super.disconnect()
+
+    if (this.isTryingToConnect)
+      return
 
     if (this.imageOptions?.deleteContainerAfterDisconnect && dockerContainer?.exist()) {
       await dockerContainer?.delete({force: true})
