@@ -104,7 +104,10 @@ export default function ClipboardMenu({ clipboardText, sendClipboardText, disabl
         />
         {
           sendClipboardText &&
-          <Button sx={{height: '25px'}} onClick={() => sendClipboardText(textareaValue)}>Send to Clipboard</Button>
+          <Button sx={{height: '25px'}} onClick={() => {
+            sendClipboardText(textareaValue)
+            handleClose()
+          }}>Send to Clipboard</Button>
         }
       </Menu>
     </>
