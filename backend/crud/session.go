@@ -130,6 +130,10 @@ func GetSession(id uuid.UUID) (*ResponseSession, error) {
 func CreateSession(requestSession *RequestCreateSession) (*model.Session, error) {
 	db := database.DB
 
+	if _, err := GetSessionModelByName(requestSession.Name); err == nil {
+		return nil, errors.New("[SESSION_CREATE_ERROR]: A session with the name '" + requestSession.Name + "' already exists")
+	}
+
 	sessionConnectionId, err := createConnection(requestSession.Connection.Type, requestSession.Connection.Data)
 	if err != nil {
 		return nil, err
