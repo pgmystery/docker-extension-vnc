@@ -55,7 +55,7 @@ export default function SessionConnectionRemoteHost ({ connectionData, setSubmit
         />
         <TextField
           name="connection.data.port"
-          label="VPC-Server PORT"
+          label="VNC-Server PORT"
           type="number"
           slotProps={{ htmlInput: { min: 1, max: 65535 } }}
           value={remotePort}
