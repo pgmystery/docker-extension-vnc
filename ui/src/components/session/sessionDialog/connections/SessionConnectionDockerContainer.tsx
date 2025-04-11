@@ -141,7 +141,7 @@ export default function SessionConnectionDockerContainer({ ddClient, connectionD
           options={selectedContainerPorts}
           renderInput={params => <TextField
             { ...params }
-            label="Container internal VPC-Server PORT*"
+            label="VNC-Server PORT*"
             type="number"
             name="connection.data.port"
             slotProps={{ htmlInput: { ...params.inputProps, min: 1, max: 65535 } }}
