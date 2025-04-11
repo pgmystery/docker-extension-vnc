@@ -41,9 +41,14 @@ export default function DockerImageSearchInput({setSelectedImage, initSelectedIm
   }
 
   async function getImagesFromHub(value: string): Promise<DockerImage[]> {
-    const searchResult = await dockerCli.search(value)
+    try {
+      const searchResult = await dockerCli.search(value)
 
-    return searchResult.map(image => ({where: 'HUB', image: image.Name}))
+      return searchResult.map(image => ({where: 'HUB', image: image.Name}))
+    }
+    catch {
+      return []
+    }
   }
 
   async function getImagesLocally(value: string): Promise<DockerImage[]> {
