@@ -100,7 +100,7 @@ export default function DockerCreateImageButton({ disabled }: DockerCreateImageB
       catch (e: any) {
         console.error(e)
 
-        if (e instanceof Error)
+        if (e instanceof Object && e.hasOwnProperty('message'))
           ddClient.desktopUI.toast.error(e.message)
         else if (isRawExecResult(e))
           ddClient.desktopUI.toast.error(e.stderr)
@@ -113,7 +113,7 @@ export default function DockerCreateImageButton({ disabled }: DockerCreateImageB
       const e = commitResult.out
       console.error(e)
 
-      if (e instanceof Error)
+      if (e instanceof Object && e.hasOwnProperty('message'))
         ddClient.desktopUI.toast.error(e.message)
       else if (isRawExecResult(e))
         ddClient.desktopUI.toast.error(e.stderr)

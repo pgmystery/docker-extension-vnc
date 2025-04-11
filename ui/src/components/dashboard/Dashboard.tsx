@@ -119,7 +119,7 @@ export default function Dashboard({ ddUIToast, connect, sessionStore, openUrl }:
         console.error(e)
 
         if (ddUIToast) {
-          if (e instanceof Error)
+          if (e instanceof Object && e.hasOwnProperty('message'))
             ddUIToast.error(e.message)
           else if (isRawExecResult(e))
             ddUIToast.error(e.stderr)
@@ -254,7 +254,7 @@ export default function Dashboard({ ddUIToast, connect, sessionStore, openUrl }:
     catch (e: any) {
       console.error(e)
 
-      if (e instanceof Error)
+      if (e instanceof Object && e.hasOwnProperty('message'))
         ddUIToast.error(e.message)
       else if (isRawExecResult(e))
         ddUIToast.error(e.stderr)

@@ -17,7 +17,7 @@ export default function useEventBus(ddClient: DockerDesktopClient) {
       console.error(e)
 
       if (ddClient.desktopUI.toast) {
-        if (e instanceof Error)
+        if (e instanceof Object && e.hasOwnProperty('message'))
           ddClient.desktopUI.toast.error(e.message)
         else if (isRawExecResult(e))
           ddClient.desktopUI.toast.error(e.stderr)

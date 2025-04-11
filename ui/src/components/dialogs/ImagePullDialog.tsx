@@ -34,7 +34,7 @@ export default function ImagePullDialog({ open, onClose, payload }: DialogProps<
       .catch(e => {
         console.error(e)
 
-        if (e instanceof Error)
+        if (e instanceof Object && e.hasOwnProperty('message'))
           ddClient.desktopUI.toast.error(e.message)
         else if (isRawExecResult(e))
           ddClient.desktopUI.toast.error(e.stderr)

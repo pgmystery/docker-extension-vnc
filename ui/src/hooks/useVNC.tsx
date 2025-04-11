@@ -69,7 +69,7 @@ export default function useVNC(ddClient: DockerDesktopClient): VNCHandler {
       catch (e: any) {
         console.error(e)
 
-        if (e instanceof Error)
+        if (e instanceof Object && e.hasOwnProperty('message'))
           ddClient.desktopUI.toast.error(e.message)
         else if (isRawExecResult(e))
           ddClient.desktopUI.toast.error(e.stderr)
@@ -92,7 +92,7 @@ export default function useVNC(ddClient: DockerDesktopClient): VNCHandler {
         await vnc.connect(session.name, session.connection)
       }
       catch (e: any) {
-        if (e instanceof Error)
+        if (e instanceof Object && e.hasOwnProperty('message'))
           ddClient.desktopUI.toast.error(e.message)
         else if (isRawExecResult(e))
           ddClient.desktopUI.toast.error(e.stderr)
@@ -130,7 +130,7 @@ export default function useVNC(ddClient: DockerDesktopClient): VNCHandler {
     catch (e: any) {
       console.error(e)
 
-      if (e instanceof Error)
+      if (e instanceof Object && e.hasOwnProperty('message'))
         ddClient.desktopUI.toast.error(e.message)
       else if (isRawExecResult(e))
         ddClient.desktopUI.toast.error(e.stderr)
