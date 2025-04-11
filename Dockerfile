@@ -57,7 +57,7 @@ LABEL org.opencontainers.image.title="VNC Viewer" \
     com.docker.extension.publisher-url="https://github.com/pgmystery" \
     com.docker.extension.additional-urls="[{\"title\":\"GitHub\",\"url\":\"https://github.com/pgmystery/docker-extension-vnc\"},\
                                            {\"title\":\"License\",\"url\":\"https://github.com/pgmystery/docker-extension-vnc/blob/main/LICENSE\"}]" \
-    com.docker.extension.categories="utility-tools,networking" \
+    com.docker.extension.categories="utility-tools,testing-tools,networking" \
     com.docker.extension.changelog="See full <a href=\"https://github.com/pgmystery/docker-extension-vnc/blob/main/CHANGELOG.md\">change log</a>"
 
 WORKDIR /
