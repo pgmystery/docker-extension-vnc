@@ -40,6 +40,12 @@ interface DockerCreateImageButtonProps {
 interface DockerCreateImageDialogProps {
   port: number
   credentials?: VNCCredentials
+  runOptions: DockerImageRunOptions
+}
+
+interface DockerImageRunOptions {
+  containerRunOptions?: string
+  containerRunArgs?: string
 }
 
 
@@ -57,8 +63,23 @@ export default function DockerCreateImageButton({ disabled }: DockerCreateImageB
     if (!connectionData || !connectionData.container)
       return
 
+    const runOptions: {
+      containerRunOptions?: string
+      containerRunArgs?: string
+    } = {}
+
+    if (vnc?.connectedData?.sessionName) {
+      const currentSession = await sessionStore.getSessionByName(vnc?.connectedData?.sessionName)
+
+      if (currentSession?.connection.type === 'image') {
+        runOptions.containerRunOptions = currentSession.connection.data.containerRunOptions
+        runOptions.containerRunArgs = currentSession.connection.data.containerRunArgs
+      }
+    }
+
     const createImageData = await dialogs.open(DockerCreateImageDialog, {
       port: vnc?.connectedData?.connection.data.port,
+      runOptions,
       credentials: vnc?.connectedData?.credentials,
     })
     if (!createImageData)
@@ -113,7 +134,7 @@ export default function DockerCreateImageButton({ disabled }: DockerCreateImageB
 
 
 function DockerCreateImageDialog({ open, onClose, payload }: DialogProps<DockerCreateImageDialogProps, null | DockerCreateImageDialogData>) {
-  const { port, credentials } = payload
+  const { port, credentials, runOptions } = payload
   const [repository, setRepository] = useState<string>('')
   const [tag, setTag] = useState<string>('latest')
   const [shouldCreateSession, setShouldCreateSession] = useState<boolean>(false)
@@ -209,8 +230,8 @@ function DockerCreateImageDialog({ open, onClose, payload }: DialogProps<DockerC
                     <Divider />
                     <DockerImageOptions required={shouldCreateSession} connectionData={{
                       port,
-                      containerRunOptions: '',
-                      containerRunArgs: '',
+                      containerRunOptions: runOptions.containerRunOptions || '',
+                      containerRunArgs: runOptions.containerRunArgs || '',
                       deleteContainerAfterDisconnect: true,
                     }} />
                     <Divider />
