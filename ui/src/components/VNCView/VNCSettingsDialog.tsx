@@ -9,11 +9,13 @@ import ViewOnly from './VNCSettingForms/ViewOnly'
 import { VNCSettings } from '../../stores/vncSettingsStore'
 import Scaling, { ScalingResize } from './VNCSettingForms/Scaling'
 import { DialogProps } from '@toolpad/core'
+import PlayBellSound from './VNCSettingForms/PlayBellSound'
 
 
-interface VNCSettingsSaveData extends Omit<VNCSettings, 'showDotCursor' | 'viewOnly' | 'scaling'> {
+interface VNCSettingsSaveData extends Omit<VNCSettings, 'showDotCursor' | 'viewOnly' | 'scaling' | 'playBell'> {
   showDotCursor?: 'on'
   viewOnly?: 'on'
+  playBell?: 'on'
   'scaling.clipToWindow'?: 'on'
   'scaling.resize': ScalingResize
 }
@@ -32,6 +34,7 @@ export default function VNCSettingsDialog({ open, onClose, payload }: DialogProp
       compressionLevel: Number(data.compressionLevel),
       showDotCursor: !!data.showDotCursor,
       viewOnly: !!data.viewOnly,
+      playBell: !!data.playBell,
       scaling: {
         clipToWindow: !!data['scaling.clipToWindow'],
         resize: data['scaling.resize'],
@@ -94,6 +97,11 @@ export default function VNCSettingsDialog({ open, onClose, payload }: DialogProp
           <Divider />
           <ViewOnly
             initValue={payload.viewOnly}
+            reset={reset}
+          />
+          <Divider />
+          <PlayBellSound
+            initValue={payload.playBell}
             reset={reset}
           />
           <Divider />

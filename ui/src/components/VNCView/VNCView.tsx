@@ -287,7 +287,12 @@ export default function VNCView({ sessionName, url, onCancel, ddUIToast, openBro
                 setHavePowerCapability(e?.detail.capabilities.power || false)
               }
             }}
-            onBell={() => bellSound.play()}
+            onBell={() => {
+              if (!vncSettings.playBell)
+                return
+
+              bellSound.play()
+            }}
           />
           : <VNCViewSkeleton />
         }
