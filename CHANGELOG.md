@@ -3,18 +3,24 @@
 History of all released versions and changes
 
 ## v1.3.0
-- Show the Image size from the selected Example Docker Image on Dashboard.
-- Add a screenshot-button for making a screenshot from the canvas and save it on the user's computer.
-- Add a record-button to record the canvas as a video and save it on the user's computer.
-- Disable some session buttons if there is no session (disconnected).
-- NoVNC-Proxy: Update Websockify version from v0.12.0 -> v0.13.0.
-- Add GitHub-url on Dashboard for the selected example Docker-Image.
-- Play a bell sound when the server request it.
-- Add a new option in the Clipboard-Menu to change the textfield into a password input.
-- New connection-type: Docker Image.
-- Add a feature to commit the current docker container to a new docker image.
-- Add a update button if the proxy docker image is not the newest version from docker hub.
-- Add a update button if the selected example docker container environment is not the newest version from docker hub.
+### Added
+- Display the image size of the selected example Docker image on the Dashboard.
+- Screenshot button to capture the canvas and save the image locally.
+- Record button to capture the canvas as a video and save it on the user's computer.
+- GitHub URL link on the Dashboard for the selected example Docker image.
+- Bell sound playback when triggered by the server.
+- Option in the Clipboard menu to toggle the text field to a password input.
+- New connection type: **Docker Image**.
+- Feature to commit the current Docker container as a new Docker image.
+- Update button for the proxy Docker image when a newer version is available on Docker Hub.
+- Update button for the selected example Docker container environment if a newer version is available on Docker Hub.
+
+### Changed
+- Disabled session-related buttons when no active session is available (e.g., disconnected state).
+
+### Updated
+- **NoVNC Proxy**: Websockify updated from version `v0.12.0` to `v0.13.0`.
+
 
 ## v1.2.0
 - Fix bug with "Toggle keys" under a windows machine.
