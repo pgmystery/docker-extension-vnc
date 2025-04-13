@@ -7,8 +7,12 @@ import { VncScreenHandle } from 'react-vnc'
 import ClipboardMenu from './ClipboardMenu'
 import SendMachineCommandsMenu, { MachineCommand } from './SendMachineCommandsMenu'
 import DragViewportButton from './DragViewportButton'
-import { RefObject, useEffect } from 'react'
+import { RefObject, useContext, useEffect } from 'react'
 import PowerIcon from '@mui/icons-material/Power'
+import ScreenshotButton from './ScreenshotButton'
+import RecordButton from './RecordButton'
+import DockerCreateImageButton from './DockerCreateImageButton'
+import { VNCContext } from '../../contexts/VNCContext'
 
 
 export interface VNCSessionBarProps {
@@ -25,6 +29,7 @@ export interface VNCSessionBarProps {
   sendMachineCommand: (command: MachineCommand) => void
   havePowerCapability: boolean
   viewOnly: boolean
+  canvas?: HTMLCanvasElement
 }
 
 
@@ -42,7 +47,10 @@ export default function VNCSessionBar({
   sendMachineCommand,
   havePowerCapability,
   viewOnly,
+  canvas,
 }: VNCSessionBarProps) {
+  const vnc = useContext(VNCContext)
+
   useEffect(() => {
     if (!vncScreenRef || !vncScreenRef.current?.rfb)
       return
@@ -71,19 +79,23 @@ export default function VNCSessionBar({
       {
         !viewOnly && <>
           <SendKeysMenu
+            disabled={!canvas}
             sendKey={ (keysym: number, code: string, down?: boolean) => vncScreenRef?.current?.sendKey(keysym, code, down) }
             sendCtrlAltDel={ () => {
               vncScreenRef?.current?.sendCtrlAltDel()
               vncScreenRef?.current?.focus()
             } }
           />
-          <ClipboardMenu clipboardText={ clipboardText } sendClipboardText={ sendClipboardText }/>
+          <ClipboardMenu disabled={!canvas} clipboardText={ clipboardText } sendClipboardText={ sendClipboardText }/>
           { havePowerCapability && <SendMachineCommandsMenu sendMachineCommand={ sendMachineCommand }/> }
         </>
       }
+      <ScreenshotButton canvas={canvas} />
+      <RecordButton canvas={canvas} />
 
       <Box sx={ {flexGrow: 1} }/>
 
+      { vnc?.connectedData?.connection.type !== 'remote' && <DockerCreateImageButton disabled={ !canvas }/> }
       <Tooltip title="Copy Websocket-URL to Clipboard" arrow>
         <IconButton onClick={ onWebsocketUrlCopyClick }>
           <PowerIcon/>

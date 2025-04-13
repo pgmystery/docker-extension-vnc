@@ -1,49 +1,55 @@
-import VNCConnection from './VNCConnection'
-import { Config, loadConfig } from '../../../hooks/useConfig'
-import { Docker } from '@docker/extension-api-client-types/dist/v1'
-import { createDockerDesktopClient } from '@docker/extension-api-client'
-import { ContainerExtended } from '../../../types/docker/cli/inspect'
+import VNCConnection, { ReconnectData } from './VNCConnection'
+import { ConnectionDataActiveSession } from '../VNC'
 
 
 export type ConnectionTypeRemoteHost = 'remote'
-export interface ConnectionDataRemoteHost {
+export interface ConnectionRemoteHost {
   type: ConnectionTypeRemoteHost
-  data: ConnectionDataRemoteHostData
+  data: ConnectionDataRemoteHost
 }
-export interface ConnectionDataRemoteHostData {
+export interface ConnectionDataRemoteHost {
   host: string
   port: number
 }
 
-export default class VNCRemoteHost extends VNCConnection {
-  public type: ConnectionTypeRemoteHost
+export default class VNCRemoteHost extends VNCConnection<ConnectionTypeRemoteHost> {
+  public type: ConnectionTypeRemoteHost = 'remote'
+  public data: ConnectionDataRemoteHost | null = null
 
-  constructor(docker?: Docker, config?: Config) {
-    if (!docker)
-      docker = createDockerDesktopClient().docker
+  async reconnect(data: ReconnectData<ConnectionTypeRemoteHost, ConnectionDataRemoteHost>) {
+    let targetIp, targetPort, sessionName
 
-    if (!config)
-      config = loadConfig()
+    switch (data.type) {
+      case 'proxy':
+        sessionName = this.proxy.getSessionName()
+        targetIp = this.proxy.getTargetIp()
+        targetPort = this.proxy.getTargetPort()
 
-    super(docker, config)
+        break
 
-    this.type = 'remote'
+      case 'activeSession':
+        sessionName = data.sessionName
+        targetIp = data.data.host
+        targetPort = data.data.port
+
+        break
+    }
+
+    await this.connect(sessionName, {host: targetIp, port: targetPort})
   }
 
-  async reconnect(container: ContainerExtended) {
-    await super.reconnect(container)
-
-    const targetIp = this.proxy.getTargetIp()
-    const targetPort = this.proxy.getTargetPort()
-    const sessionName = this.proxy.getSessionName()
-
-    await this.connect(sessionName, {type: this.type, data: {host: targetIp, port: targetPort}})
-  }
-
-  async connect(sessionName: string, { data }: ConnectionDataRemoteHost) {
+  async connect(sessionName: string, data: ConnectionDataRemoteHost) {
     const { host, port } = data
     await this.target.connect(host, port)
+    this.data = data
 
-    return super.connect(sessionName, {type: this.type, data})
+    return super._connect(sessionName, data)
+  }
+
+  getActiveSessionData(): ConnectionDataActiveSession<ConnectionTypeRemoteHost, ConnectionDataRemoteHost | null> {
+    return {
+      type: this.type,
+      data: this.data,
+    }
   }
 }

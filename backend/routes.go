@@ -10,4 +10,5 @@ func createAPIs(app *fiber.App) {
 
 	APIRoutes.SettingsRouter(apiRouter)
 	APIRoutes.SessionRouter(apiRouter)
+	APIRoutes.DockerHubRouter(apiRouter)
 }

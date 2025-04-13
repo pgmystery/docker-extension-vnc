@@ -55,11 +55,13 @@ export default function CompressionLevel({ initValue, reset }: CompressionLevelP
           size="small"
           onChange={handleInputChange}
           onBlur={handleBlur}
-          inputProps={{
-            step: 1,
-            min: CompressionLevelRange.min,
-            max: CompressionLevelRange.max,
-            type: 'number',
+          slotProps={{
+            input: {
+              step: 1,
+              min: CompressionLevelRange.min,
+              max: CompressionLevelRange.max,
+              type: 'number',
+            },
           }}
         />
       </Stack>

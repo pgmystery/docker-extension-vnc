@@ -1,18 +1,29 @@
 import ContentPasteIcon from '@mui/icons-material/ContentPaste'
-import { IconButton, ListSubheader, Menu, styled, TextareaAutosize, Tooltip, Typography } from '@mui/material'
+import {
+  Checkbox,
+  FormControlLabel,
+  IconButton,
+  ListSubheader,
+  Menu,
+  Tooltip,
+  Typography
+} from '@mui/material'
 import { MouseEvent, useEffect, useState } from 'react'
 import Button from '@mui/material/Button'
+import ClipboardField from '../inputs/ClipboardField'
 
 
 interface ClipboardMenuProps {
   clipboardText: string
   sendClipboardText?: (text: string)=>void
+  disabled?: boolean
 }
 
-export default function ClipboardMenu({ clipboardText, sendClipboardText }: ClipboardMenuProps) {
+export default function ClipboardMenu({ clipboardText, sendClipboardText, disabled }: ClipboardMenuProps) {
   const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null)
   const open = Boolean(anchorEl)
   const [textareaValue, setTextareaValue] = useState<string>('')
+  const [textIsHidden, setTextIsHidden] = useState<boolean>(false)
 
   useEffect(() => {
     setTextareaValue(clipboardText)
@@ -35,6 +46,7 @@ export default function ClipboardMenu({ clipboardText, sendClipboardText }: Clip
           aria-controls={ open ? 'clipboard-menu' : undefined }
           aria-haspopup="true"
           aria-expanded={ open ? 'true' : undefined }
+          disabled={ disabled }
         >
           <ContentPasteIcon/>
         </IconButton>
@@ -78,21 +90,26 @@ export default function ClipboardMenu({ clipboardText, sendClipboardText }: Clip
       >
         <ListSubheader>Clipboard</ListSubheader>
         <Typography>Edit clipboard content in the textarea below.</Typography>
-        <Textarea
+        <ClipboardField
           autoFocus
           value={textareaValue}
-          onChange={(e) => setTextareaValue(e.currentTarget.value)}
+          setValue={value => setTextareaValue(value)}
+          isPassword={textIsHidden}
+        />
+        <FormControlLabel
+          control={
+            <Checkbox checked={textIsHidden} onChange={event => setTextIsHidden(event.target.checked)} />
+          }
+          label="Password input"
         />
         {
           sendClipboardText &&
-          <Button sx={{height: '25px'}} onClick={() => sendClipboardText(textareaValue)}>Send to Clipboard</Button>
+          <Button sx={{height: '25px'}} onClick={() => {
+            sendClipboardText(textareaValue)
+            handleClose()
+          }}>Send to Clipboard</Button>
         }
       </Menu>
     </>
   )
 }
-
-const Textarea = styled(TextareaAutosize)(() => `
-  min-height: 50px;
-  margin-bottom: 10px;
-`)

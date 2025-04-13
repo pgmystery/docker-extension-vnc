@@ -60,5 +60,10 @@ func Connect() {
 		panic(err)
 	}
 
+	err = db.AutoMigrate(&connections.DockerImage{})
+	if err != nil {
+		panic(err)
+	}
+
 	DB = db
 }

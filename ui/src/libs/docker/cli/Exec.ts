@@ -53,6 +53,10 @@ export default class DockerCliExec {
     return this.client.cli.exec(cmd, [...optionsList, ...args])
   }
 
+  execCli(cmd: string, args: string[] = []) {
+    return this.client.cli.exec(cmd, args)
+  }
+
   private returnValueAsString(value: ObjectValueTypes<CliExecOptions>): string | undefined {
     switch (typeof value) {
       case 'string':

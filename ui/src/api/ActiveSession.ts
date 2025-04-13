@@ -1,11 +1,25 @@
 import BackendRoute from './BackendRoute'
 import { HttpService } from '@docker/extension-api-client-types/dist/v1'
 import { createDockerDesktopClient } from '@docker/extension-api-client'
+import { ConnectionType } from '../libs/vnc/VNC'
+import { ConnectionDataRemoteHost } from '../libs/vnc/connectionTypes/VNCRemoteHost'
+import { ConnectionDataDockerContainer } from '../libs/vnc/connectionTypes/VNCDockerContainer/VNCDockerContainerBase'
+import { ConnectionDataDockerImageWithOptions } from '../libs/vnc/connectionTypes/VNCDockerImage'
 
 
-interface ActiveSessionData {
+interface ActiveSessionData<T extends ConnectionType> {
   name: string
   proxy_container_id: string
+  connection: {
+    type: T,
+    data: ActiveSessionConnectionData[T]
+  }
+}
+
+interface ActiveSessionConnectionData {
+  remote: ConnectionDataRemoteHost
+  container: ConnectionDataDockerContainer
+  image: ConnectionDataDockerImageWithOptions
 }
 
 
@@ -23,14 +37,14 @@ export default class ActiveSessionBackend {
     this.api = new BackendRoute(backendHttpService, '/session/active')
   }
 
-  async get(): Promise<ActiveSessionData | undefined> {
+  async get(): Promise<ActiveSessionData<ConnectionType> | undefined> {
     try {
-      return await this.api.get('') as ActiveSessionData
+      return await this.api.get('') as ActiveSessionData<ConnectionType>
     }
     catch {}
   }
 
-  set(data: ActiveSessionData) {
+  set<T extends ConnectionType>(data: ActiveSessionData<T>) {
     return this.api.post<void>('', data)
   }
 

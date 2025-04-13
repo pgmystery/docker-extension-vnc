@@ -53,8 +53,7 @@ func getSession(ctx *fiber.Ctx) error {
 func createSession(ctx *fiber.Ctx) error {
 	requestSession := new(crud.RequestCreateSession)
 
-	err := ctx.BodyParser(requestSession)
-	if err != nil {
+	if err := ctx.BodyParser(requestSession); err != nil {
 		return fiber.NewError(fiber.StatusBadRequest, err.Error())
 	}
 
@@ -74,8 +73,7 @@ func updateSession(ctx *fiber.Ctx) error {
 	}
 	sessionUpdate := new(crud.SessionUpdate)
 
-	err = ctx.BodyParser(sessionUpdate)
-	if err != nil {
+	if err := ctx.BodyParser(sessionUpdate); err != nil {
 		return fiber.NewError(fiber.StatusBadRequest, err.Error())
 	}
 
@@ -94,8 +92,7 @@ func deleteSession(ctx *fiber.Ctx) error {
 		return fiber.NewError(fiber.StatusBadRequest, err.Error())
 	}
 
-	err = crud.DeleteSession(id)
-	if err != nil {
+	if err := crud.DeleteSession(id); err != nil {
 		return fiber.NewError(fiber.StatusInternalServerError, err.Error())
 	}
 

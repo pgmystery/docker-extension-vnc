@@ -10,6 +10,8 @@ import {
 import { createDockerDesktopClient } from '@docker/extension-api-client'
 import { CliExecOptions } from '../../types/docker/cli'
 import { MultipleContainersFoundError } from './Container'
+import DockerCliManifest from './cli/Manifest'
+import DockerCliImage from './dockerCli/Image'
 
 interface AbortEventTarget extends EventTarget {
   reason?: string
@@ -19,12 +21,27 @@ interface AbortEvent extends Event {
   target: AbortEventTarget | null
 }
 
-interface PullOptions {
+interface ExecStreamCommand {
+  command: string
+  args?: string[]
+}
+
+interface ExecStreamOptions {
   abortSignal?: AbortSignal
+}
+
+interface DockerHubImage {
+  Description: string
+  IsAutomated: 'false' | 'true'
+  IsOfficial: 'false' | 'true'
+  Name: string
+  StarCount: string
 }
 
 export default class DockerCli extends DockerCliExec {
   public network: DockerCliNetwork
+  public manifest: DockerCliManifest
+  public image: DockerCliImage
 
   constructor(dockerClient?: DockerClient) {
     if (!dockerClient)
@@ -33,6 +50,8 @@ export default class DockerCli extends DockerCliExec {
     super(dockerClient)
 
     this.network = new DockerCliNetwork(dockerClient)
+    this.manifest = new DockerCliManifest(dockerClient)
+    this.image = new DockerCliImage(dockerClient)
   }
 
   async getContainer(filters: DockerListContainersFilters): Promise<ContainerInfo | undefined> {
@@ -92,7 +111,66 @@ export default class DockerCli extends DockerCliExec {
     return images.length === 1
   }
 
-  pull(image: string, addStdout: (stdout: string)=>void, options?: PullOptions) {
+  pull(image: string, addStdout: (stdout: string)=>void, options?: ExecStreamOptions) {
+    return this.execStream({
+      command: 'pull',
+      args: [image],
+    }, addStdout, options)
+  }
+
+  run(image: string, options: CliExecOptions, args: string[] = []) {
+    return this.exec('run', options, image, ...args)
+  }
+
+  rm(containerId: string, options: {force: boolean} = {force: false}) {
+    const execOptions = options.force ? {'--force': null} : {}
+
+    return this.exec('rm', execOptions, containerId)
+  }
+
+  start(containerId: string, options: CliExecOptions = {}) {
+    return this.exec('start', options, containerId)
+  }
+
+  async search(searchString: string, limit: number = 10) {
+    const searchResult = await this.exec(
+      'search',
+      {
+        '--format': 'json',
+        '--no-trunc': null,
+        '--limit': limit,
+      },
+      searchString
+    )
+
+    return searchResult.parseJsonLines() as DockerHubImage[]
+  }
+
+  listImages(options?: any) {
+    return this.client.listImages({
+      ...options,
+      format: 'json',
+    }) as Promise<DockerImage[]>
+  }
+
+  commit(containerId: string, repository: string) {
+    return this.exec(
+      'commit',
+      {},
+      containerId,
+      repository,
+    )
+  }
+
+  // STEAM IS NOT WORKING :( THE DOCKER-EXEC COMMAND IS BROKEN FROM THE EXTENSION. https://github.com/docker/extensions-sdk/issues/303
+  commitStream(containerId: string, repository: string, addStdout: (stdout: string)=>void, options?: ExecStreamOptions) {
+    return this.execStream({
+      command: 'commit',
+      args: [containerId, repository],
+    }, addStdout, options)
+  }
+
+  private execStream(command: ExecStreamCommand, addStdout: (stdout: string)=>void, options?: ExecStreamOptions) {
     return new Promise<void>((resolve, reject) => {
       function abortListener({ target }: AbortEvent) {
         options?.abortSignal?.removeEventListener('abort', abortListener)
@@ -102,7 +180,7 @@ export default class DockerCli extends DockerCliExec {
 
       options?.abortSignal?.addEventListener('abort', abortListener)
 
-      return this.client.cli.exec('pull', [image], {
+      return this.client.cli.exec(command.command, command.args || [], {
         stream: {
           onOutput(data) {
             if (data.stdout) {
@@ -126,19 +204,5 @@ export default class DockerCli extends DockerCliExec {
         },
       })
     })
-  }
-
-  run(image: string, options: CliExecOptions) {
-    return this.exec('run', options, image)
-  }
-
-  rm(containerId: string, options: {force: boolean} = {force: false}) {
-    const execOptions = options.force ? {'--force': null} : {}
-
-    return this.exec('rm', execOptions, containerId)
-  }
-
-  start(containerId: string, options: CliExecOptions = {}) {
-    return this.exec('start', options, containerId)
   }
 }

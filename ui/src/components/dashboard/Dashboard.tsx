@@ -1,13 +1,13 @@
 import { useEffect, useMemo, useReducer, useRef, useState, useSyncExternalStore } from 'react'
 import {
+  Box,
   FormControl,
   IconButton,
-  InputAdornment,
+  InputAdornment, Link,
   OutlinedInput,
   Stack,
   Tooltip,
   Typography,
-  TypographyProps
 } from '@mui/material'
 import ContentCopyIcon from '@mui/icons-material/ContentCopy'
 import TextStreamOutput from '../utils/TextStreamOutput'
@@ -19,12 +19,18 @@ import useConfig from '../../hooks/useConfig'
 import { Session } from '../../types/session'
 import { SessionStore } from '../../stores/sessionStore'
 import ExampleContainerButton, { ExampleContainerImageTag } from './ExampleContainerButton'
+import {filesize} from "filesize"
+import DockerHubApi from '../../libs/dockerHub/DockerHubApi'
+import InfoText from './InfoText'
+import InfoTextImageSize from './InfoTextImageSize'
+import InfoTextUpdateAvailable from './InfoTextUpdateAvailable'
 
 
 interface DashboardProps {
   ddUIToast: Toast
   connect: (session: Session)=>Promise<void>
   sessionStore: SessionStore
+  openUrl: (url: string)=>void
 }
 
 const UbuntuVNCDockerSessionName = 'example vnc container'
@@ -35,19 +41,8 @@ const UbuntuVNCDockerImageLabel = 'pgmystery.vnc.extension.example'
 const UbuntuVNCDockerImagePort = 5901
 
 
-function InfoText(props: TypographyProps) {
-  return <Typography
-    sx={{
-      textAlign: 'left',
-      marginLeft: '14px',
-      marginRight: '14px',
-    }}
-    { ...props }
-  >{ props.children }</Typography>
-}
-
-
-export default function Dashboard({ ddUIToast, connect, sessionStore }: DashboardProps) {
+export default function Dashboard({ ddUIToast, connect, sessionStore, openUrl }: DashboardProps) {
+  const dockerHubApi = new DockerHubApi()
   const [loading, setLoading] = useState<boolean>(true)
   const sessions = useSyncExternalStore(sessionStore.subscribe, sessionStore.getSnapshot)
   const exampleRunInputRef = useRef<HTMLInputElement>(null)
@@ -59,16 +54,34 @@ export default function Dashboard({ ddUIToast, connect, sessionStore }: Dashboar
   const [{ proxyContainerPassword }] = useConfig()
   const [exampleContainerTag, setExampleContainerTag] = useState<ExampleContainerImageTag>(UbuntuVNCDockerImageDefaultTag)
   const ubuntuVNCDockerImage = useMemo(() => UbuntuVNCDockerImage + ':' + exampleContainerTag, [exampleContainerTag])
+  const [imageSize, setImageSize] = useState<string | undefined>()
+  const [imageShaDigest, setImageShaDigest] = useState<string | undefined>()
 
   useEffect(() => {
     checkIfExampleContainerExist().finally(() => setLoading(false))
-  }, [])
 
-  useEffect(() => {
     return () => {
       pullAbortController.abort(`Cancel pulling image "${ubuntuVNCDockerImage}"...`)
     }
   }, [])
+
+  useEffect(() => {
+    setImageSize(undefined)
+
+    if (ubuntuVNCDockerImage === '') {
+      setImageSize('ERROR')
+
+      return
+    }
+
+    const [image, tag] = ubuntuVNCDockerImage.split(':')
+    const dockerRepo = dockerHubApi.repository(image)
+    dockerRepo.getTag(tag)
+              .then(imageInfo => {
+                setImageSize(filesize(imageInfo.full_size, {standard: 'jedec'}))
+                setImageShaDigest(imageInfo.digest)
+              })
+  }, [ubuntuVNCDockerImage])
 
   async function checkIfExampleContainerExist() {
     const dockerCli = new DockerCli()
@@ -106,7 +119,7 @@ export default function Dashboard({ ddUIToast, connect, sessionStore }: Dashboar
         console.error(e)
 
         if (ddUIToast) {
-          if (e instanceof Error)
+          if (e instanceof Object && e.hasOwnProperty('message'))
             ddUIToast.error(e.message)
           else if (isRawExecResult(e))
             ddUIToast.error(e.stderr)
@@ -241,7 +254,7 @@ export default function Dashboard({ ddUIToast, connect, sessionStore }: Dashboar
     catch (e: any) {
       console.error(e)
 
-      if (e instanceof Error)
+      if (e instanceof Object && e.hasOwnProperty('message'))
         ddUIToast.error(e.message)
       else if (isRawExecResult(e))
         ddUIToast.error(e.stderr)
@@ -287,9 +300,23 @@ export default function Dashboard({ ddUIToast, connect, sessionStore }: Dashboar
               maxWidth: '600px',
             }}
           />
-          <InfoText>VNC connect Password = { proxyContainerPassword }</InfoText>
-          <InfoText>Docker Container Name = ubuntu_vnc</InfoText>
-          <InfoText>VNC Port = 5901</InfoText>
+          <Box sx={{marginTop: '10px'}}>
+            <InfoText>VNC connect Password = { proxyContainerPassword }</InfoText>
+            <InfoText>Docker Container Name = ubuntu_vnc</InfoText>
+            <InfoText>VNC Port = 5901</InfoText>
+            <InfoTextImageSize imageSize={imageSize} />
+            <InfoText>
+              GitHub ={" "}
+              <Link
+                component="button"
+                onClick={() => openUrl(`https://github.com/pgmystery/docker-extension-vnc/tree/main/docker/vnc_ubuntu/${exampleContainerTag}`)}
+              >{ubuntuVNCDockerImage}</Link>
+            </InfoText>
+            <InfoTextUpdateAvailable
+              image={ubuntuVNCDockerImage}
+              digestSha={imageShaDigest}
+            />
+          </Box>
         </FormControl>
 
         <ExampleContainerButton

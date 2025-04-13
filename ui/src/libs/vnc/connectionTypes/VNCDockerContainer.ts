@@ -1,82 +1,48 @@
-import VNCConnection from './VNCConnection'
-import TargetDockerContainer from '../targets/TargetDockerContainer'
-import ProxyNetwork from '../ProxyNetwork'
 import { Docker } from '@docker/extension-api-client-types/dist/v1'
 import { Config, loadConfig } from '../../../hooks/useConfig'
 import { createDockerDesktopClient } from '@docker/extension-api-client'
-import ProxyDockerContainer from '../proxies/ProxyDockerContainer'
-import { ContainerExtended } from '../../../types/docker/cli/inspect'
+import VNCDockerContainerBase, {
+  ConnectionDataDockerContainer, ConnectionTypeDockerContainer
+} from './VNCDockerContainer/VNCDockerContainerBase'
+import { ReconnectData } from './VNCConnection'
 
 
-export type ConnectionTypeDockerContainer = 'container'
-export interface ConnectionDataDockerContainer {
+export interface NewConnectionDockerContainerData {
   type: ConnectionTypeDockerContainer
-  data: ConnectionDataDockerContainerData
+  data: ConnectionDataDockerContainer
 }
-export interface ConnectionDataDockerContainerData {
-  container: string
-  port: number
+export interface ConnectionDockerContainer {
+  type: ConnectionTypeDockerContainer
+  data: ConnectionDataDockerContainer | null
 }
 
 
-export default class VNCDockerContainer extends VNCConnection {
-  declare proxy: ProxyDockerContainer
-  declare target: TargetDockerContainer
-  public type: ConnectionTypeDockerContainer
-  public network: ProxyNetwork
+export default class VNCDockerContainer extends VNCDockerContainerBase {
+  public type: ConnectionTypeDockerContainer = 'container'
 
-  constructor(docker?: Docker, config?: Config) {
-    docker = docker || createDockerDesktopClient().docker
-    config = config || loadConfig()
+  constructor(props: {docker?: Docker, config?: Config}) {
+    const docker = props.docker || createDockerDesktopClient().docker
+    const config = props.config || loadConfig()
 
-    const proxyNetwork = new ProxyNetwork(docker, config)
-    const proxy = new ProxyDockerContainer(proxyNetwork, docker, config)
-    const target = new TargetDockerContainer(proxyNetwork, docker, config)
-
-    super(docker, config, proxy, target)
-
-    this.network = proxyNetwork
-    this.type = 'container'
+    super(docker, config)
   }
 
-  async reconnect(container: ContainerExtended) {
-    const proxyExist = await this.proxy.get(container)
-    if (!proxyExist) return await this.disconnect()
+  async connect(sessionName: string, data: ConnectionDataDockerContainer, labels?: {[p: string]: string}) {
+    this.data = await this.getContainerConnectData(data)
 
-    const targetContainerId = this.proxy.getTargetContainerId()
-    const targetPort = this.proxy.getTargetPort()
-    const sessionName = this.proxy.getSessionName()
-
-    await this.connect(sessionName, {type: this.type, data: {container: targetContainerId, port: targetPort}})
+    return super._connect<ConnectionDataDockerContainer>(sessionName, this.data, labels)
   }
 
-  async connect(sessionName: string, { data }: ConnectionDataDockerContainer) {
-    await this.target.connect(data.container, data.port)
-    const targetContainerId = this.target.getContainerId()
+  async reconnect(data: ReconnectData<ConnectionTypeDockerContainer, ConnectionDataDockerContainer>) {
+    const reconnectData = await this.getReconnectData(data)
 
-    if (!targetContainerId)
-      throw new Error(`Can't get target container "${data.container}" ID`)
+    await this.connect(reconnectData.sessionName, reconnectData.connectionData)
+  }
 
-    if (this.proxy.container) {
-      const isProxyContainerInNetwork = await this.network.hasContainer(this.proxy.container.Id)
-
-      if (!isProxyContainerInNetwork)
-        await this.proxy.delete()
-    }
-
-    return super.connect(sessionName, {
+  getActiveSessionData(): ConnectionDockerContainer {
+    return {
       type: this.type,
-      data: {
-        container: targetContainerId,
-        port: data.port
-      },
-    })
-  }
-
-  async disconnect() {
-    await super.disconnect()
-
-    if (await this.network.exist())
-      await this.network.remove({ force: true })
+      data: this.data,
+    }
   }
 }

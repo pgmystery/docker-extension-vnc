@@ -5,6 +5,7 @@ type SettingsData struct {
 	QualityLevel     int     `json:"qualityLevel"`
 	CompressionLevel int     `json:"compressionLevel"`
 	ShowDotCursor    bool    `json:"showDotCursor"`
+	PlayBell         bool    `json:"playBell"`
 	Scaling          Scaling `json:"scaling"`
 }
 
@@ -19,6 +20,7 @@ func getDefaultSettings() SettingsData {
 		CompressionLevel: 2,
 		ShowDotCursor:    false,
 		ViewOnly:         false,
+		PlayBell:         true,
 		Scaling: Scaling{
 			ClipToWindow: false,
 			Resize:       "scale",

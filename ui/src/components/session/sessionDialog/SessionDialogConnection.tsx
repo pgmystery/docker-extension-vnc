@@ -1,15 +1,20 @@
 import { FormControl, FormLabel, MenuItem, Select, Stack } from '@mui/material'
-import { ConnectionData, ConnectionType } from '../../../libs/vnc/VNC'
+import { ConnectionType } from '../../../libs/vnc/VNC'
 import React, { useEffect, useMemo, useState } from 'react'
 import { createDockerDesktopClient } from '@docker/extension-api-client'
-import SessionConnectionDockerContainer, {
+import SessionConnectionRemoteHost from './connections/SessionConnectionRemoteHost'
+import SessionConnectionDockerImage from './connections/SessionConnectionDockerImage'
+import { SessionConnectionData } from '../../../types/session'
+import SessionConnectionDockerContainer from './connections/SessionConnectionDockerContainer'
+import {
   ConnectionDataDockerContainer
-} from './connections/SessionConnectionDockerContainer'
-import SessionConnectionRemoteHost, { ConnectionDataRemoteHost } from './connections/SessionConnectionRemoteHost'
+} from '../../../libs/vnc/connectionTypes/VNCDockerContainer/VNCDockerContainerBase'
+import { ConnectionDataDockerImage } from '../../../libs/vnc/connectionTypes/VNCDockerImage'
+import { ConnectionDataRemoteHost } from '../../../libs/vnc/connectionTypes/VNCRemoteHost'
 
 
 interface SessionDialogConnectionProps {
-  connection?: ConnectionData
+  connection?: SessionConnectionData
   setSubmitReady: (state: boolean)=>void
 }
 
@@ -30,6 +35,11 @@ export default function SessionDialogConnection({ connection, setSubmitReady }: 
         return <SessionConnectionDockerContainer
           ddClient={ddClient}
           connectionData={ connection?.type === 'container' ? connection.data as ConnectionDataDockerContainer : undefined}
+          setSubmitReady={setSubmitReady}
+        />
+      case 'image':
+        return <SessionConnectionDockerImage
+          connectionData={ connection?.type === 'image' ? connection.data as ConnectionDataDockerImage : undefined}
           setSubmitReady={setSubmitReady}
         />
       case 'remote':
@@ -55,6 +65,7 @@ export default function SessionDialogConnection({ connection, setSubmitReady }: 
           }}
         >
           <MenuItem value="container">Docker Container</MenuItem>
+          <MenuItem value="image">Docker Image</MenuItem>
           <MenuItem value="remote">Remote Host</MenuItem>
         </Select>
         {

@@ -6,9 +6,11 @@ import { createDockerDesktopClient } from '@docker/extension-api-client'
 import { HttpService } from '@docker/extension-api-client-types/dist/v1'
 import BackendRoute from '../api/BackendRoute'
 import { ScalingDefault, ScalingSettings } from '../components/VNCView/VNCSettingForms/Scaling'
+import { PlayBellSoundDefault } from '../components/VNCView/VNCSettingForms/PlayBellSound'
 
 
 export interface VNCSettings {
+  playBell: boolean
   viewOnly: boolean
   qualityLevel: number
   compressionLevel: number
@@ -38,6 +40,7 @@ const defaultSettings: VNCSettings = {
   showDotCursor: ShowDotCursorDefault,
   viewOnly: ViewOnlyDefault,
   scaling: ScalingDefault,
+  playBell: PlayBellSoundDefault,
 }
 const ddClient = createDockerDesktopClient()
 let vncSettings: VNCSettings = defaultSettings

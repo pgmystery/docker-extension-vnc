@@ -1,77 +1,121 @@
 import { Docker } from '@docker/extension-api-client-types/dist/v1'
 import { Config, loadConfig } from '../../hooks/useConfig'
 import { createDockerDesktopClient } from '@docker/extension-api-client'
-import VNCDockerContainer, {
-  ConnectionDataDockerContainer,
-  ConnectionTypeDockerContainer
-} from './connectionTypes/VNCDockerContainer'
+import VNCDockerContainer from './connectionTypes/VNCDockerContainer'
 import Proxy from './proxies/Proxy'
-import VNCRemoteHost, { ConnectionDataRemoteHost, ConnectionTypeRemoteHost } from './connectionTypes/VNCRemoteHost'
+import VNCRemoteHost, {
+  ConnectionDataRemoteHost,
+  ConnectionTypeRemoteHost
+} from './connectionTypes/VNCRemoteHost'
 import { DockerImage } from '../../types/docker/extension'
 import ActiveSessionBackend from '../../api/ActiveSession'
-import { SessionStore } from '../../stores/sessionStore'
-import ProxyNetwork from './ProxyNetwork'
+import VNCDockerImage, {
+  ConnectionDataDockerImage,
+  ConnectionTypeDockerImage
+} from './connectionTypes/VNCDockerImage'
+import {
+  ConnectionDataDockerContainer,
+  ConnectionTypeDockerContainer
+} from './connectionTypes/VNCDockerContainer/VNCDockerContainerBase'
+import { SessionConnectionData } from '../../types/session'
+import VNCConnection, { ReconnectData } from './connectionTypes/VNCConnection'
+import { AbstractConstructorParameters } from '../../types/utils'
 
 
-export type ConnectionType = ConnectionTypeDockerContainer | ConnectionTypeRemoteHost
-export type VNCConnectionType = VNCDockerContainer | VNCRemoteHost
-export type ConnectionData = ConnectionDataDockerContainer | ConnectionDataRemoteHost
+export type ConnectionType = ConnectionTypeDockerContainer | ConnectionTypeRemoteHost | ConnectionTypeDockerImage
+export type ConnectionData = ConnectionDataDockerContainer | ConnectionDataRemoteHost | ConnectionDataDockerImage
+export interface ConnectionDataActiveSession<T extends ConnectionType, D> {
+  type: T
+  data: D
+}
+type VNCConnectionConstructor = AbstractConstructorParameters<typeof VNCConnection>
 
 
 export default class VNC {
   private readonly docker: Docker
   private readonly config: Config
   private readonly activeSessionBackend: ActiveSessionBackend
-  public connection?: VNCConnectionType
+  public connection?: VNCConnection<ConnectionType>
+
+  private readonly connectionMap: Record<ConnectionType, new (...args: VNCConnectionConstructor) => VNCConnection<ConnectionType>> = {
+    container: VNCDockerContainer,
+    image: VNCDockerImage,
+    remote: VNCRemoteHost,
+  }
 
   constructor(docker?: Docker, config?: Config) {
-    if (!docker)
-      docker = createDockerDesktopClient().docker
-
-    if (!config)
-      config = loadConfig()
-
-    this.docker = docker
-    this.config = config
+    this.docker = docker || createDockerDesktopClient().docker
+    this.config = config || loadConfig()
     this.activeSessionBackend = new ActiveSessionBackend()
   }
 
-  async reconnect(sessionStore?: SessionStore) {
-    if (this.connection) return
+  async reconnect() {
+    if (this.connection)
+      return
 
     const proxy = await this.getExistingProxy()
-    if (!proxy || !proxy.container) {
-      return this.checkActiveSession(sessionStore)
+
+    let reconnectData: ReconnectData<ConnectionType, unknown> | null = null
+
+    if (proxy?.container) {
+      reconnectData = {
+        type: 'proxy',
+        connectionType: proxy.getConnectionType(),
+        data: proxy,
+      }
+    }
+    else {
+      const activeSession = await this.activeSessionBackend.get()
+
+      if (activeSession) {
+        reconnectData = {
+          type: 'activeSession',
+          connectionType: activeSession.connection.type,
+          data: activeSession.connection.data,
+          sessionName: activeSession.name,
+        }
+      }
     }
 
-    this.connection = this.getNewConnection(proxy.getConnectionType())
+    if (!reconnectData)
+      return this.disconnect()
+
+    this.connection = this.getConnectionClass(reconnectData.connectionType)
+
+    if (proxy) {
+      this.connection.proxy.container = proxy.container
+    }
 
     try {
-      await this.connection.reconnect(proxy.container)
+      await this.connection.reconnect(reconnectData)
     }
     catch (e) {
       console.error(e)
+
       await this.disconnect()
 
       throw e
     }
   }
 
-  async connect(sessionName: string, connectionData: ConnectionData) {
+  async connect(sessionName: string, connectionData: SessionConnectionData) {
     await this.disconnect()
 
     await this.newConnection(sessionName, connectionData)
 
-    if (!this.connection || !this.connection.proxy.container) return
+    if (!this.connection?.proxy.container)
+      return
 
-    this.activeSessionBackend.set({
+    await this.activeSessionBackend.set({
       name: sessionName,
       proxy_container_id: this.connection.proxy.container.Id,
+      connection: this.connection.getActiveSessionData(),
     })
   }
 
   async disconnect() {
-    if (!this.connection) return
+    if (!this.connection)
+      return
 
     await this.connection.disconnect()
     this.connection = undefined
@@ -80,58 +124,36 @@ export default class VNC {
   }
 
   get connected(): boolean {
-    if (!this.connection) return false
-
-    return this.connection.connected
+    return !!this.connection?.connected
   }
 
-  async checkActiveSession(sessionStore?: SessionStore) {
-    if (!sessionStore) return
+  private newConnection(sessionName: string, connectionData: SessionConnectionData) {
+    if (!connectionData?.type)
+      throw new Error('No connection type provided')
 
-    const activeSession = await this.activeSessionBackend.get()
-
-    if (!activeSession) return
-
-    const session = await sessionStore.getSessionByName(activeSession.name)
-    if (!session) return
-
-    // FIX BUG ON CONTAINER CONNECTION
-    if (session.connection.type === 'container') {
-      const proxyNetwork = new ProxyNetwork()
-
-      await proxyNetwork.removeContainer(session.connection.data.container)
-    }
-
-    await this.activeSessionBackend.reset()
+    this.connection = this.getConnectionClass(connectionData.type)
+    return this.connection.connect(sessionName, connectionData.data)
   }
 
-  private newConnection(sessionName: string, connectionData: ConnectionData) {
-    switch (connectionData.type) {
-      case 'container':
-        this.connection = new VNCDockerContainer(this.docker, this.config)
+  private getConnectionClass<T extends ConnectionType>(type: T) {
+    const ConnectionClass = this.connectionMap[type]
 
-          return this.connection.connect(sessionName, connectionData)
-      case 'remote':
-        this.connection = new VNCRemoteHost(this.docker, this.config)
-
-        return this.connection.connect(sessionName, connectionData)
+    if (!ConnectionClass) {
+      throw new Error(`Unsupported connection type: ${type}`)
     }
-  }
 
-  private getNewConnection(connectionType: ConnectionType) {
-    switch (connectionType) {
-      case 'container':
-        return new VNCDockerContainer(this.docker, this.config)
-      case 'remote':
-        return new VNCRemoteHost(this.docker, this.config)
-    }
+    return new ConnectionClass({
+      docker: this.docker,
+      config: this.config,
+    })
   }
 
   private async getExistingProxy() {
     const proxy = new Proxy(this.docker, this.config)
     const proxyExist = await proxy.get()
 
-    if (!proxyExist || !proxy.exist()) return
+    if (!proxyExist || !proxy.exist())
+      return
 
     return proxy
   }
@@ -139,41 +161,17 @@ export default class VNC {
   async dockerProxyImageExist(): Promise<boolean> {
     const images = await this.docker.listImages({
       filters: {
-        reference: [this.config.proxyDockerImage]
-      }
+        reference: [this.config.proxyDockerImage],
+      },
     }) as DockerImage[]
 
     if (images.length > 1)
-      throw new Error(`Found no or multiple docker images with tag "${this.config.proxyDockerImage}"`)
+      throw new Error(`Multiple docker images found with tag "${this.config.proxyDockerImage}"`)
 
     return images.length === 1
   }
 
-  pullProxyDockerImage(addStdout: (stdout: string)=>void) {
-    return new Promise<void>((resolve, reject) => (
-      this.docker.cli.exec('pull', [this.config.proxyDockerImage], {
-        stream: {
-          onOutput(data) {
-            if (data.stdout) {
-              addStdout(data.stdout)
-            }
-
-            if (data.stderr) {
-              reject(data.stderr)
-            }
-          },
-          onError(error) {
-            reject(error)
-          },
-          onClose(exitCode) {
-            if (exitCode !== 0)
-              return reject(exitCode)
-
-            resolve()
-          },
-          splitOutputLines: true,
-        },
-      }
-    )))
+  get proxyDockerImage() {
+    return this.config.proxyDockerImage
   }
 }

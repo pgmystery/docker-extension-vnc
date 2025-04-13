@@ -9,8 +9,14 @@ import (
 )
 
 type ActiveSessionData struct {
-	Name             string `json:"name"`
-	ProxyContainerID string `json:"proxy_container_id"`
+	Name             string                       `json:"name"`
+	ProxyContainerID string                       `json:"proxy_container_id"`
+	Connection       *ActiveSessionDataConnection `json:"connection"`
+}
+
+type ActiveSessionDataConnection struct {
+	Type string          `json:"type"`
+	Data json.RawMessage `json:"data,omitempty"`
 }
 
 type ActiveSessionHandler struct {
@@ -49,6 +55,7 @@ func (activeSessionHandler *ActiveSessionHandler) Save(data ActiveSessionData) e
 	ActiveSession.ActiveSessionData = &ActiveSessionData{
 		Name:             session.Name,
 		ProxyContainerID: data.ProxyContainerID,
+		Connection:       data.Connection,
 	}
 
 	return nil

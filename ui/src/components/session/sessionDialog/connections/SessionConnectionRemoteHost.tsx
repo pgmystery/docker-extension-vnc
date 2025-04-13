@@ -1,16 +1,12 @@
 import { FormGroup, Stack, TextField } from '@mui/material'
 import React, { useEffect, useState } from 'react'
 import { serializeConnectionData } from '../../forms/SessionDataForm'
+import { ConnectionDataRemoteHost } from '../../../../libs/vnc/connectionTypes/VNCRemoteHost'
 
 
 interface RemoteHostProps {
   connectionData?: ConnectionDataRemoteHost
   setSubmitReady: (state: boolean)=>void
-}
-
-export interface ConnectionDataRemoteHost {
-  host: string
-  port: number
 }
 
 
@@ -59,7 +55,7 @@ export default function SessionConnectionRemoteHost ({ connectionData, setSubmit
         />
         <TextField
           name="connection.data.port"
-          label="Remote Host PORT"
+          label="VNC-Server PORT"
           type="number"
           slotProps={{ htmlInput: { min: 1, max: 65535 } }}
           value={remotePort}
