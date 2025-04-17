@@ -9,6 +9,9 @@ on:
       - docker/vnc_ubuntu/xterm/start-vnc.sh
   workflow_dispatch:
 
+permissions:
+  contents: read
+
 jobs:
   build_and_push_to_hub_xterm:
     name: Build docker image and push it to docker hub

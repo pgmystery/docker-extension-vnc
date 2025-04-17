@@ -10,6 +10,9 @@ on:
       - docker/vnc_ubuntu/lxde/.config/**
   workflow_dispatch:
 
+permissions:
+  contents: read
+
 jobs:
   build_and_push_to_hub_lxde:
     name: Build docker image and push it to docker hub

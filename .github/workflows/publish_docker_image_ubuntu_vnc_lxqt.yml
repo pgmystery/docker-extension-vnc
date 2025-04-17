@@ -10,6 +10,9 @@ on:
       - docker/vnc_ubuntu/lxqt/.config/**
   workflow_dispatch:
 
+permissions:
+  contents: read
+
 jobs:
   build_and_push_to_hub_lxqt:
     name: Build docker image and push it to docker hub

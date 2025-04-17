@@ -8,6 +8,9 @@ on:
       - docker/vnc_ubuntu/dockerhub.md
   workflow_dispatch:
 
+permissions:
+  contents: read
+
 jobs:
   update_readme_description_of_ubuntu_vnc:
     name: Update Repository description of pgmystery/ubuntu_vnc on DockerHub

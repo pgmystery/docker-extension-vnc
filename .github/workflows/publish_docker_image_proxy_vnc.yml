@@ -9,13 +9,14 @@ on:
       - docker/novnc_proxy/entrypoint.sh
   workflow_dispatch:
 
+permissions:
+  contents: read
+  packages: write
+
 jobs:
   build_and_push_to_hub:
     name: Build docker image and push it to docker hub
     runs-on: ubuntu-latest
-    permissions:
-      packages: write
-      contents: read
     steps:
       - name: Check out the repo
         uses: actions/checkout@v4

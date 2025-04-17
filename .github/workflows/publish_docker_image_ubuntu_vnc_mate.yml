@@ -11,6 +11,9 @@ on:
       - docker/vnc_ubuntu/mate/usr/**
   workflow_dispatch:
 
+permissions:
+  contents: read
+
 jobs:
   build_mate_amd64:
     name: Build docker image on amd64
