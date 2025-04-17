@@ -9,10 +9,6 @@ interface DockerImageOptionsProps {
   required?: boolean
 }
 
-// export interface DockerImageConnectionDataOptions {
-//   deleteContainerAfterDisconnect: boolean
-// }
-
 interface DockerImageOptionsData {
   port: number
   containerRunOptions: string
