@@ -6,7 +6,7 @@ import { marked } from 'marked'
 
 export function convertReadmeToHTML() {
   function postProcess(html: string): string {
-    return html.replace(/(\r\n|\n|\r)/gm, '').replace(/"/g, '\\"')
+    return html.replace(/(\r\n|\n|\r)/gm, '').replace(/\\/g, '\\\\').replace(/"/g, '\\"')
   }
 
   const githubUrl = 'https://raw.githubusercontent.com/pgmystery/docker-extension-vnc/refs/heads/main/'
