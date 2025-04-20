@@ -1,4 +1,4 @@
-import { styled, TextareaAutosize, TextField } from '@mui/material'
+import { styled, TextareaAutosize, TextareaAutosizeProps, TextField } from '@mui/material'
 import { useEffect, useRef } from 'react'
 
 interface ClipboardFieldProps {
@@ -9,6 +9,32 @@ interface ClipboardFieldProps {
 }
 
 export default function ClipboardField({ isPassword, autoFocus, value, setValue }: ClipboardFieldProps) {
+  if (isPassword) {
+    return (
+      <TextField
+        autoFocus={autoFocus}
+        type="password"
+        value={value}
+        onChange={e => setValue(e.currentTarget.value)}
+        sx={{
+          width: '300px',
+        }}
+      />
+    )
+  }
+  else {
+    return (
+      <TextareaMaxSized
+        autoFocus={autoFocus}
+        value={value}
+        onChange={e => setValue(e.currentTarget.value)}
+        placeholder="Edit clipboard content in here..."
+      />
+    )
+  }
+}
+
+function TextareaMaxSized(props: TextareaAutosizeProps) {
   const textAreaRef = useRef<HTMLTextAreaElement>(null)
   const resizeObserverRef = useRef<ResizeObserver | null>(null)
 
@@ -39,30 +65,12 @@ export default function ClipboardField({ isPassword, autoFocus, value, setValue 
     }
   }, [])
 
-  if (isPassword) {
-    return (
-      <TextField
-        autoFocus={autoFocus}
-        type="password"
-        value={value}
-        onChange={e => setValue(e.currentTarget.value)}
-        sx={{
-          width: '300px',
-        }}
-      />
-    )
-  }
-  else {
-    return (
-      <Textarea
-        ref={textAreaRef}
-        autoFocus={autoFocus}
-        value={value}
-        onChange={e => setValue(e.currentTarget.value)}
-        placeholder="Edit clipboard content in here..."
-      />
-    )
-  }
+  return (
+    <Textarea
+      ref={textAreaRef}
+      { ...props }
+    />
+  )
 }
 
 const Textarea = styled(TextareaAutosize)(() => `
