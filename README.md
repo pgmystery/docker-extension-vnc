@@ -38,7 +38,7 @@ Key features:
 You can also install the extension using the Docker CLI:
 
 ```shell
-docker extension install pgmystery/docker-extension-vnc:1.3.0
+docker extension install pgmystery/docker-extension-vnc:1.3.1
 ```
 
 ## Usage

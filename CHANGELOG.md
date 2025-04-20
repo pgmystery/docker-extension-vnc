@@ -2,6 +2,10 @@
 
 History of all released versions and changes
 
+## v1.3.1
+### Changed
+- Update the clipboard menu to handle a large amount of text better. 
+
 ## v1.3.0
 ### Added
 - Display the image size of the selected example Docker image on the Dashboard.

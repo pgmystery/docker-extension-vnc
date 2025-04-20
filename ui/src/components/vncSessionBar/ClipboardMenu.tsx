@@ -6,7 +6,6 @@ import {
   ListSubheader,
   Menu,
   Tooltip,
-  Typography
 } from '@mui/material'
 import { MouseEvent, useEffect, useState } from 'react'
 import Button from '@mui/material/Button'
@@ -89,19 +88,6 @@ export default function ClipboardMenu({ clipboardText, sendClipboardText, disabl
         anchorOrigin={ {horizontal: 'left', vertical: 'bottom'} }
       >
         <ListSubheader>Clipboard</ListSubheader>
-        <Typography>Edit clipboard content in the textarea below.</Typography>
-        <ClipboardField
-          autoFocus
-          value={textareaValue}
-          setValue={value => setTextareaValue(value)}
-          isPassword={textIsHidden}
-        />
-        <FormControlLabel
-          control={
-            <Checkbox checked={textIsHidden} onChange={event => setTextIsHidden(event.target.checked)} />
-          }
-          label="Password input"
-        />
         {
           sendClipboardText &&
           <Button sx={{height: '25px'}} onClick={() => {
@@ -109,6 +95,18 @@ export default function ClipboardMenu({ clipboardText, sendClipboardText, disabl
             handleClose()
           }}>Send to Clipboard</Button>
         }
+        <FormControlLabel
+          control={
+            <Checkbox checked={textIsHidden} onChange={event => setTextIsHidden(event.target.checked)} />
+          }
+          label="Password input"
+        />
+        <ClipboardField
+          autoFocus
+          value={textareaValue}
+          setValue={value => setTextareaValue(value)}
+          isPassword={textIsHidden}
+        />
       </Menu>
     </>
   )
