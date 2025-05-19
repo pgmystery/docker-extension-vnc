@@ -9,7 +9,7 @@ interface SessionNameProps extends Omit<TextFieldProps, 'value'> {
 export default function SessionName({ name, setName, required }: SessionNameProps) {
   return (
     <FormControl>
-      <FormLabel required>Session Name</FormLabel>
+      <FormLabel required={required === undefined ? true : required}>Session Name</FormLabel>
       <TextField
         name="name"
         value={name}
