@@ -10,11 +10,20 @@ export function convertReadmeToHTML() {
   }
 
   const githubUrl = 'https://raw.githubusercontent.com/pgmystery/docker-extension-vnc/refs/heads/main/'
+  const githubUrl2 = 'https://github.com/pgmystery/docker-extension-vnc/tree/main'
   const renderer = new marked.Renderer()
 
   // @ts-ignore
   renderer.image = (src: string, _: null, title: string): string =>
     `<p><a href="${githubUrl + src}">${title} Screenshot</a></p>`
+
+  // @ts-ignore
+  renderer.link = (src: string, _: null, title: string) => {
+    if (src.startsWith('/'))
+      src = githubUrl2 + src
+
+    return `<a href="${src}">${title}</a>`
+  }
 
   gulp.src("../README.md")
       .pipe(markdown({ renderer, hooks: { postprocess: postProcess } }))

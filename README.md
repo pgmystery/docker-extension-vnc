@@ -33,13 +33,13 @@ This Docker Desktop Extension creates a temporary proxy container using [noVNC](
 - Automatic Docker networking and cleanup
 - Secure session management with persistent storage
 - Includes pre-built environments:
-    - [Xfce](docker/vnc_ubuntu/xfce)
-    - [Cinnamon](docker/vnc_ubuntu/cinnamon)
-    - [MATE](docker/vnc_ubuntu/mate)
-    - [KDE-Plasma](docker/vnc_ubuntu/kde-plasma)
-    - [LXDE](docker/vnc_ubuntu/lxde)
-    - [LXQT](docker/vnc_ubuntu/lxqt)
-    - [xTerm](docker/vnc_ubuntu/xterm)
+    - [Xfce](/docker/vnc_ubuntu/xfce)
+    - [Cinnamon](/docker/vnc_ubuntu/cinnamon)
+    - [MATE](/docker/vnc_ubuntu/mate)
+    - [KDE-Plasma](/docker/vnc_ubuntu/kde-plasma)
+    - [LXDE](/docker/vnc_ubuntu/lxde)
+    - [LXQT](/docker/vnc_ubuntu/lxqt)
+    - [xTerm](/docker/vnc_ubuntu/xterm)
 
 ---
 
