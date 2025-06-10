@@ -7,9 +7,18 @@ import { Docker } from '@docker/extension-api-client-types/dist/v1'
 import DockerCli from '../../docker/DockerCli'
 
 
+export interface TargetDockerContainerOptions {
+  stopAfterDisconnect?: boolean
+}
+
+
+export const TARGET_LABEL_STOP_AFTER_DISCONNECT = 'pgmystery.vnc.extension.connection.target.container.stop'
+
+
 export default class TargetDockerContainer extends Target {
   private readonly proxyNetwork: ProxyNetwork
   protected dockerContainer: DockerContainer | undefined
+  public options: TargetDockerContainerOptions | null = null
 
   constructor(proxyNetwork: ProxyNetwork, docker?: Docker, config?: Config) {
     docker = docker || createDockerDesktopClient().docker
@@ -69,6 +78,10 @@ export default class TargetDockerContainer extends Target {
     this.dockerContainer = undefined
   }
 
+  async stop() {
+    return this.dockerContainer?.stop()
+  }
+
   getContainerId() {
     if (!this.dockerContainer?.exist()) return
 
@@ -81,5 +94,11 @@ export default class TargetDockerContainer extends Target {
 
   get ip() {
     return this.dockerContainer?.container?.NetworkSettings.Networks[this.proxyNetwork.name].IPAddress
+  }
+
+  get optionLabels() {
+    return {
+      [TARGET_LABEL_STOP_AFTER_DISCONNECT]: this.options?.stopAfterDisconnect?.toString() || 'false',
+    }
   }
 }

@@ -1,4 +1,13 @@
-import { Autocomplete, FormGroup, IconButton, Stack, TextField, Tooltip } from '@mui/material'
+import {
+  Autocomplete,
+  Checkbox,
+  FormControlLabel,
+  FormGroup,
+  IconButton,
+  Stack,
+  TextField,
+  Tooltip
+} from '@mui/material'
 import RefreshIcon from '@mui/icons-material/Refresh'
 import React, { useEffect, useState } from 'react'
 import { DockerDesktopClient } from '@docker/extension-api-client-types/dist/v1'
@@ -26,6 +35,9 @@ export function serializeConnectionDataDockerContainer(formData: FormData): Conn
       case 'port':
         connectionData.port = Number(value as string)
         break
+      case 'stopContainerAfterDisconnect':
+        connectionData.stopAfterDisconnect = true
+        break
     }
 
     return connectionData
@@ -40,6 +52,7 @@ export default function SessionConnectionDockerContainer({ ddClient, connectionD
   const [selectedContainerName, setSelectedContainerName] = useState<string>(connectionData?.container || '')
   const [selectedContainerPorts, setSelectedContainerPorts] = useState<string[]>([])
   const [selectedPort, setSelectedPort] = useState<string>('')
+  const [stopContainer, setStopContainer] = useState<boolean>(connectionData?.stopAfterDisconnect || false)
 
   useEffect(() => {
     // INIT CONTAINERS
@@ -153,6 +166,16 @@ export default function SessionConnectionDockerContainer({ ddClient, connectionD
           sx={{
             width: '200px',
           }}
+        />
+        <FormControlLabel
+          control={
+            <Checkbox
+              checked={stopContainer}
+              onChange={() => setStopContainer(!stopContainer)}
+              name="connection.data.stopContainerAfterDisconnect"
+            />
+          }
+          label="Stop Container after disconnect"
         />
       </Stack>
     </FormGroup>

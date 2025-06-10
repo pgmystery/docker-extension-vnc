@@ -30,7 +30,7 @@ export interface VNCHandler {
 type VNCHandlerState = 'ready' | 'disconnecting' | 'connecting'
 
 export default function useVNC(ddClient: DockerDesktopClient): VNCHandler {
-  const vnc = useMemo(() => new VNC(ddClient.docker), [ddClient.docker])
+  const vnc = useMemo(() => new VNC({docker: ddClient.docker}), [ddClient.docker])
   const [connectedData, setConnectedData] = useState<ConnectedData>()
   const sessionStore = useMemo(getSessionStore, [])
   const state = useRef<VNCHandlerState>('ready')

@@ -85,6 +85,18 @@ export default class Container {
     await this.waitForContainer(checkCallback, 10000, 30)
   }
 
+  async stop() {
+    if (!this.container) {
+      const containerExist = await this.get()
+
+      if (!containerExist || !this.container) throw new ContainerDontExistError()
+    }
+
+    return this.docker.cli.exec('stop', [
+      this.container.Id,
+    ])
+  }
+
   async delete({force}={force: false}) {
     if (!this.container) {
       const containerExist = await this.get()
