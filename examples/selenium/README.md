@@ -35,9 +35,8 @@ Fill out the form like this:
 
 ### 2. Start the Session
 
-- Click "Connect"
-- The VNC Desktop will automatically connect to the VNC Server of `selenium/standalone-chrome`
-- You will see **Chrome preinstalled** and a **terminal**
+Click **"Connect"**.
+The VNC Desktop will automatically connect to the VNC Server of `selenium/standalone-chrome`.
 
 ### 3. Install Requirements
 
@@ -52,7 +51,7 @@ pip install -r requirements.txt
 Execute the provided test script:
 
 ```shell
-shell python seleniumDockerTest.py
+python seleniumDockerTest.py
 ```
 
 🧠 This script will:
@@ -71,15 +70,6 @@ You will see the browser open and run live inside the docker desktop.
 - You can debug tests visually using real Chrome UI
 - No need to build Docker images or use CLI
 - Fully isolated browser test environment, visible in Docker Desktop
-
-## 💡 Bonus: Develop Live in Container
-
-You can:
-- Open terminal inside the container
-- `pip install` libraries
-- Write or paste new test cases
-- View test runs in real time via Chrome
-
 
 ---
 
