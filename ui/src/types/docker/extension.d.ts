@@ -3,9 +3,18 @@ export interface ContainerInfo {
   Names: string[]
   Image: string
   ImageID: string
+  ImageManifestDescriptor: {
+    digest: string
+    mediaType: string
+    platform: {
+      architecture: string
+      os: string
+    }
+    size: number
+  }
   Command: string
   Created: number
-  Ports: ContainerPort[]
+  Ports: ContainerPort[] | null
   Labels: {[key: string]: string}
   State: string
   Status: string

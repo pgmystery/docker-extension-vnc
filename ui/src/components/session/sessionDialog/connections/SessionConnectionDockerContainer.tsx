@@ -66,7 +66,7 @@ export default function SessionConnectionDockerContainer({ ddClient, connectionD
 
     const selectedContainer = getContainerByName(selectedContainerName)
 
-    setSelectedContainerPorts(selectedContainer?.Ports.map(portInfo => portInfo.PrivatePort.toString()) || [])
+    setSelectedContainerPorts(selectedContainer?.Ports?.map(portInfo => portInfo.PrivatePort.toString()) || [])
   }, [selectedContainerName])
 
   useEffect(() => {
@@ -109,7 +109,7 @@ export default function SessionConnectionDockerContainer({ ddClient, connectionD
       if (container.Names.includes(targetContainerName)) {
         setSelectedContainerName(targetContainerName)
 
-        if (container.Ports.some(containerPort => containerPort.PrivatePort === targetPort))
+        if (container.Ports?.some(containerPort => containerPort.PrivatePort === targetPort))
           setSelectedPort(targetPort.toString())
       }
     })
