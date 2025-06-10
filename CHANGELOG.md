@@ -2,6 +2,10 @@
 
 History of all released versions and changes
 
+## v1.3.4
+### Changed
+- Add info buttons for the docker image connection option text-fields.
+
 ## v1.3.3
 ### Fixed
 - The DragViewportButton was not highlighted when selected
