@@ -9,6 +9,7 @@ History of all released versions and changes
 
 ### Added
 - Add new option on the "Docker Container" connection-type: Stop Container after disconnect.
+- Added an example of what you can do with this extension.
 
 ## v1.3.1
 ### Changed
