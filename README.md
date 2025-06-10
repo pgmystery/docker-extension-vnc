@@ -119,7 +119,7 @@ Provide ready-to-use Linux desktops for workshops, demos, or internal labs.
 ### 🛠️ Manual Installation
 
 ```bash
-docker extension install pgmystery/docker-extension-vnc:1.3.2
+docker extension install pgmystery/docker-extension-vnc:1.3.3
 ```
 
 ---
