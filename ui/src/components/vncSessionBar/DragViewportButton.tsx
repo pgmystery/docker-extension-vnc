@@ -1,5 +1,6 @@
 import { IconButton, styled, Tooltip } from '@mui/material'
 import PanToolIcon from '@mui/icons-material/PanTool'
+import PanToolOutlinedIcon from '@mui/icons-material/PanToolOutlined'
 import { useEffect, useState } from 'react'
 
 
@@ -42,7 +43,7 @@ export default function DragViewportButton({ onChange, disabled }: DragViewportB
         disabled={disabled}
         className={selected ? 'drag-viewport-button-selected' : ''}
       >
-        <PanToolIcon />
+        { selected ? <PanToolIcon color="warning"/> : <PanToolOutlinedIcon/> }
       </ToggleIconButton>
     </Tooltip>
   )

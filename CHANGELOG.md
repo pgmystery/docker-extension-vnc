@@ -2,6 +2,11 @@
 
 History of all released versions and changes
 
+## v1.3.3
+### Fixed
+- The DragViewportButton was not highlighted when selected
+- Fix a bug where the extension crashes when a container got selected without any exposed ports in the docker container connection-type.
+
 ## v1.3.2
 ### Fixed
 - With Docker Desktop version >=4.42.0, the response data of the request to the backend changed.
