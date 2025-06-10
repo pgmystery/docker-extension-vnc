@@ -101,7 +101,7 @@ export default class TargetDockerImage extends TargetDockerContainer {
     const { deleteContainerAfterDisconnect } = this.imageOptions
 
     return {
-      [TARGET_LABEL_DELETE_AFTER_DISCONNECT]: `${deleteContainerAfterDisconnect}`,
+      [TARGET_LABEL_DELETE_AFTER_DISCONNECT]: deleteContainerAfterDisconnect.toString(),
     }
   }
 }

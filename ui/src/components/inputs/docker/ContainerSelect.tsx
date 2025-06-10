@@ -17,7 +17,7 @@ export interface ContainerSelectProps {
 
 export default function ContainerSelect({ containers, disabled, selectedContainerName, setSelectedContainerName, dockerClient }: ContainerSelectProps) {
   const [containerNames, setContainerNames] = useState<string[]>([])
-  const [initContainerExistColor, setInitContainerExistColor] = useState<BaseTextFieldProps['color']>('primary')
+  const [initContainerExistColor, setInitContainerExistColor] = useState<BaseTextFieldProps['color']>()
 
   useEffect(() => {
     if (!selectedContainerName) return
@@ -35,7 +35,7 @@ export default function ContainerSelect({ containers, disabled, selectedContaine
 
   function handleInputChange(_: any, value: string) {
     setSelectedContainerName(value)
-    setInitContainerExistColor('primary')
+    setInitContainerExistColor(undefined)
   }
 
   return (
@@ -54,6 +54,13 @@ export default function ContainerSelect({ containers, disabled, selectedContaine
       />}
       inputValue={selectedContainerName}
       onInputChange={handleInputChange}
+      sx={theme => ({
+        '& .MuiOutlinedInput-root': {
+          '& fieldset': {
+            borderColor: initContainerExistColor && theme.palette[initContainerExistColor].main,
+          },
+        },
+      })}
     />
   )
 }

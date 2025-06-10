@@ -45,9 +45,15 @@ export default class BackendRoute {
   }
 
   async request<T>(opts: RequestConfig) {
-    return await this.backendAPI.request({
+    let response = await this.backendAPI.request({
       ...opts,
       url: this.route + opts.url,
-    }) as T
+    })
+
+    if (response && typeof response === 'object')
+      if ('headers' in response && 'status' in response && 'data' in response)
+        response = response.data
+
+    return response as T
   }
 }

@@ -17,6 +17,7 @@ export type ConnectionTypeDockerContainer = 'container'
 export interface ConnectionDataDockerContainer {
   container: string
   port: number
+  stopAfterDisconnect?: boolean
 }
 
 
@@ -62,7 +63,8 @@ export default abstract class VNCDockerContainerBase extends VNCConnection<Conne
 
     return {
       container: targetContainerId,
-      port: data.port
+      port: data.port,
+      stopAfterDisconnect: data.stopAfterDisconnect || false,
     }
   }
 
