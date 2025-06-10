@@ -48,10 +48,12 @@ This Docker Desktop Extension creates a temporary proxy container using [noVNC](
 ### 🖥️ Run GUI-Based Linux Applications
 
 Launch popular apps without installing anything on your host:
+
 - Browsers (Firefox, Chromium)
 - Editors (VS Code, LibreOffice)
 - Tools (GIMP, PDF viewers)
 
+And many more...
 
     ✔️ Ideal for isolated, disposable environments. Ideal for temporary, sandboxed tasks without cluttering your OS.
 
