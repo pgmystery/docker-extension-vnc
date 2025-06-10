@@ -1,6 +1,7 @@
 import { SyntheticEvent, useEffect, useState } from 'react'
 import useDockerRepository from '../../../hooks/docker/useDockerRepository'
 import AutocompleteSearch from '../AutocompleteSearch'
+import { BaseTextFieldProps } from '@mui/material/TextField/TextField'
 
 
 interface DockerImageSearchTagInputProps {
@@ -16,6 +17,7 @@ export default function DockerImageSearchTagInput({ repository, tag, setTag, onT
   const dockerRepository = useDockerRepository(repository)
   const [tags, setTags] = useState<string[]>([])
   const [isSearching, setIsSearching] = useState<boolean>(false)
+  const [tagColor, setTagColor] = useState<BaseTextFieldProps['color']>()
 
   useEffect(() => {
     if (!dockerRepository || tag === '')
@@ -39,6 +41,11 @@ export default function DockerImageSearchTagInput({ repository, tag, setTag, onT
   }, [repository])
 
   useEffect(() => {
+    if (tag === '')
+      setTagColor(undefined)
+    else
+      setTagColor(isValidTag ? 'success' : 'error')
+
     onTagIsValidChange?.(isValidTag)
   }, [isValidTag])
 
@@ -56,13 +63,6 @@ export default function DockerImageSearchTagInput({ repository, tag, setTag, onT
     setIsValidTag(allTags.includes(value))
   }
 
-  function getValidColor() {
-    if (tag === '')
-      return undefined
-    else
-      return isValidTag ? 'success' : 'error'
-  }
-
   return (
     <AutocompleteSearch
       fullWidth
@@ -75,7 +75,14 @@ export default function DockerImageSearchTagInput({ repository, tag, setTag, onT
       isSearching={ isSearching }
       label="Select a Image-Tag*"
       name="connection.data.imageTag"
-      color={ getValidColor() }
+      color={ tagColor }
+      sx={theme => ({
+        '& .MuiOutlinedInput-root': {
+          '& fieldset': {
+            borderColor: tagColor && theme.palette[tagColor].main,
+          },
+        },
+      })}
     />
   )
 }
