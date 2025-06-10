@@ -35,7 +35,7 @@ Fill out the form like this:
 
 ### 2. Start the Session
 
-- Click "Start"
+- Click "Connect"
 - The VNC Desktop will automatically connect to the VNC Server of `selenium/standalone-chrome`
 - You will see **Chrome preinstalled** and a **terminal**
 
