@@ -2,6 +2,14 @@
 
 History of all released versions and changes
 
+## v1.3.2
+### Fixed
+- With Docker Desktop version >=4.42.0, the response data of the request to the backend changed.
+- Some input highlighting if not focus.
+
+### Added
+- Add new option on the "Docker Container" connection-type: Stop Container after disconnect.
+
 ## v1.3.1
 ### Changed
 - Update the clipboard menu to handle a large amount of text better. 
