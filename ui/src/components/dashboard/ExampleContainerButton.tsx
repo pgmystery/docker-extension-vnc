@@ -4,7 +4,7 @@ import { ContainerExtended } from '../../types/docker/cli/inspect'
 import LoadingButton from '@mui/lab/LoadingButton'
 import SelectButton from '../utils/SelectButton/SelectButton'
 import SelectButtonItem from '../utils/SelectButton/SelectButtonItem'
-import { SelectChangeEvent } from '@mui/material'
+import { Box, SelectChangeEvent, Stack, Typography } from '@mui/material'
 import { useEffect, useState } from 'react'
 
 
@@ -29,14 +29,35 @@ interface ExampleContainerButtonProps {
 }
 
 
-const tooltips: Record<ExampleContainerImageTag, string> = {
-  xfce: 'Try XFCE (lightweight)',
-  cinnamon: 'Try Cinnamon (modern GNOME-like)',
-  mate: 'Try Mate (GNOME 2 fork)',
-  'kde-plasma': 'Try KDE-Plasma (full-featured)',
-  lxqt: 'Try LXQT (light and fast)',
-  lxde: 'Try LXDE (legacy lightweight)',
-  xterm: 'Try XTerm (terminal only)',
+const tooltips: Record<ExampleContainerImageTag, { title: string, imageSrc: string }> = {
+  xfce: {
+    title: 'Try XFCE (lightweight)',
+    imageSrc: "https://raw.githubusercontent.com/pgmystery/docker-extension-vnc/refs/heads/main/docker/vnc_ubuntu/xfce/docs/xfce_small.png",
+  },
+  cinnamon: {
+    title: 'Try Cinnamon (modern GNOME-like)',
+    imageSrc: 'https://raw.githubusercontent.com/pgmystery/docker-extension-vnc/refs/heads/main/docker/vnc_ubuntu/cinnamon/docs/cinnamon_small.png',
+  },
+  mate: {
+    title: 'Try Mate (GNOME 2 fork)',
+    imageSrc: 'https://raw.githubusercontent.com/pgmystery/docker-extension-vnc/refs/heads/main/docker/vnc_ubuntu/mate/docs/mate_small.png',
+  },
+  'kde-plasma': {
+    title: 'Try KDE-Plasma (full-featured)',
+    imageSrc: 'https://raw.githubusercontent.com/pgmystery/docker-extension-vnc/refs/heads/main/docker/vnc_ubuntu/kde-plasma/docs/kde_plasma_small.png',
+  },
+  lxqt: {
+    title: 'Try LXQT (light and fast)',
+    imageSrc: 'https://raw.githubusercontent.com/pgmystery/docker-extension-vnc/refs/heads/main/docker/vnc_ubuntu/lxqt/docs/lxqt_small.png',
+  },
+  lxde: {
+    title: 'Try LXDE (legacy lightweight)',
+    imageSrc: 'https://raw.githubusercontent.com/pgmystery/docker-extension-vnc/refs/heads/main/docker/vnc_ubuntu/lxde/docs/lxde_small.png',
+  },
+  xterm: {
+    title: 'Try XTerm (terminal only)',
+    imageSrc: 'https://raw.githubusercontent.com/pgmystery/docker-extension-vnc/refs/heads/main/docker/vnc_ubuntu/xterm/docs/xterm_small.png',
+  },
 }
 
 
@@ -50,7 +71,7 @@ export default function ExampleContainerButton({
   onTagChange,
 }: ExampleContainerButtonProps) {
   const [selectedTag, setSelectedTag] = useState<string | undefined>()
-  const [tooltip, setTooltip] = useState<string>(tooltips.xfce)
+  const [tooltip, setTooltip] = useState<{ title: string, imageSrc: string }>(tooltips.xfce)
 
   useEffect(() => {
     if (!exampleContainer)
@@ -105,8 +126,20 @@ export default function ExampleContainerButton({
       disabled={disabled || loading}
       onChange={handleSelectButtonChange}
       selectValue={selectedTag}
-      tooltip={tooltip}
-      tooltipPlacement="top"
+      tooltip={
+        <Stack spacing={1}>
+          <Typography>{ tooltip.title }</Typography>
+          <Box
+            component="img"
+            alt={`Example Container (${tooltip.title})`}
+            loading="lazy"
+            src={tooltip.imageSrc}
+            sx={{
+              maxWidth: '14rem',
+            }}
+          />
+        </Stack>
+      }
     >
       <SelectButtonItem
         value="xfce"

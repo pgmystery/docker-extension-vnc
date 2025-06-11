@@ -23,7 +23,7 @@ interface SelectButtonProps extends Omit<ButtonGroupProps, 'onChange'> {
   onChange?: (event: SelectChangeEvent, child: React.ReactNode)=>void
   endIcon?: ReactNode
   selectValue?: string
-  tooltip?: string
+  tooltip?: string | ReactElement
   tooltipPlacement?: 'top' | 'bottom' | 'left' | 'right'
 }
 
