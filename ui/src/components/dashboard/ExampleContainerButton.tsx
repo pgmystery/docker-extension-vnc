@@ -140,6 +140,7 @@ export default function ExampleContainerButton({
           />
         </Stack>
       }
+      tooltipPlacement="top"
     >
       <SelectButtonItem
         value="xfce"
