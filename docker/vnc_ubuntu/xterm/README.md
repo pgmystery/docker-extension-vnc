@@ -17,4 +17,4 @@ This Docker Image is part of the project [docker-extension-vnc](https://github.c
 | `RESOLUTION`         | 640x480 | The resolution of the Desktop.                  |
 
 ## Screenshot
-![xterm.png](doc/xterm.png)
+![xterm.png](docs/xterm.png)

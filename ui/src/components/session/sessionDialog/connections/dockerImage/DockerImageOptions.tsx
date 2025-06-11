@@ -1,7 +1,9 @@
-import { Checkbox, FormControlLabel, Stack, TextField } from '@mui/material'
+import { Checkbox, FormControlLabel, IconButton, InputAdornment, TextField, Tooltip } from '@mui/material'
 import { serializeConnectionData } from '../../../forms/SessionDataForm'
 import { ConnectionDataDockerImage } from '../../../../../libs/vnc/connectionTypes/VNCDockerImage'
-import { useState } from 'react'
+import React, { useState } from 'react'
+import eventBus from '../../../../../libs/EventBus'
+import InfoIcon from '@mui/icons-material/Info'
 
 
 interface DockerImageOptionsProps {
@@ -51,26 +53,62 @@ export default function DockerImageOptions({ connectionData, required }: DockerI
 
   return (
     <>
-      <Stack direction="row" spacing={1}>
-        <TextField
-          label="Docker Container Run [OPTIONS]"
-          name="connection.data.containerRunOptions"
-          value={containerRunOptions}
-          onChange={e => setContainerRunOptions(e.target.value)}
-          sx={{
-            width: '100%',
-          }}
-        />
-        <TextField
-          label="Docker Container Run [COMMAND] [ARG...]"
-          name="connection.data.containerRunArgs"
-          value={containerRunArgs}
-          onChange={e => setContainerRunArgs(e.target.value)}
-          sx={{
-            width: '100%',
-          }}
-        />
-      </Stack>
+      <TextField
+        label="Docker Container Run [OPTIONS]"
+        name="connection.data.containerRunOptions"
+        value={containerRunOptions}
+        onChange={e => setContainerRunOptions(e.target.value)}
+        sx={{
+          width: '100%',
+        }}
+        slotProps={{
+          input: {
+            endAdornment: (
+              <InputAdornment position="end">
+                <Tooltip title="Docker Run Options" arrow>
+                  <IconButton
+                    size="small"
+                    onClick={() => eventBus.emit('openUrl', 'https://docs.docker.com/reference/cli/docker/container/run/#options')}
+                    sx={{
+                      marginLeft: 'auto',
+                    }}
+                  >
+                    <InfoIcon />
+                  </IconButton>
+                </Tooltip>
+              </InputAdornment>
+            ),
+          },
+        }}
+      />
+      <TextField
+        label="Docker Container Run [COMMAND] [ARG...]"
+        name="connection.data.containerRunArgs"
+        value={containerRunArgs}
+        onChange={e => setContainerRunArgs(e.target.value)}
+        sx={{
+          width: '100%',
+        }}
+        slotProps={{
+          input: {
+            endAdornment: (
+              <InputAdornment position="end">
+                <Tooltip title="Docker Run command with Args" arrow>
+                  <IconButton
+                    size="small"
+                    onClick={() => eventBus.emit('openUrl', 'https://docs.docker.com/engine/containers/run/#commands-and-arguments')}
+                    sx={{
+                      marginLeft: 'auto',
+                    }}
+                  >
+                    <InfoIcon />
+                  </IconButton>
+                </Tooltip>
+              </InputAdornment>
+            ),
+          },
+        }}
+      />
       <TextField
         name="connection.data.port"
         label="Container VNC PORT"
