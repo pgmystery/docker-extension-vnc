@@ -29,6 +29,17 @@ interface ExampleContainerButtonProps {
 }
 
 
+const tooltips: Record<ExampleContainerImageTag, string> = {
+  xfce: 'Try XFCE (lightweight)',
+  cinnamon: 'Try Cinnamon (modern GNOME-like)',
+  mate: 'Try Mate (GNOME 2 fork)',
+  'kde-plasma': 'Try KDE-Plasma (full-featured)',
+  lxqt: 'Try LXQT (light and fast)',
+  lxde: 'Try LXDE (legacy lightweight)',
+  xterm: 'Try XTerm (terminal only)',
+}
+
+
 export default function ExampleContainerButton({
   exampleContainer,
   tryExampleClick,
@@ -39,6 +50,7 @@ export default function ExampleContainerButton({
   onTagChange,
 }: ExampleContainerButtonProps) {
   const [selectedTag, setSelectedTag] = useState<string | undefined>()
+  const [tooltip, setTooltip] = useState<string>(tooltips.xfce)
 
   useEffect(() => {
     if (!exampleContainer)
@@ -48,7 +60,10 @@ export default function ExampleContainerButton({
   }, [exampleContainer])
 
   function handleSelectButtonChange(event: SelectChangeEvent) {
-    onTagChange?.(event.target.value as ExampleContainerImageTag)
+    const tag = event.target.value as ExampleContainerImageTag
+
+    onTagChange?.(tag)
+    setTooltip(tooltips[tag])
   }
 
   if (exampleContainer) {
@@ -90,6 +105,8 @@ export default function ExampleContainerButton({
       disabled={disabled || loading}
       onChange={handleSelectButtonChange}
       selectValue={selectedTag}
+      tooltip={tooltip}
+      tooltipPlacement="top"
     >
       <SelectButtonItem
         value="xfce"
