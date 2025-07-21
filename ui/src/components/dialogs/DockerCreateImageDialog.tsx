@@ -1,5 +1,5 @@
 import { DialogProps } from '@toolpad/core'
-import { FormEvent, useEffect, useState } from 'react'
+import { FormEvent, useEffect, useRef, useState } from 'react'
 import { serializeSessionFormData } from '../session/forms/SessionDataForm'
 import {
   Accordion, AccordionDetails, AccordionSummary,
@@ -46,10 +46,17 @@ export default function DockerCreateImageDialog({ open, onClose, payload }: Dial
   const [shouldCreateSession, setShouldCreateSession] = useState<boolean>(false)
   const [accordionExpanded, setAccordionExpanded] = useState<boolean>(false)
   const [sessionName, setSessionName] = useState<string>('')
+  const sessionNameRef = useRef<HTMLInputElement>(null)
 
   useEffect(() => {
     setAccordionExpanded(shouldCreateSession)
   }, [shouldCreateSession])
+
+  useEffect(() => {
+    if (accordionExpanded) {
+      sessionNameRef.current?.focus()
+    }
+  }, [accordionExpanded])
 
   function handleSubmit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault()
@@ -129,6 +136,7 @@ export default function DockerCreateImageDialog({ open, onClose, payload }: Dial
                 <AccordionDetails>
                   <Stack spacing={1}>
                     <SessionName
+                      ref={sessionNameRef}
                       name={sessionName}
                       setName={setSessionName}
                       required={shouldCreateSession}
