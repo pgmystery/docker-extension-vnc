@@ -30,7 +30,7 @@ Fill out the form like this:
 | **Image Tag**                           | `latest`                            |
 | **Docker Run Options**                  | `-p 4444:4444 -e VNC_NO_PASSWORD=1` |
 | **VNC Port**                            | `5900`                              |
-| **✅ Remove Container After Disconnect** | ✔️ Checked                          |
+| **Remove Container After Disconnect** | ✔️ Checked                          |
 
 
 ### 2. Start the Session
