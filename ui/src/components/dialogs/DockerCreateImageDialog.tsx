@@ -54,7 +54,6 @@ export default function DockerCreateImageDialog({ open, onClose, payload }: Dial
 
   useEffect(() => {
     if (accordionExpanded) {
-      console.log('sessionNameRef', sessionNameRef)
       sessionNameRef.current?.focus()
     }
   }, [accordionExpanded])
