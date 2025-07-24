@@ -22,7 +22,7 @@ export default function RefreshButton({ tooltip, loading, onClick }: RefreshButt
         }}
         disabled={loading}
       >
-        { loading ? <CircularProgress /> : <RefreshIcon /> }
+        { loading ? <CircularProgress size={24} /> : <RefreshIcon /> }
       </IconButton>
     </Tooltip>
   )
