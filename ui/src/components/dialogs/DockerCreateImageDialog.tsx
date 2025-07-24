@@ -54,6 +54,7 @@ export default function DockerCreateImageDialog({ open, onClose, payload }: Dial
 
   useEffect(() => {
     if (accordionExpanded) {
+      console.log('sessionNameRef', sessionNameRef)
       sessionNameRef.current?.focus()
     }
   }, [accordionExpanded])
@@ -136,7 +137,7 @@ export default function DockerCreateImageDialog({ open, onClose, payload }: Dial
                 <AccordionDetails>
                   <Stack spacing={1}>
                     <SessionName
-                      ref={sessionNameRef}
+                      inputRef={sessionNameRef}
                       name={sessionName}
                       setName={setSessionName}
                       required={shouldCreateSession}
