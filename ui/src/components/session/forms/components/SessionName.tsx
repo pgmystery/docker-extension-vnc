@@ -1,11 +1,12 @@
 import { FormControl, FormLabel, TextField, TextFieldProps } from '@mui/material'
-import * as React from 'react'
+
 
 interface SessionNameProps extends Omit<TextFieldProps, 'value'> {
   name: string
   setName: (name: string)=>void
   required?: boolean
 }
+
 
 export default function SessionName({ name, setName, required, ...props }: SessionNameProps) {
   return (
