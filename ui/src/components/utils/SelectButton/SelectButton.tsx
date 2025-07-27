@@ -1,5 +1,15 @@
 import React, { ReactElement, ReactNode, useEffect, useRef, useState } from 'react'
-import { Box, ButtonGroup, ButtonGroupProps, ClickAwayListener, Grow, MenuList, Paper, Popper } from '@mui/material'
+import {
+  Box,
+  ButtonGroup,
+  ButtonGroupProps,
+  ClickAwayListener,
+  Grow,
+  MenuList,
+  Paper,
+  Popper,
+  Tooltip
+} from '@mui/material'
 import Button from '@mui/material/Button'
 import ArrowDropDownIcon from '@mui/icons-material/ArrowDropDown'
 import ArrowDropUpIcon from '@mui/icons-material/ArrowDropUp'
@@ -13,10 +23,12 @@ interface SelectButtonProps extends Omit<ButtonGroupProps, 'onChange'> {
   onChange?: (event: SelectChangeEvent, child: React.ReactNode)=>void
   endIcon?: ReactNode
   selectValue?: string
+  tooltip?: string | ReactElement
+  tooltipPlacement?: 'top' | 'bottom' | 'left' | 'right'
 }
 
 export default function SelectButton(props: SelectButtonProps) {
-  const {children, onChange, selectValue} = props
+  const {children, onChange, selectValue, tooltip} = props
   const [open, setOpen] = useState(false)
   const anchorRef = useRef<HTMLDivElement>(null)
   const [selected, setSelected] = useState(0)
@@ -126,29 +138,31 @@ export default function SelectButton(props: SelectButtonProps) {
 
   return (
     <>
-      <ButtonGroup
-        { ...props }
-        onChange={ undefined }
-        ref={ anchorRef }
-      >
-        <Button
-          endIcon={ props.endIcon }
-          onClick={ handleClick }
+      <Tooltip title={tooltip} placement={props.tooltipPlacement}>
+        <ButtonGroup
+          { ...props }
+          onChange={ undefined }
+          ref={ anchorRef }
         >
-          { !(items) || items[selected].props.children || <Box/> }
-        </Button>
-        <Button
-          size="small"
-          aria-controls={ open ? 'select-button-menu' : undefined }
-          aria-expanded={ open ? 'true' : undefined }
-          aria-haspopup="menu"
-          onClick={ toggleMenu }
-        >
-          {
-            open ? <ArrowDropUpIcon/> : <ArrowDropDownIcon/>
-          }
-        </Button>
-      </ButtonGroup>
+          <Button
+            endIcon={ props.endIcon }
+            onClick={ handleClick }
+          >
+            { !(items) || items[selected].props.children || <Box/> }
+          </Button>
+          <Button
+            size="small"
+            aria-controls={ open ? 'select-button-menu' : undefined }
+            aria-expanded={ open ? 'true' : undefined }
+            aria-haspopup="menu"
+            onClick={ toggleMenu }
+          >
+            {
+              open ? <ArrowDropUpIcon/> : <ArrowDropDownIcon/>
+            }
+          </Button>
+        </ButtonGroup>
+      </Tooltip>
 
       <Popper
         sx={ {zIndex: 1} }

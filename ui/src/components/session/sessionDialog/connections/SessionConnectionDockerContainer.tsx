@@ -17,6 +17,7 @@ import { serializeConnectionData } from '../../forms/SessionDataForm'
 import {
   ConnectionDataDockerContainer
 } from '../../../../libs/vnc/connectionTypes/VNCDockerContainer/VNCDockerContainerBase'
+import RefreshButton from '../../../icons/RefreshButton'
 
 
 interface DockerContainerProps {
@@ -53,6 +54,7 @@ export default function SessionConnectionDockerContainer({ ddClient, connectionD
   const [selectedContainerPorts, setSelectedContainerPorts] = useState<string[]>([])
   const [selectedPort, setSelectedPort] = useState<string>('')
   const [stopContainer, setStopContainer] = useState<boolean>(connectionData?.stopAfterDisconnect || false)
+  const [isContainerListRefreshing, setIsContainerListRefreshing] = useState<boolean>(false)
 
   useEffect(() => {
     // INIT CONTAINERS
@@ -136,18 +138,15 @@ export default function SessionConnectionDockerContainer({ ddClient, connectionD
             setSelectedContainerName={setSelectedContainerName}
             dockerClient={ddClient.docker}
           />
-          <Tooltip title="Refresh Containerlist" arrow>
-            <IconButton
-              size="small"
-              onClick={setRunningContainersState}
-              sx={{
-                alignSelf: 'start',
-                marginTop: '2px',
-              }}
-            >
-              <RefreshIcon />
-            </IconButton>
-          </Tooltip>
+          <RefreshButton
+            tooltip="Refresh Containerlist"
+            onClick={ async () => {
+              setIsContainerListRefreshing(true)
+              await setRunningContainersState()
+              setIsContainerListRefreshing(false)
+            } }
+            loading={ isContainerListRefreshing }
+          />
         </Stack>
         <Autocomplete
           disabled={selectedContainerName === ''}
