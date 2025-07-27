@@ -4,8 +4,16 @@ import { ContainerExtended } from '../../types/docker/cli/inspect'
 import LoadingButton from '@mui/lab/LoadingButton'
 import SelectButton from '../utils/SelectButton/SelectButton'
 import SelectButtonItem from '../utils/SelectButton/SelectButtonItem'
-import { Box, SelectChangeEvent, Stack, Typography } from '@mui/material'
+import { SelectChangeEvent, Stack, Typography } from '@mui/material'
 import { useEffect, useState } from 'react'
+import xfceSkeleton from '../../resources/images/vnc_ubuntu/xfce/xfce_small.png'
+import cinnamonSkeleton from '../../resources/images/vnc_ubuntu/cinnamon/cinnamon_small.png'
+import mateSkeleton from '../../resources/images/vnc_ubuntu/mate/mate_small.png'
+import kdePlasmaSkeleton from '../../resources/images/vnc_ubuntu/kde-plasma/kde_plasma_small.png'
+import lxqtSkeleton from '../../resources/images/vnc_ubuntu/lxqt/lxqt_small.png'
+import lxdeSkeleton from '../../resources/images/vnc_ubuntu/lxde/lxde_small.png'
+import xtermSkeleton from '../../resources/images/vnc_ubuntu/xterm/xterm_small.png'
+import CachedImage, { CachedImageData } from '../icons/CachedImage'
 
 
 export type ExampleContainerImageTag =
@@ -29,34 +37,41 @@ interface ExampleContainerButtonProps {
 }
 
 
-const tooltips: Record<ExampleContainerImageTag, { title: string, imageSrc: string }> = {
+const imageTooltips: Record<string, CachedImageData> = {
   xfce: {
-    title: 'Try XFCE (lightweight)',
-    imageSrc: "https://raw.githubusercontent.com/pgmystery/docker-extension-vnc/refs/heads/main/docker/vnc_ubuntu/xfce/docs/xfce_small.png",
+    title: 'XFCE (lightweight)',
+    skeleton: xfceSkeleton,
+    src: 'https://raw.githubusercontent.com/pgmystery/docker-extension-vnc/refs/heads/main/docker/vnc_ubuntu/xfce/docs/xfce_small.png',
   },
   cinnamon: {
-    title: 'Try Cinnamon (modern GNOME-like)',
-    imageSrc: 'https://raw.githubusercontent.com/pgmystery/docker-extension-vnc/refs/heads/main/docker/vnc_ubuntu/cinnamon/docs/cinnamon_small.png',
+    title: 'Cinnamon (modern GNOME-like)',
+    skeleton: cinnamonSkeleton,
+    src: 'https://raw.githubusercontent.com/pgmystery/docker-extension-vnc/refs/heads/main/docker/vnc_ubuntu/cinnamon/docs/cinnamon_small.png',
   },
   mate: {
-    title: 'Try Mate (GNOME 2 fork)',
-    imageSrc: 'https://raw.githubusercontent.com/pgmystery/docker-extension-vnc/refs/heads/main/docker/vnc_ubuntu/mate/docs/mate_small.png',
+    title: 'Mate (GNOME 2 fork)',
+    skeleton: mateSkeleton,
+    src: 'https://raw.githubusercontent.com/pgmystery/docker-extension-vnc/refs/heads/main/docker/vnc_ubuntu/mate/docs/mate_small.png',
   },
   'kde-plasma': {
-    title: 'Try KDE-Plasma (full-featured)',
-    imageSrc: 'https://raw.githubusercontent.com/pgmystery/docker-extension-vnc/refs/heads/main/docker/vnc_ubuntu/kde-plasma/docs/kde_plasma_small.png',
+    title: 'KDE-Plasma (full-featured)',
+    skeleton: kdePlasmaSkeleton,
+    src: 'https://raw.githubusercontent.com/pgmystery/docker-extension-vnc/refs/heads/main/docker/vnc_ubuntu/kde-plasma/docs/kde_plasma_small.png',
   },
   lxqt: {
-    title: 'Try LXQT (light and fast)',
-    imageSrc: 'https://raw.githubusercontent.com/pgmystery/docker-extension-vnc/refs/heads/main/docker/vnc_ubuntu/lxqt/docs/lxqt_small.png',
+    title: 'LXQT (light and fast)',
+    skeleton: lxqtSkeleton,
+    src: 'https://raw.githubusercontent.com/pgmystery/docker-extension-vnc/refs/heads/main/docker/vnc_ubuntu/lxqt/docs/lxqt_small.png',
   },
   lxde: {
-    title: 'Try LXDE (legacy lightweight)',
-    imageSrc: 'https://raw.githubusercontent.com/pgmystery/docker-extension-vnc/refs/heads/main/docker/vnc_ubuntu/lxde/docs/lxde_small.png',
+    title: 'LXDE (legacy lightweight)',
+    skeleton: lxdeSkeleton,
+    src: 'https://raw.githubusercontent.com/pgmystery/docker-extension-vnc/refs/heads/main/docker/vnc_ubuntu/lxde/docs/lxde_small.png',
   },
   xterm: {
-    title: 'Try XTerm (terminal only)',
-    imageSrc: 'https://raw.githubusercontent.com/pgmystery/docker-extension-vnc/refs/heads/main/docker/vnc_ubuntu/xterm/docs/xterm_small.png',
+    title: 'XTerm (terminal only)',
+    skeleton: xtermSkeleton,
+    src: 'https://raw.githubusercontent.com/pgmystery/docker-extension-vnc/refs/heads/main/docker/vnc_ubuntu/xterm/docs/xterm_small.png',
   },
 }
 
@@ -70,21 +85,24 @@ export default function ExampleContainerButton({
   loading,
   onTagChange,
 }: ExampleContainerButtonProps) {
-  const [selectedTag, setSelectedTag] = useState<string | undefined>()
-  const [tooltip, setTooltip] = useState<{ title: string, imageSrc: string }>(tooltips.xfce)
+  const [selectedTag, setSelectedTag] = useState<string>("xfce")
+  const [imageTooltip, setImageTooltip] = useState<CachedImageData>(imageTooltips[selectedTag])
 
   useEffect(() => {
     if (!exampleContainer)
       return
 
-    setSelectedTag(exampleContainer.Config.Image.split(':')[1])
+    const tag = exampleContainer.Config.Image.split(':')[1]
+
+    setSelectedTag(tag)
+    setImageTooltip(imageTooltips[tag])
   }, [exampleContainer])
 
   function handleSelectButtonChange(event: SelectChangeEvent) {
     const tag = event.target.value as ExampleContainerImageTag
+    setImageTooltip(imageTooltips[tag])
 
     onTagChange?.(tag)
-    setTooltip(tooltips[tag])
   }
 
   if (exampleContainer) {
@@ -128,19 +146,15 @@ export default function ExampleContainerButton({
       selectValue={selectedTag}
       tooltip={
         <Stack spacing={1}>
-          <Typography>{ tooltip.title }</Typography>
-          <Box
-            component="img"
-            alt={`Example Container (${tooltip.title})`}
-            loading="lazy"
-            src={tooltip.imageSrc}
+          <Typography>{ imageTooltip.title }</Typography>
+          <CachedImage
+            image={imageTooltip}
             sx={{
               maxWidth: '14rem',
             }}
           />
         </Stack>
       }
-      tooltipPlacement="top"
     >
       <SelectButtonItem
         value="xfce"
