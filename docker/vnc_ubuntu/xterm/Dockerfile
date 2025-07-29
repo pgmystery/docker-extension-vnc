@@ -21,6 +21,9 @@ RUN mkdir /root/.vnc
 # Create an .Xauthority file
 RUN touch /root/.Xauthority
 
+# Copy .Xdefaults file
+COPY ./config/root/ /root/
+
 # Expose VNC port
 EXPOSE $PORT
 
