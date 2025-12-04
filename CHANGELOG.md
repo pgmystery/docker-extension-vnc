@@ -2,6 +2,9 @@
 
 History of all released versions and changes
 
+## 1.4.0
+TODO
+
 ## v1.3.4
 ### Changed
 - Add info buttons for the docker image connection option text-fields.
