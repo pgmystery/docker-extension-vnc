@@ -91,8 +91,10 @@ export function getVNCSettingsStore(backendHttpService?: HttpService): VNCSettin
       emitChange()
     },
 
-    save() {
-      return this.api.post<void>('', vncSettings)
+    async save() {
+      await this.api.post<void>('', vncSettings)
+
+      emitChange()
     },
 
     async set(newVNCSettings: VNCSettings) {

@@ -3,8 +3,8 @@
 History of all released versions and changes
 
 ## v1.4.0
-TODO
-
+### Changed
+- Remove local react-vnc submodule.
 
 ## v1.3.4
 ### Changed

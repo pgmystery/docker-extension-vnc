@@ -1,5 +1,5 @@
 # BUILD BACKEND
-FROM golang:1.24.3-alpine AS builder
+FROM golang:1.25.5-alpine AS builder
 ENV CGO_ENABLED=1
 WORKDIR /backend
 RUN apk add --no-cache gcc musl-dev
@@ -12,20 +12,7 @@ RUN --mount=type=cache,target=/go/pkg/mod \
     --mount=type=cache,target=/root/.cache/go-build \
     go build -trimpath -ldflags="-s -w" -o bin/service
 
-# BUILD lib react-vnc
-FROM --platform=$BUILDPLATFORM node:22.16-alpine AS lib-react-vnc
-RUN apk add git
-WORKDIR /react-vnc
-COPY .git ./.git
-COPY .gitmodules ./.gitmodules
-COPY ui/libs/react-vnc ./ui/libs/react-vnc
-RUN git submodule update --init --recursive
-RUN --mount=type=cache,target=/usr/src/app/.npm \
-    npm --prefix ./ui/libs/react-vnc set cache /usr/src/app/.npm && \
-    npm ci --prefix ./ui/libs/react-vnc
-RUN npm --prefix ./ui/libs/react-vnc run build:lib
-
-FROM --platform=$BUILDPLATFORM node:22.16-alpine AS client-builder
+FROM --platform=$BUILDPLATFORM node:24.11-alpine AS client-builder
 WORKDIR /ui
 # cache packages in layer
 COPY ui/package.json /ui/package.json
@@ -36,7 +23,6 @@ RUN --mount=type=cache,target=/usr/src/app/.npm \
     npm ci
 # install
 COPY ui /ui
-COPY --from=lib-react-vnc /react-vnc/ui/libs/react-vnc/dist /ui/libs/react-vnc/dist
 RUN npm run build
 
 FROM alpine

@@ -20,6 +20,11 @@ install-extension: build-extension ## Install the extension
 update-extension: build-extension ## Update the extension
 	docker extension update -f $(IMAGE):$(TAG)
 
+dev: ui-dev debug
+
+dev-reset:
+	docker extension dev reset $(IMAGE)
+
 ui-dev:
 	docker extension dev ui-source $(IMAGE) $(UI_DEV_SERVER)
 

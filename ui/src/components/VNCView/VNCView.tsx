@@ -1,5 +1,4 @@
 import React, { useEffect, useMemo, useRef, useState, useSyncExternalStore } from 'react'
-import { VncScreen } from 'react-vnc'
 import { Box, Stack } from '@mui/material'
 import VNCCredentialsDialog from './VNCCredentialsDialog'
 import VNCSessionBar from '../vncSessionBar/VNCSessionBar'
@@ -14,6 +13,7 @@ import { getVNCSettingsStore } from '../../stores/vncSettingsStore'
 import useWindowFocus from '../../hooks/useWindowFocus'
 import { useDialogs } from '@toolpad/core'
 import bellSoundFile from '../../resources/audio/bell.mp3'
+import { VncScreen } from 'react-vnc'
 
 
 interface VNCViewProps {
@@ -34,6 +34,9 @@ export default function VNCView({ sessionName, url, onCancel, ddUIToast, openBro
     onFocus: handleWindowFocus,
   })
   const [ready, setReady] = useState<boolean>(false)
+  const [isConnected, setIsConnected] = useState<boolean>(false)
+  const retryTimerRef = useRef<NodeJS.Timeout | null>(null)
+  const shouldRetryRef = useRef<boolean>(true)
   const vncContainerRef = useRef<HTMLDivElement>(null)
   const [canvasElement, setCanvasElement] = useState<HTMLCanvasElement | undefined>()
   const vncScreenRef = useRef<React.ElementRef<typeof VncScreen>>(null)
@@ -49,6 +52,10 @@ export default function VNCView({ sessionName, url, onCancel, ddUIToast, openBro
   useEffect(() => {
     if ('load' in vncSettingsStore)
       vncSettingsStore.load().finally(() => setReady(true))
+
+    return () => {
+      if (retryTimerRef.current) clearTimeout(retryTimerRef.current)
+    }
   }, [])
 
   useEffect(() => {
@@ -58,6 +65,7 @@ export default function VNCView({ sessionName, url, onCancel, ddUIToast, openBro
       disconnect?.()
     }
 
+    shouldRetryRef.current = true
     connect?.()
   }, [currentCredentials])
 
@@ -72,6 +80,10 @@ export default function VNCView({ sessionName, url, onCancel, ddUIToast, openBro
 
   function onVNCConnect() {
     if (!vncContainerRef.current) return
+
+    setIsConnected(true)
+    if (retryTimerRef.current) clearTimeout(retryTimerRef.current)
+    shouldRetryRef.current = true
 
     const vncCanvasElement = vncContainerRef.current.getElementsByTagName('canvas').item(0)
     setCanvasElement(vncCanvasElement || undefined)
@@ -98,6 +110,15 @@ export default function VNCView({ sessionName, url, onCancel, ddUIToast, openBro
 
   function onVNCDisconnect() {
     setCanvasElement(undefined)
+    setIsConnected(false)
+
+    if (retryTimerRef.current) clearTimeout(retryTimerRef.current)
+
+    if (shouldRetryRef.current) {
+      retryTimerRef.current = setTimeout(() => {
+        vncScreenRef.current?.connect?.()
+      }, 3000)
+    }
   }
 
   async function handleCredentialRequest() {
@@ -136,7 +157,8 @@ export default function VNCView({ sessionName, url, onCancel, ddUIToast, openBro
     setCurrentCredentials(credentials)
   }
 
-  function handleSecurityFailure(e?: { detail: { status: number, reason: string } }) {
+  function handleSecurityFailure(e: CustomEvent<{status: number; reason?: string | undefined;}>) {
+    shouldRetryRef.current = false
     const { connected, disconnect } = vncScreenRef.current ?? {};
 
     if (connected) {
@@ -146,7 +168,7 @@ export default function VNCView({ sessionName, url, onCancel, ddUIToast, openBro
     if (e?.detail.status === 0) return
 
     if (e)
-      ddUIToast.error(e?.detail.reason)
+      ddUIToast.error(e?.detail.reason || 'Unknown error')
 
     handleCredentialRequest()
   }
@@ -175,8 +197,9 @@ export default function VNCView({ sessionName, url, onCancel, ddUIToast, openBro
 
     if (connected) {
       disconnect?.()
-      connect?.()
     }
+    shouldRetryRef.current = true
+    connect?.()
   }
 
   function sendClipboardText(text: string) {
@@ -255,22 +278,28 @@ export default function VNCView({ sessionName, url, onCancel, ddUIToast, openBro
       }}>
         {
           ready
-          ? <VncScreen
-            url={url?.ws || ''}
-            style={{
-              width: '100%',
-              height: '100%',
-              overflow: 'hidden',
-            }}
-            ref={vncScreenRef}
-            onConnect={onVNCConnect}
-            onDisconnect={onVNCDisconnect}
-            onCredentialsRequired={handleCredentialRequest}
-            onSecurityFailure={handleSecurityFailure}
+          ? <>
+            { !isConnected && <VNCViewSkeleton /> }
+            <VncScreen
+              url={url?.ws || ''}
+              style={{
+                width: '100%',
+                height: '100%',
+                overflow: 'hidden',
+                display: isConnected ? 'block' : 'none',
+              }}
+              ref={vncScreenRef}
+              onConnect={onVNCConnect}
+              onDisconnect={onVNCDisconnect}
+              onCredentialsRequired={handleCredentialRequest}
+              onSecurityFailure={handleSecurityFailure}
             rfbOptions={{
-              credentials: currentCredentials,
+              credentials: {
+                username: currentCredentials.username || '',
+                password: currentCredentials.password || '',
+                target: url?.ws || ''
+              },
             }}
-            loadingUI={<VNCViewSkeleton />}
             qualityLevel={vncSettings.qualityLevel}
             compressionLevel={vncSettings.compressionLevel}
             showDotCursor={vncSettings.showDotCursor}
@@ -294,6 +323,7 @@ export default function VNCView({ sessionName, url, onCancel, ddUIToast, openBro
               bellSound.play()
             }}
           />
+          </>
           : <VNCViewSkeleton />
         }
 
