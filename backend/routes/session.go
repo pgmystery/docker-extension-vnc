@@ -57,7 +57,12 @@ func createSession(ctx *fiber.Ctx) error {
 		return fiber.NewError(fiber.StatusBadRequest, err.Error())
 	}
 
-	session, err := crud.CreateSession(requestSession)
+	sessionModel, err := crud.CreateSession(requestSession)
+	if err != nil {
+		return fiber.NewError(fiber.StatusInternalServerError, err.Error())
+	}
+
+	session, err := crud.GetSession(sessionModel.ID)
 	if err != nil {
 		return fiber.NewError(fiber.StatusInternalServerError, err.Error())
 	}
