@@ -1,12 +1,13 @@
 package vnc
 
 type SettingsData struct {
-	ViewOnly         bool    `json:"viewOnly"`
-	QualityLevel     int     `json:"qualityLevel"`
-	CompressionLevel int     `json:"compressionLevel"`
-	ShowDotCursor    bool    `json:"showDotCursor"`
-	PlayBell         bool    `json:"playBell"`
-	Scaling          Scaling `json:"scaling"`
+	ViewOnly                   bool    `json:"viewOnly"`
+	QualityLevel               int     `json:"qualityLevel"`
+	CompressionLevel           int     `json:"compressionLevel"`
+	ShowDotCursor              bool    `json:"showDotCursor"`
+	PlayBell                   bool    `json:"playBell"`
+	Scaling                    Scaling `json:"scaling"`
+	ShowHiddenContainerWarning bool    `json:"showHiddenContainerWarning"`
 }
 
 type Scaling struct {
@@ -25,5 +26,6 @@ func getDefaultSettings() SettingsData {
 			ClipToWindow: false,
 			Resize:       "scale",
 		},
+		ShowHiddenContainerWarning: true,
 	}
 }
