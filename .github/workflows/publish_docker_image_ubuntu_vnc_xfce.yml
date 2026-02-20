@@ -42,3 +42,6 @@ jobs:
           file: ./docker/vnc_ubuntu/xfce/Dockerfile
           push: true
           tags: pgmystery/ubuntu_vnc:latest,pgmystery/ubuntu_vnc:xfce
+          labels: |
+            pgmystery.vnc.extension.audio.output=true
+            pgmystery.vnc.extension.audio.input=true
