@@ -1,33 +1,24 @@
-# Use an official Ubuntu base image
 FROM ubuntu:24.04
 
 ENV VNC_PASSWORD="foobar"
-
-# Avoid warnings by switching to noninteractive for the build process
 ENV DEBIAN_FRONTEND=noninteractive
-
 ENV USER=root
-
-# Set display resolution (change as needed)
 ENV RESOLUTION=1920x1080
-
-# Set port of VNC Server
 ENV PORT=5901
-
-# Set Display env for dbus
 ENV DISPLAY=:0.0
-
-# Set default lang
 ENV LANG="en_US.UTF-8"
 ENV LC_ALL=$LANG
+ENV XDG_RUNTIME_DIR=/tmp/runtime
+ENV PIPEWIRE_RUNTIME_DIR=/tmp/runtime
 
-# Install locales and set it up
+ENV VNC_EXTENSION_AUDIO_OUTPUT=true
+ENV VNC_EXTENSION_AUDIO_INPUT=true
+
+# Set up locale
 RUN apt-get update && apt-get install -y --no-install-recommends \
-    && echo $LANG UTF-8 > /etc/locale.gen && \
-    env DEBIAN_FRONTEND=noninteractive apt-get install -y \
-      locales && \
-    update-locale --reset LANG=$LANG \
-    && apt-get clean && rm -rf /var/lib/apt/lists/* /tmp/* /var/tmp/*
+    locales && \
+    echo $LANG UTF-8 > /etc/locale.gen && locale-gen && update-locale LANG=$LANG && \
+    apt-get clean && rm -rf /var/lib/apt/lists/* /tmp/* /var/tmp/*
 
 # Copy settings to avoid snap
 COPY apt/preferences.d/ /etc/apt/preferences.d/
@@ -35,17 +26,33 @@ COPY apt/apt.conf.d/ /etc/apt/apt.conf.d/
 
 # Install necessary packages
 RUN apt-get update && dpkg --configure -a && apt-get install -y --no-install-recommends \
-    tightvncpasswd  \
+    tightvncpasswd \
     tigervnc-common \
     tigervnc-standalone-server \
-    dbus-x11
-RUN dpkg --configure -a && apt-get install -y --no-install-recommends \
-    software-properties-common
-
-# Install desktop
-RUN apt-get update && apt-get install -y --no-install-recommends \
+    dbus-x11 \
+    software-properties-common \
     xfce4 \
-    xfce4-goodies
+    xfce4-goodies \
+    fonts-noto-cjk fonts-ipafont-gothic fonts-ipafont-mincho \
+    pulseaudio \
+    pulseaudio-utils \
+    ffmpeg \
+    pavucontrol \
+    audacity \
+    iputils-ping \
+    dnsutils \
+    && apt-get clean && rm -rf /var/lib/apt/lists/* /tmp/* /var/tmp/*
+
+# Force PulseAudio to allow root and disable SHM (shared memory)
+# which often fails in Docker
+RUN sed -i 's/; daemonize = no/daemonize = yes/' /etc/pulse/daemon.conf && \
+    sed -i 's/; allow-exit = yes/allow-exit = no/' /etc/pulse/daemon.conf && \
+    sed -i 's/; default-fragments = .*/default-fragments = 2/' /etc/pulse/daemon.conf && \
+    sed -i 's/; default-fragment-size-msec = .*/default-fragment-size-msec = 10/' /etc/pulse/daemon.conf && \
+    sed -i 's/; enable-shm = yes/enable-shm = no/' /etc/pulse/daemon.conf
+
+# Create pulse user/group for system-mode compatibility
+# RUN usermod -aG pulse-access root
 
 # Config
 COPY ./.config/xfce4/xfconf/xfce-perchannel-xml/xfce4-desktop.xml /root/.config/xfce4/xfconf/xfce-perchannel-xml/xfce4-desktop.xml
@@ -60,20 +67,22 @@ RUN add-apt-repository -y ppa:mozillateam/ppa \
 # Clean apt caches
 RUN apt-get clean && rm -rf /var/lib/apt/lists/* /tmp/* /var/tmp/*
 
-# Create .vnc directory
-RUN mkdir /root/.vnc
+# Create .vnc and runtime directories
+RUN mkdir -p /root/.vnc /tmp/runtime && chmod 700 /tmp/runtime
 
-# Create an .Xauthority file
+# Create .Xauthority
 RUN touch /root/.Xauthority
 
-# Expose VNC port
+# Expose VNC and audio TCP port
 EXPOSE $PORT
+EXPOSE 7900
 
-# Set the working directory in the container
+# Set working directory
 WORKDIR /app
 
-# Copy a script to start the VNC server
+# Copy start script
 COPY start-vnc.sh start-vnc.sh
 RUN chmod +x start-vnc.sh
 
+# Entry point
 ENTRYPOINT ["bash", "./start-vnc.sh"]

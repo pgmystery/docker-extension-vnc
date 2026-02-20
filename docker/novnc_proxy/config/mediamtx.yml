@@ -1,0 +1,37 @@
+###############################################
+# General
+###############################################
+
+# Path to the stream (optional, but good for debugging)
+paths:
+  vnc:
+#    source: srt://localhost:7900?mode=caller
+    sourceProtocol: udp
+    sourceOnDemand: no
+  mic:
+
+writeQueueSize: 256  # Smaller queue = less delay
+#udpMaxPayloadSize: 1472
+
+###############################################
+# WebRTC Server Configuration
+###############################################
+
+# Enable WebRTC
+webrtc: yes
+
+# Address of the WebRTC HTTP Signaling server (This receives the POST /whep)
+webrtcAddress: :8889
+
+# -------------------------------------------------
+# CRITICAL: TCP/UDP Configuration for Docker
+# -------------------------------------------------
+
+webrtcLocalUDPAddress: :8188
+webrtcLocalTCPAddress: :8189
+
+# -------------------------------------------------
+# NAT / Connectivity
+# -------------------------------------------------
+
+webrtcAdditionalHosts: [127.0.0.1]
