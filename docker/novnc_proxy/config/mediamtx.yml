@@ -5,10 +5,11 @@
 # Path to the stream (optional, but good for debugging)
 paths:
   vnc:
-#    source: srt://localhost:7900?mode=caller
     sourceProtocol: udp
-    sourceOnDemand: no
+    sourceOnDemand: yes
   mic:
+
+logLevel: warn
 
 writeQueueSize: 256  # Smaller queue = less delay
 #udpMaxPayloadSize: 1472

@@ -22,3 +22,10 @@ It is using [noVNC](https://github.com/novnc/noVNC) and [websockify](https://git
 | `NOVNC_LISTEN_HOST`   | 0.0.0.0 | The listening interface of the Proxy. |
 | `NOVNC_LISTEN_PORT`   | 6081    | The listening Port of the Proxy.      |
 | `NOVNC_REMOTE_SERVER` |         | The remote VNC Server.                |
+
+
+## Build Command
+
+```bash
+docker build -t pgmystery/proxy_vnc:latest .
+```

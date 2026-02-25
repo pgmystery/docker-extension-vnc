@@ -1,69 +1,39 @@
-# Use an official Ubuntu base image
-FROM ubuntu:24.04
+ARG BASE_IMAGE="pgmystery/vnc-ubuntu-base:latest"
+FROM ${BASE_IMAGE}
 
-ENV VNC_PASSWORD="foobar"
+USER root
 
-# Avoid warnings by switching to noninteractive for the build process
-ENV DEBIAN_FRONTEND=noninteractive
-
-ENV USER=root
-
-# Set display resolution (change as needed)
-ENV RESOLUTION=1920x1080
-
-# Set port of VNC Server
-ENV PORT=5901
-
-# Set Display env for dbus
-ENV DISPLAY=:0.0
-
-# Set default lang
-ENV LANG="en_US.UTF-8"
-ENV LC_ALL=$LANG
-
-# Install locales and set it up
+# Install LXDE-specific packages and remove lxpolkit to avoid session errors in Docker
 RUN apt-get update && apt-get install -y --no-install-recommends \
-    && echo $LANG UTF-8 > /etc/locale.gen && \
-    env DEBIAN_FRONTEND=noninteractive apt-get install -y \
-      locales && \
-    update-locale --reset LANG=$LANG \
+    lxde \
+    dbus-x11 \
+    dos2unix \
+    x11-utils \
+    x11-xserver-utils \
+    libfm-modules \
+    && rm -f /usr/bin/lxpolkit \
     && apt-get clean && rm -rf /var/lib/apt/lists/* /tmp/* /var/tmp/*
 
-RUN dpkg --configure -a
-
-# Install necessary packages
-RUN apt-get update && apt-get install -y --no-install-recommends \
-    tightvncpasswd  \
-    tigervnc-common \
-    tigervnc-standalone-server \
-    dbus-x11 \
-    software-properties-common
-
-# Install desktop
-RUN apt-get update && apt-get install -y --no-install-recommends \
-    lxde
-
 # Fix issue: https://askubuntu.com/a/1520459
-COPY ./.config/lxpanel/LXDE/panels/panel /root/.config/lxpanel/LXDE/panels/panel
-RUN chmod 0644 /root/.config/lxpanel/LXDE/panels/panel
+USER root
+RUN mkdir -p /etc/xdg/lxpanel/LXDE/panels
+COPY ./.config/lxpanel/LXDE/panels/panel /etc/xdg/lxpanel/LXDE/panels/panel
 
-# Clean apt caches
-RUN apt-get clean && rm -rf /var/lib/apt/lists/* /tmp/* /var/tmp/*
+USER vncuser
+RUN mkdir -p /home/vncuser/.config/lxpanel/LXDE/panels \
+    && mkdir -p /home/vncuser/.config/lxpanel/default/panels
+COPY --chown=vncuser:vncuser ./.config/lxpanel/LXDE/panels/panel /home/vncuser/.config/lxpanel/LXDE/panels/panel
+COPY --chown=vncuser:vncuser ./.config/lxpanel/LXDE/panels/panel /home/vncuser/.config/lxpanel/default/panels/panel
 
-# Create .vnc directory
-RUN mkdir /root/.vnc
+# Sanitize all config files (remove Windows CRLF)
+USER root
+RUN find /home/vncuser/.config -type f -exec dos2unix {} + \
+    && find /etc/xdg/lxpanel -type f -exec dos2unix {} +
 
-# Create an .Xauthority file
-RUN touch /root/.Xauthority
+USER vncuser
+RUN chmod -R 755 /home/vncuser/.config
 
-# Expose VNC port
-EXPOSE $PORT
+ENV XDG_MENU_PREFIX="lxde-"
 
-# Set the working directory in the container
-WORKDIR /app
-
-# Copy a script to start the VNC server
-COPY start-vnc.sh start-vnc.sh
-RUN chmod +x start-vnc.sh
-
-ENTRYPOINT ["bash", "./start-vnc.sh"]
+# Set session command
+CMD ["startlxde"]

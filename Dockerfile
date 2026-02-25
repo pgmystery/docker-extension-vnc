@@ -1,5 +1,5 @@
 # BUILD BACKEND
-FROM golang:1.25.5-alpine AS builder
+FROM golang:1.26.0-alpine AS builder
 ENV CGO_ENABLED=1
 WORKDIR /backend
 RUN apk add --no-cache gcc musl-dev
@@ -12,8 +12,10 @@ RUN --mount=type=cache,target=/go/pkg/mod \
     --mount=type=cache,target=/root/.cache/go-build \
     go build -trimpath -ldflags="-s -w" -o bin/service
 
-FROM --platform=$BUILDPLATFORM node:24.11-alpine AS client-builder
+FROM --platform=$BUILDPLATFORM node:24.13-alpine AS client-builder
 WORKDIR /ui
+# update NPM because of a vulnerability: https://github.com/advisories/GHSA-3966-f6p6-2qr9
+RUN npm install -g npm@11.9.0
 # cache packages in layer
 COPY ui/package.json /ui/package.json
 COPY ui/package-lock.json /ui/package-lock.json
@@ -25,7 +27,7 @@ RUN --mount=type=cache,target=/usr/src/app/.npm \
 COPY ui /ui
 RUN npm run build
 
-FROM alpine
+FROM alpine:3.23.3
 LABEL org.opencontainers.image.title="VNC Viewer" \
     org.opencontainers.image.description="A Docker Desktop Extension that enables you to connect to VNC servers running inside Docker containers or on remote hosts — directly from Docker Desktop." \
     org.opencontainers.image.vendor="pgmystery" \

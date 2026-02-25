@@ -1,5 +1,5 @@
 import React, { useEffect, useState, useSyncExternalStore } from 'react'
-import { Backdrop, Box, CircularProgress, IconButton, Stack, Tooltip } from '@mui/material'
+import { Backdrop, Box, CircularProgress, IconButton, Skeleton, Stack, Tooltip } from '@mui/material'
 import AddIcon from '@mui/icons-material/Add'
 import EditIcon from '@mui/icons-material/Edit'
 import SessionDialog from '../session/sessionDialog/SessionDialog'
@@ -18,11 +18,20 @@ interface ConnectBarProps {
   onDisconnect: ()=>void
   connectedSession?: string
   ddUIToast: Toast
+  appLoading: boolean
   disabled?: boolean
 }
 
 
-export default function ConnectBar({ connectedSession, sessionStore, ddUIToast, onConnect, onDisconnect, disabled }: ConnectBarProps) {
+export default function ConnectBar({
+  connectedSession,
+  sessionStore,
+  ddUIToast,
+  onConnect,
+  onDisconnect,
+  appLoading,
+  disabled,
+}: ConnectBarProps) {
   const [loading, setLoading] = useState<boolean>(true)
   const sessions = useSyncExternalStore(sessionStore.subscribe, sessionStore.getSnapshot)
   const [selectedSessionName, setSelectedSessionName] = useState<string>('')
@@ -161,38 +170,62 @@ export default function ConnectBar({ connectedSession, sessionStore, ddUIToast, 
 
   return (
     <>
-      <Stack direction="row" spacing={ 2 } alignItems="center">
-        <Tooltip title="Create a new Session">
-          <IconButton
-            disabled={!!connectedSession}
-            color="success"
-            onClick={handleAddNewSessionClick}
-          >
-            <AddIcon/>
-          </IconButton>
-        </Tooltip>
-        <SessionSelect
-          disabled={!!connectedSession}
-          sessions={sessions}
-          selectedSessionName={selectedSessionName}
-          setSelectedSessionName={setSelectedSessionName}
-        />
-        <Tooltip title="Edit selected Session">
-          <IconButton disabled={selectedSessionName === '' || !!connectedSession} onClick={handleEditSessionClick}>
-            <EditIcon/>
-          </IconButton>
-        </Tooltip>
+      <Stack className={'connect-bar'} direction="row" spacing={ 2 } alignItems="center">
+          {
+            appLoading ? (
+              <Skeleton variant="circular" width={40} height={40} />
+            ) : (
+              <Tooltip title="Create a new Session">
+                <IconButton
+                  disabled={!!connectedSession}
+                  color="success"
+                  onClick={handleAddNewSessionClick}
+                >
+                  <AddIcon/>
+                </IconButton>
+              </Tooltip>
+            )
+          }
+        {
+          appLoading ? (
+            <Skeleton variant="rectangular" width={300} height={45} />
+          ) : (
+            <SessionSelect
+              disabled={!!connectedSession}
+              sessions={sessions}
+              selectedSessionName={selectedSessionName}
+              setSelectedSessionName={setSelectedSessionName}
+            />
+          )
+        }
+        {
+          appLoading ? (
+            <Skeleton variant="circular" width={40} height={40} />
+          ) : (
+            <Tooltip title="Edit selected Session">
+              <IconButton disabled={selectedSessionName === '' || !!connectedSession} onClick={handleEditSessionClick}>
+                <EditIcon/>
+              </IconButton>
+            </Tooltip>
+          )
+        }
         <Box sx={ {flexGrow: 1} }/>
-        <ConnectButton
-          onConnect={handleConnectClick}
-          onDisconnect={onDisconnect}
-          connected={!!connectedSession}
-          connectButtonDisabled={selectedSessionName === '' || loading || !!connectedSession || disabled}
-          disconnectButtonDisabled={loading || !connectedSession || disabled}
-          sx={{
-            minWidth: '180px',
-          }}
-        />
+        {
+          appLoading ? (
+            <Skeleton variant="rectangular" width={180} height={37} />
+          ) : (
+            <ConnectButton
+              onConnect={handleConnectClick}
+              onDisconnect={onDisconnect}
+              connected={!!connectedSession}
+              connectButtonDisabled={selectedSessionName === '' || loading || !!connectedSession || disabled}
+              disconnectButtonDisabled={loading || !connectedSession || disabled}
+              sx={{
+                minWidth: '180px',
+              }}
+            />
+          )
+        }
       </Stack>
 
       <Backdrop sx={(theme) => ({ color: '#fff', zIndex: theme.zIndex.drawer + 1 })} open={loading}>

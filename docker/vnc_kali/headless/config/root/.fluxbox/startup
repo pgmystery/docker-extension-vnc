@@ -1,0 +1,11 @@
+#!/bin/sh
+
+# Turn off screensaver and power management for VNC
+xset s off
+xset -dpms
+
+# Start xterm in the background
+xterm &
+
+# The last command must be exec fluxbox
+exec fluxbox

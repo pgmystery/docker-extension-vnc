@@ -6,16 +6,24 @@ import { ContainerExtended } from '../../../types/docker/cli/inspect'
 import MultiExecResult from '../../docker/MultiExecResult'
 import { ConnectionType } from '../VNC'
 import Target from '../targets/Target'
+import TargetDockerContainer from '../targets/TargetDockerContainer'
 
 export interface ProxyURL {
   ws: string
   browser: string
 }
 
+export interface AudioData {
+  signalingPort: number
+  audioInputPort?: number
+  audioOutputPort?: number
+}
+
 export class ContainerDeleteError extends Error {}
 
 export default class Proxy extends DockerContainer {
   protected readonly config: Config
+  public target?: Target
 
   constructor(docker?: Docker, config?: Config) {
     docker = docker || createDockerDesktopClient().docker
@@ -52,6 +60,36 @@ export default class Proxy extends DockerContainer {
       return
 
     return Number(internalPort[0].HostPort)
+  }
+
+  async getAudioData(): Promise<AudioData | undefined> {
+    if (!this.exist())
+      return
+
+    if (!(this.target instanceof TargetDockerContainer))
+      return
+
+    const signalPort = this.container?.NetworkSettings.Ports[`${this.config.proxyContainerLocalPortAudioSignal}/tcp`]
+    const audioPortTcp = this.container?.NetworkSettings.Ports[`${this.config.proxyContainerLocalPortAudioTcp}/tcp`]
+    const audioPortUdp = this.container?.NetworkSettings.Ports[`${this.config.proxyContainerLocalPortAudioUdp}/udp`]
+    const { output: acceptAudioOutput, input: acceptAudioInput } = await this.target.hasAudio()
+
+    if (acceptAudioOutput)
+      if (!audioPortTcp || audioPortTcp.length === 0)
+        return
+
+    if (acceptAudioInput)
+      if (!audioPortUdp || audioPortUdp.length === 0)
+        return
+
+    if (!signalPort || signalPort.length === 0)
+      return
+
+    return {
+      signalingPort: Number(signalPort[0].HostPort),
+      audioOutputPort: acceptAudioOutput && audioPortTcp ? Number(audioPortTcp[0].HostPort) : undefined,
+      audioInputPort: acceptAudioInput && audioPortUdp ? Number(audioPortUdp[0].HostPort) : undefined,
+    }
   }
 
   get url(): ProxyURL {
@@ -120,15 +158,38 @@ export default class Proxy extends DockerContainer {
       proxyContainerName,
       proxyContainerLabelTargetIp,
       proxyContainerLabelTargetPort,
+      proxyContainerLabelAudioOutput,
       proxyContainerLabelConnectionType,
       proxyContainerLabelSessionName,
       proxyContainerLocalPort,
+      proxyContainerLocalPortAudioTcp,
+      proxyContainerLocalPortAudioUdp,
+      proxyContainerLocalPortAudioSignal,
+      proxyContainerLabelAudioInput,
+      proxyContainerLocalPortAudioInput,
+      audioOutputEnvVarName,
+      audioInputEnvVarName,
     } = this.config
+
+    const extraArgs: string[] = []
+
+    extraArgs.push('-p', `":${proxyContainerLocalPortAudioSignal.toString()}"`)
+
+    extraArgs.push('-p', `":${proxyContainerLocalPortAudioTcp.toString()}"`)
+    extraArgs.push('-e', `"MTX_PATHS_VNC_SOURCE=srt://${targetHost}:7900"`)
+    extraArgs.push('-e', `"${audioOutputEnvVarName}=true"`)
+    extraArgs.push('--label', `${proxyContainerLabelAudioOutput}="true"`)
+
+    extraArgs.push('-p', `":${proxyContainerLocalPortAudioUdp.toString()}/udp"`)
+    extraArgs.push('-p', `":${proxyContainerLocalPortAudioInput.toString()}"`)  // TODO: Do I need this?
+    extraArgs.push('-e', `"${audioInputEnvVarName}=true"`)
+    extraArgs.push('--label', `${proxyContainerLabelAudioInput}="true"`)
 
     const createExecResult = await this.createContainer(this.config.proxyDockerImage, [
       ...args,
       '--detach',
       '--name', `"${proxyContainerName}"`,
+      '--hostname', `"${proxyContainerName}"`,
       '--label', `${proxyContainerLabelSessionName}="${sessionName}"`,
       '--label', `${proxyContainerLabelKey}=""`,
       '--label', `${proxyContainerLabelTargetIp}=${targetHost}`,
@@ -137,10 +198,13 @@ export default class Proxy extends DockerContainer {
       '-p', `"${proxyContainerLocalPort.toString()}"`,
       '-e', `"NOVNC_REMOTE_SERVER=${targetHost}:${targetPort}"`,
       '-e', `"NONVC_REMOTE_SERVER=${targetHost}:${targetPort}"`,  // TO HAVE SUPPORT OF A "BROKEN" OLD VERSION OF THE PROXY DOCKER IMAGE
+      ...extraArgs,
     ])
 
     if (createExecResult.stderr)
       throw new Error(createExecResult.stderr)
+
+    this.target = target
   }
 
   async disconnect() {

@@ -5,7 +5,7 @@ import VNCSessionBar from '../vncSessionBar/VNCSessionBar'
 import VNCSettingsDialog from './VNCSettingsDialog'
 import { Toast } from '@docker/extension-api-client-types/dist/v1'
 import VNCViewSkeleton from './VNCViewSkeleton'
-import { ProxyURL } from '../../libs/vnc/proxies/Proxy'
+import { ProxyURL, AudioData } from '../../libs/vnc/proxies/Proxy'
 import { MachineCommand } from '../vncSessionBar/SendMachineCommandsMenu'
 import { SessionCredentials } from '../../types/session'
 import { SessionStore } from '../../stores/sessionStore'
@@ -14,9 +14,16 @@ import useWindowFocus from '../../hooks/useWindowFocus'
 import { useDialogs } from '@toolpad/core'
 import bellSoundFile from '../../resources/audio/bell.mp3'
 import { VncScreen } from 'react-vnc'
+import DockerCli from '../../libs/docker/DockerCli'
+import { VNCHandler } from '../../hooks/useVNC'
+import VNCDockerContainerBase from '../../libs/vnc/connectionTypes/VNCDockerContainer/VNCDockerContainerBase'
+import AudioPlayer from './AudioPlayer'
+import { useWebRTCAudio } from '../../hooks/useWebRTCAudio'
+import { useMicrophone } from '../../hooks/useMicrophone'
 
 
 interface VNCViewProps {
+  vnc: VNCHandler
   sessionName: string
   ddUIToast: Toast
   openBrowserURL: (url: string)=>void
@@ -28,8 +35,39 @@ interface VNCViewProps {
 
 export type VNCCredentials = Partial<SessionCredentials>
 
+interface WebRTCAudioConfig {
+  signalingPort: number
+  output?: {
+    url: string
+    audioOutputPath: string
+    port: number
+  }
+  input?: {
+    port: number
+  }
+}
 
-export default function VNCView({ sessionName, url, onCancel, ddUIToast, openBrowserURL, credentials, sessionStore }: VNCViewProps) {
+function buildWebRTCAudioConfig(audioData?: AudioData): WebRTCAudioConfig | undefined {
+  if (!audioData) return
+
+  return {
+    output: audioData.audioOutputPort
+      ? {
+          url: `http://localhost:${audioData.signalingPort}`,
+          audioOutputPath: 'vnc',
+          port: audioData.audioOutputPort,
+        }
+      : undefined,
+    input: audioData.audioInputPort
+      ? {
+          port: audioData.audioInputPort,
+        }
+      : undefined,
+    signalingPort: audioData.signalingPort,
+  }
+}
+
+export default function VNCView({ vnc, sessionName, url, onCancel, ddUIToast, openBrowserURL, credentials, sessionStore }: VNCViewProps) {
   useWindowFocus({
     onFocus: handleWindowFocus,
   })
@@ -49,12 +87,62 @@ export default function VNCView({ sessionName, url, onCancel, ddUIToast, openBro
   const bellSound = useMemo(() => new Audio(bellSoundFile), [])
   const dialogs = useDialogs()
 
+  const webRTCAudioConfig = useMemo(
+    () =>
+      buildWebRTCAudioConfig(vnc.connectedData?.audioData),
+    [vnc.connectedData?.audioData]
+  )
+
+  const webRTCAudioHookConfig = useMemo(() => {
+    if (!webRTCAudioConfig?.output)
+      return
+
+    return {
+      path: webRTCAudioConfig.output.audioOutputPath,
+      url: webRTCAudioConfig.output.url,
+      audioPort: webRTCAudioConfig.output.port,
+    }
+  }, [webRTCAudioConfig?.output])
+
+  const micAudioPort = useMemo(() => {
+    if (!webRTCAudioConfig?.input)
+      return
+
+    return {
+      signalingPort: webRTCAudioConfig.signalingPort,
+      audioPort: webRTCAudioConfig.input.port,
+    }
+  }, [webRTCAudioConfig?.input])
+
+  const webRTCAudio = useWebRTCAudio(webRTCAudioHookConfig)
+  const micAudio = useMicrophone(micAudioPort)
+
   useEffect(() => {
+    const checkForHiddenContainers = async () => {
+      const dockerCli = new DockerCli()
+
+      if (!(vnc.connectedData?.connection instanceof VNCDockerContainerBase))
+        return
+
+      for (const container of await dockerCli.containersUnsafe) {
+        if (vnc.connectedData.connection.data?.container.startsWith(container.ID))
+          return
+      }
+
+      ddUIToast.warning('The container will not showing in the container list because of the docker desktop setting "Show Docker Extensions system containers" is not set (https://docs.docker.com/extensions/settings-feedback/#see-containers-created-by-extensions)')
+    }
+
     if ('load' in vncSettingsStore)
-      vncSettingsStore.load().finally(() => setReady(true))
+      vncSettingsStore.load()
+                      .then(vncSettings => {
+                        if (vncSettings.showHiddenContainerWarning)
+                          checkForHiddenContainers()
+                      })
+                      .finally(() => setReady(true))
 
     return () => {
-      if (retryTimerRef.current) clearTimeout(retryTimerRef.current)
+      if (retryTimerRef.current)
+        clearTimeout(retryTimerRef.current)
     }
   }, [])
 
@@ -268,6 +356,13 @@ export default function VNCView({ sessionName, url, onCancel, ddUIToast, openBro
         sendMachineCommand={sendMachineCommand}
         havePowerCapability={havePowerCapability}
         viewOnly={vncSettings.viewOnly}
+        webRTCAudio={webRTCAudio}
+        micAudio={{
+          enabled: vncSettings.audio.input.enabled,
+          muted: vncSettings.audio.input.muted,
+          device: vncSettings.audio.input.device,
+          mic: micAudio,
+        }}
         canvas={canvasElement}
       />
       <Box ref={vncContainerRef} sx={{
@@ -293,36 +388,37 @@ export default function VNCView({ sessionName, url, onCancel, ddUIToast, openBro
               onDisconnect={onVNCDisconnect}
               onCredentialsRequired={handleCredentialRequest}
               onSecurityFailure={handleSecurityFailure}
-            rfbOptions={{
-              credentials: {
-                username: currentCredentials.username || '',
-                password: currentCredentials.password || '',
-                target: url?.ws || ''
-              },
-            }}
-            qualityLevel={vncSettings.qualityLevel}
-            compressionLevel={vncSettings.compressionLevel}
-            showDotCursor={vncSettings.showDotCursor}
-            viewOnly={vncSettings.viewOnly}
-            scaleViewport={vncSettings.scaling.resize === 'scale'}
-            resizeSession={vncSettings.scaling.resize === 'remote'}
-            clipViewport={vncSettings.scaling.clipToWindow}
-            onClippingViewport={handleClippingViewport}
-            onClipboard={e => setClipboardText(e?.detail.text || '')}
-            onCapabilities={(e?: { detail: { capabilities: any } }) => {
-              setHavePowerCapability(false)
+              rfbOptions={{
+                credentials: {
+                  username: currentCredentials.username || '',
+                  password: currentCredentials.password || '',
+                  target: url?.ws || ''
+                },
+              }}
+              qualityLevel={vncSettings.qualityLevel}
+              compressionLevel={vncSettings.compressionLevel}
+              showDotCursor={vncSettings.showDotCursor}
+              viewOnly={vncSettings.viewOnly}
+              scaleViewport={vncSettings.scaling.resize === 'scale'}
+              resizeSession={vncSettings.scaling.resize === 'remote'}
+              clipViewport={vncSettings.scaling.clipToWindow}
+              onClippingViewport={handleClippingViewport}
+              onClipboard={e => setClipboardText(e?.detail.text || '')}
+              onCapabilities={(e?: { detail: { capabilities: any } }) => {
+                setHavePowerCapability(false)
 
-              if (e?.detail.capabilities.hasOwnProperty('power')) {
-                setHavePowerCapability(e?.detail.capabilities.power || false)
-              }
-            }}
-            onBell={() => {
-              if (!vncSettings.playBell)
-                return
+                if (e?.detail.capabilities.hasOwnProperty('power')) {
+                  setHavePowerCapability(e?.detail.capabilities.power || false)
+                }
+              }}
+              onBell={() => {
+                if (!vncSettings.playBell)
+                  return
 
-              bellSound.play()
-            }}
-          />
+                bellSound.play()
+              }}
+            />
+            { webRTCAudio && <AudioPlayer audioRef={webRTCAudio.audioRef} /> }
           </>
           : <VNCViewSkeleton />
         }

@@ -1,6 +1,6 @@
 import BackendRoute from '../api/BackendRoute'
 import { createDockerDesktopClient } from '@docker/extension-api-client'
-import { Session, SessionCreateData, SessionList, SessionUpdateData } from '../types/session'
+import { Session, SessionCreateData, SessionCredentials, SessionList, SessionUpdateData } from '../types/session'
 import { HttpService } from '@docker/extension-api-client-types/dist/v1'
 
 
@@ -10,7 +10,7 @@ export interface SessionStore {
   api: BackendRoute
   refresh: ()=>Promise<void>
   getSessionByName: (name: string)=>Promise<Session | undefined>
-  add: (data: SessionCreateData)=>Promise<void>
+  add: (data: SessionCreateData)=>Promise<Session>
   update: (data: SessionUpdateData)=>Promise<void>
   delete: (sessionId: string)=>Promise<void>
 }
@@ -19,10 +19,12 @@ const ddClient = createDockerDesktopClient()
 let sessions: SessionList = []
 let listeners: (()=>void)[] = []
 
-export function getSessionStore(backendHttpService?: HttpService): SessionStore | undefined {
+export function getSessionStore(backendHttpService?: HttpService): SessionStore {
   if (!backendHttpService) {
     backendHttpService = ddClient.extension.vm?.service
-    if (!backendHttpService) return
+
+    if (!backendHttpService)
+      throw new Error('BackendHttpService is not initialized')
   }
 
   return {
@@ -51,8 +53,10 @@ export function getSessionStore(backendHttpService?: HttpService): SessionStore 
     },
 
     async add(data: SessionCreateData) {
-      await this.api.post<Session>('', data)
+      const newSession = await this.api.post<Session>('', data)
       await this.refresh()
+
+      return newSession
     },
 
     async update(data: SessionUpdateData) {

@@ -11,47 +11,54 @@ interface UseCachedImageResult {
 
 export interface CachedImageData {
   title: string
-  src: string
   skeleton: string
+  src?: string
 }
 
 
 function useCachedImage(image: CachedImageData): UseCachedImageResult {
-  const { src: imageSrc, skeleton: skeletonSrc } = image
+  const { title, src: imageSrc, skeleton: skeletonSrc } = image
   const [currentSrc, setCurrentSrc] = useState<string>(
-    imageCache[imageSrc] || skeletonSrc
+    imageCache[title] || skeletonSrc
   )
-  const [isLoading, setIsLoading] = useState<boolean>(!imageCache[imageSrc])
+  const [isLoading, setIsLoading] = useState<boolean>(!imageCache[title] && !!imageSrc)
 
   useEffect(() => {
-    if (imageCache[imageSrc]) {
-      setCurrentSrc(imageCache[imageSrc])
+    if (imageCache[title]) {
+      setCurrentSrc(imageCache[title])
       setIsLoading(false)
 
       return
     }
 
-    const loadImage = async () => {
+    const loadImage = async (imageSrc: string) => {
       try {
         const response = await fetch(imageSrc)
+
+        if (!response.ok)
+          return
+
         const blob = await response.blob()
         const objectUrl = URL.createObjectURL(blob)
 
         imageCache[imageSrc] = objectUrl
         setCurrentSrc(objectUrl)
-        setIsLoading(false)
-      } catch (error) {
+      }
+      catch (error) {
         console.error('Error loading image:', error)
+      }
+      finally {
         setIsLoading(false)
       }
     }
 
-    loadImage()
+    if (imageSrc)
+      loadImage(imageSrc)
 
     return () => {
-      if (imageCache[imageSrc] && imageCache[imageSrc].startsWith('blob:')) {
-        URL.revokeObjectURL(imageCache[imageSrc])
-        delete imageCache[imageSrc]
+      if (imageCache[title] && imageCache[title].startsWith('blob:')) {
+        URL.revokeObjectURL(imageCache[title])
+        delete imageCache[title]
       }
     }
   }, [imageSrc, skeletonSrc])
@@ -69,15 +76,18 @@ export default function CachedImage({ image, ...props }: CachedImageProps) {
 
   return (
     <Box
+      { ...props }
       component="img"
       src={currentSrc}
       alt={image.title}
       sx={{
         ...props.sx,
-        transition: 'opacity 0.3s ease-in-out',
         opacity: isLoading ? 0.5 : 1,
+        borderRadius: '16px',
+        userSelect: 'none',
+        WebkitUserDrag: 'none',
+        pointerEvents: 'none',
       }}
-      { ...props }
     />
   )
 }

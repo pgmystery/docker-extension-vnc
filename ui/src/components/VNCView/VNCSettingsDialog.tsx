@@ -1,27 +1,46 @@
-import { Box, Dialog, DialogActions, DialogContent, DialogTitle, Divider, IconButton, Stack } from '@mui/material'
+import {
+  Box,
+  Dialog,
+  DialogActions,
+  DialogContent,
+  DialogTitle,
+  Divider,
+  IconButton,
+  Tab,
+} from '@mui/material'
+import { TabContext, TabList } from '@mui/lab'
 import Button from '@mui/material/Button'
-import QualityLevel from './VNCSettingForms/QualityLevel'
 import { FormEvent, useEffect, useState } from 'react'
 import CloseIcon from '@mui/icons-material/Close'
-import CompressionLevel from './VNCSettingForms/CompressionLevel'
-import ShowDotCursor from './VNCSettingForms/ShowDotCursor'
-import ViewOnly from './VNCSettingForms/ViewOnly'
 import { VNCSettings } from '../../stores/vncSettingsStore'
-import Scaling, { ScalingResize } from './VNCSettingForms/Scaling'
+import { ScalingResize } from './VNCSettingForms/Scaling'
 import { DialogProps } from '@toolpad/core'
-import PlayBellSound from './VNCSettingForms/PlayBellSound'
+import VncSettingTab from './tabs/VncSettingTab'
+import DisplaySettingTab from './tabs/DisplaySettingTab'
+import AudioSettingTab from './tabs/AudioSettingTab'
+import DisplaySettingsIcon from '@mui/icons-material/DisplaySettings'
+import TuneIcon from '@mui/icons-material/Tune'
+import AudiotrackIcon from '@mui/icons-material/Audiotrack'
 
 
-interface VNCSettingsSaveData extends Omit<VNCSettings, 'showDotCursor' | 'viewOnly' | 'scaling' | 'playBell'> {
+interface VNCSettingsSaveData extends Omit<VNCSettings, 'showDotCursor' | 'viewOnly' | 'scaling' | 'playBell' | 'showHiddenContainerWarning' | 'audio'> {
   showDotCursor?: 'on'
   viewOnly?: 'on'
   playBell?: 'on'
+  showHiddenContainerWarning?: 'on'
   'scaling.clipToWindow'?: 'on'
   'scaling.resize': ScalingResize
+  'audio.output.enabled'?: 'on'
+  'audio.output.volume': string
+  'audio.output.muted'?: 'on'
+  'audio.input.enabled'?: 'on'
+  'audio.input.muted'?: 'on'
+  'audio.input.device'?: string
 }
 
 
 export default function VNCSettingsDialog({ open, onClose, payload }: DialogProps<VNCSettings, null | VNCSettings>) {
+  const [selectedTab, setSelectedTab] = useState<string>('0')
   const [reset, setReset] = useState<boolean>(false)
 
   useEffect(() => {
@@ -38,6 +57,19 @@ export default function VNCSettingsDialog({ open, onClose, payload }: DialogProp
       scaling: {
         clipToWindow: !!data['scaling.clipToWindow'],
         resize: data['scaling.resize'],
+      },
+      showHiddenContainerWarning: !!data.showHiddenContainerWarning,
+      audio: {
+        output: {
+          enabled: !!data['audio.output.enabled'],
+          volume: Number(data['audio.output.volume']),
+          muted: !!data['audio.output.muted'],
+        },
+        input: {
+          enabled: !!data['audio.input.enabled'],
+          muted: !!data['audio.input.muted'],
+          device: data['audio.input.device'],
+        },
       },
     })
   }
@@ -79,37 +111,33 @@ export default function VNCSettingsDialog({ open, onClose, payload }: DialogProp
       </IconButton>
       <Divider />
       <DialogContent>
-        <Stack spacing={1}>
-          <QualityLevel
-            initValue={payload.qualityLevel}
+        <TabContext value={selectedTab}>
+          <Box sx={{ borderBottom: 1, borderColor: 'divider' }}>
+            <TabList
+              onChange={(_, newValue) => setSelectedTab(newValue)}
+              aria-label="VNC Settings tabs"
+            >
+              <Tab label="VNC View" value="0" icon={<DisplaySettingsIcon />} iconPosition="start" />
+              <Tab label="Display & Control" value="1" icon={<TuneIcon />} iconPosition="start" />
+              <Tab label="Audio" value="2" icon={<AudiotrackIcon />} iconPosition="start" />
+            </TabList>
+          </Box>
+          <VncSettingTab
+            payload={payload}
             reset={reset}
+            value="0"
           />
-          <Divider />
-          <CompressionLevel
-            initValue={payload.compressionLevel}
+          <DisplaySettingTab
+            payload={payload}
             reset={reset}
+            value="1"
           />
-          <Divider />
-          <ShowDotCursor
-            initValue={payload.showDotCursor}
+          <AudioSettingTab
+            payload={payload}
             reset={reset}
+            value="2"
           />
-          <Divider />
-          <ViewOnly
-            initValue={payload.viewOnly}
-            reset={reset}
-          />
-          <Divider />
-          <PlayBellSound
-            initValue={payload.playBell}
-            reset={reset}
-          />
-          <Divider />
-          <Scaling
-            initValue={payload.scaling}
-            reset={reset}
-          />
-        </Stack>
+        </TabContext>
       </DialogContent>
       <Divider />
       <DialogActions
@@ -118,7 +146,7 @@ export default function VNCSettingsDialog({ open, onClose, payload }: DialogProp
         }}
       >
         <Button variant="outlined" onClick={() => setReset(true)} color="error">Reset</Button>
-        <Box sx={ {flexGrow: 1} }/>
+        <Box sx={{ flexGrow: 1 }} />
         <Button variant="outlined" onClick={() => onClose(null)}>Cancel</Button>
         <Button color="success" type="submit">Save & Reconnect</Button>
       </DialogActions>

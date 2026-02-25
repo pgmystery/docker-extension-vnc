@@ -1,12 +1,9 @@
 import { defineConfig } from "vite";
 import svgr from "vite-plugin-svgr";
-import { nodePolyfills } from 'vite-plugin-node-polyfills';
 
 // https://vitejs.dev/config/
 export default defineConfig({
-  plugins: [svgr(), nodePolyfills({
-    include: ['crypto'],
-  })],
+  plugins: [svgr()],
   base: "./",
   build: {
     outDir: "build",
