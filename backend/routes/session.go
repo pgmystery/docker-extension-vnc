@@ -1,10 +1,11 @@
 package routes
 
 import (
-	"github.com/gofiber/fiber/v2"
-	"github.com/google/uuid"
 	"vnc/crud"
 	"vnc/vnc"
+
+	"github.com/gofiber/fiber/v2"
+	"github.com/google/uuid"
 )
 
 func SessionRouter(apiRouter fiber.Router) {

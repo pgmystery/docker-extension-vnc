@@ -7,6 +7,7 @@ import { serializeConnectionDataRemoteHost } from '../sessionDialog/connections/
 import { serializeConnectionDataDockerContainer } from '../sessionDialog/connections/SessionConnectionDockerContainer'
 import { serializeConnectionDataDockerImage } from '../sessionDialog/connections/SessionConnectionDockerImage'
 import SessionName from './components/SessionName'
+import { VNCExampleSessionName } from '../../../hooks/useExampleContainer'
 
 
 interface SessionDataFormProps {
@@ -79,6 +80,11 @@ export function serializeSessionFormData(formData: FormData) {
 export default function SessionDataForm({ session, onReady, children }: SessionDataFormProps) {
   const [sessionName, setSessionName] = useState<string>(session?.name || '')
   const [connectionReady, setConnectionReady] = useState<boolean>(false)
+  const [isExampleSession, setIsExampleSession] = useState<boolean>(true)
+
+  useEffect(() => {
+    setIsExampleSession(session?.name === VNCExampleSessionName)
+  }, [session])
 
   useEffect(() => {
     if (!onReady)
@@ -90,28 +96,26 @@ export default function SessionDataForm({ session, onReady, children }: SessionD
   return (
     <Stack spacing={1}>
       <TextField type="hidden" name="id" value={session?.id || ''} sx={{display: 'none'}} disabled/>
+
       <SessionName
         name={sessionName}
         setName={setSessionName}
+        readonly={isExampleSession}
       />
+
       <Divider />
+
       <SessionDialogConnection
         setSubmitReady={setConnectionReady}
         connection={session?.connection}
       />
+
       <Divider />
+
       <SessionDialogCredentials
         credentials={session?.credentials}
       />
-      {/*<Divider />*/}
-      {/*<Accordion>*/}
-      {/*  <AccordionSummary expandIcon={<ExpandMoreIcon />} >*/}
-      {/*    <Typography component="span">Advanced Settings</Typography>*/}
-      {/*  </AccordionSummary>*/}
-      {/*  <AccordionDetails>*/}
-      {/*    <SessionExtraDataForm />*/}
-      {/*  </AccordionDetails>*/}
-      {/*</Accordion>*/}
+
       { children }
     </Stack>
   )

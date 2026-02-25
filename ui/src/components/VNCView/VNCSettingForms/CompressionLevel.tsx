@@ -9,7 +9,7 @@ export const CompressionLevelRange = {
 }
 
 interface CompressionLevelProps {
-  initValue: number
+  initValue?: number
   reset: boolean
 }
 

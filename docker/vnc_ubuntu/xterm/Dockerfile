@@ -1,37 +1,23 @@
-FROM ubuntu:24.04
+ARG BASE_IMAGE="pgmystery/vnc-ubuntu-base:core"
+FROM ${BASE_IMAGE}
 
-# Avoid warnings by switching to noninteractive for the build process
-ENV DEBIAN_FRONTEND=noninteractive
+USER root
 
-ENV VNC_PASSWORD="foobar"
-# Set display resolution (change as needed)
-ENV RESOLUTION=640x480
-# Set port of VNC Server
-ENV PORT=5901
+# Copy config files
+USER vncuser
+COPY --chown=vncuser:vncuser ./config/root/ /home/vncuser/
 
+# Install packages and fix permissions in one layer
+USER root
 RUN apt-get update && apt-get install -y --no-install-recommends \
-    xterm \
-    tightvncpasswd \
-    tigervnc-standalone-server \
+    xterm fluxbox \
+    # Fix line endings and permissions for fluxbox startup \
+    && sed -i 's/\r$//' /home/vncuser/.fluxbox/startup && \
+    chmod +x /home/vncuser/.fluxbox/startup \
+    # Cleanup \
     && apt-get clean && rm -rf /var/lib/apt/lists/* /tmp/* /var/tmp/*
 
-# Create .vnc directory
-RUN mkdir /root/.vnc
+USER vncuser
 
-# Create an .Xauthority file
-RUN touch /root/.Xauthority
-
-# Copy .Xdefaults file
-COPY ./config/root/ /root/
-
-# Expose VNC port
-EXPOSE $PORT
-
-# Set the working directory in the container
-WORKDIR /app
-
-# Copy a script to start the VNC server
-COPY start-vnc.sh start-vnc.sh
-RUN chmod +x start-vnc.sh
-
-ENTRYPOINT ["bash", "./start-vnc.sh"]
+# Set session command
+CMD ["startfluxbox"]

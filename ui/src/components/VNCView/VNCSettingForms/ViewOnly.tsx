@@ -1,15 +1,8 @@
-import CheckboxSetting from './base/CheckboxSetting'
-
+import CheckboxSetting, { CheckboxSettingProps } from './base/CheckboxSetting'
 
 export const ViewOnlyDefault = false
 
-interface ViewOnlyProps {
-  initValue?: boolean
-  reset: boolean
-}
-
-
-export default function ViewOnly({ initValue, reset }: ViewOnlyProps) {
+export default function ViewOnly({ initValue, reset }: CheckboxSettingProps) {
   return (
     <CheckboxSetting initValue={initValue} reset={reset} name="viewOnly" resetValue={ViewOnlyDefault}>
       View only mode

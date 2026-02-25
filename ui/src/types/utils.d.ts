@@ -16,3 +16,7 @@ export type NumberRange<F extends number, T extends number> = Exclude<Enumerate<
 
 type AbstractConstructorHelper<T> = (new (...args: any) => { [x: string]: any; }) & T;
 export type AbstractConstructorParameters<T> = ConstructorParameters<AbstractConstructorHelper<T>>;
+
+
+type Omit<T, K extends keyof T> = Pick<T, Exclude<keyof T, K>>
+export type PartialBy<T, K extends keyof T> = Omit<T, K> & Partial<Pick<T, K>>

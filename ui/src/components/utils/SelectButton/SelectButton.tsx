@@ -17,7 +17,6 @@ import { isFragment } from 'react-is'
 import SelectButtonItem, { SelectButtonItemProps } from './SelectButtonItem'
 import { SelectChangeEvent } from '@mui/material/Select/SelectInput'
 
-
 interface SelectButtonProps extends Omit<ButtonGroupProps, 'onChange'> {
   children?: ReactElement<SelectButtonItemProps, typeof SelectButtonItem> | ReactElement<SelectButtonItemProps, typeof SelectButtonItem>[]
   onChange?: (event: SelectChangeEvent, child: React.ReactNode)=>void
@@ -25,6 +24,7 @@ interface SelectButtonProps extends Omit<ButtonGroupProps, 'onChange'> {
   selectValue?: string
   tooltip?: string | ReactElement
   tooltipPlacement?: 'top' | 'bottom' | 'left' | 'right'
+  loading?: boolean
 }
 
 export default function SelectButton(props: SelectButtonProps) {
@@ -136,19 +136,26 @@ export default function SelectButton(props: SelectButtonProps) {
     setOpen(false)
   }
 
+  const selectedItem = items?.[selected]
+  const buttonGroupColor = selectedItem?.props?.color ?? props.color
+  const endIcon = selectedItem?.props?.endIcon ?? props.endIcon
+
   return (
     <>
       <Tooltip title={tooltip} placement={props.tooltipPlacement}>
         <ButtonGroup
           { ...props }
+          color={ buttonGroupColor}
           onChange={ undefined }
           ref={ anchorRef }
+          disabled={ props.loading || props.disabled}
         >
           <Button
-            endIcon={ props.endIcon }
+            endIcon={ endIcon }
             onClick={ handleClick }
+            loading={props.loading}
           >
-            { !(items) || items[selected].props.children || <Box/> }
+            { selectedItem?.props.children ?? <Box/> }
           </Button>
           <Button
             size="small"

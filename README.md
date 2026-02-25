@@ -63,6 +63,14 @@ Spin up clean browser instances in seconds for testing login flows, UI layouts, 
 
     💡 Use multiple containers for parallel testing.
 
+#### Audio support
+
+| **Component**                 | **Role**  | **Resilience Strategy**                                              |
+|-------------------------------| --------- | -------------------------------------------------------------------- |
+| **FFmpeg**                    | Source    | Runs in an **immortal background loop** inside the target container. |
+| **MediaMTX**                  | Proxy     | Acts as an **SRT Caller**, proactively reaching out to FFmpeg.       |
+| **Electron / Docker Desktop** | Client    | Uses **Exponential Backoff** to wait for the stream to be ready.     |
+| **Networking**                | Transport | Forced **ICE-over-TCP** to ensure stability over Docker's bridge.    |
 
 ### 🤖 Selenium Testing
 
