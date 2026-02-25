@@ -16,6 +16,7 @@ A [Docker Desktop Extension](https://www.docker.com/products/extensions/) that a
     - [Manual Installation](#-manual-installation)
 - [Usage](#-usage)
     - [Try the Example Container](#-try-the-example-container)
+    - [Audio Support (Input & Output)](#-audio-support-input--output)
     - [Working with Sessions](#-working-with-sessions)
         - [Connect to a Docker Container](#-connect-to-a-docker-container)
         - [Run from a Docker Image](#-run-from-a-docker-image)
@@ -62,15 +63,6 @@ And many more...
 Spin up clean browser instances in seconds for testing login flows, UI layouts, or performance.
 
     💡 Use multiple containers for parallel testing.
-
-#### Audio support
-
-| **Component**                 | **Role**  | **Resilience Strategy**                                              |
-|-------------------------------| --------- | -------------------------------------------------------------------- |
-| **FFmpeg**                    | Source    | Runs in an **immortal background loop** inside the target container. |
-| **MediaMTX**                  | Proxy     | Acts as an **SRT Caller**, proactively reaching out to FFmpeg.       |
-| **Electron / Docker Desktop** | Client    | Uses **Exponential Backoff** to wait for the stream to be ready.     |
-| **Networking**                | Transport | Forced **ICE-over-TCP** to ensure stability over Docker's bridge.    |
 
 ### 🤖 Selenium Testing
 
@@ -141,6 +133,21 @@ docker extension install pgmystery/docker-extension-vnc:1.4.0
 Click the **"Try example container"** button to launch a prebuilt [Ubuntu VNC image](https://hub.docker.com/r/pgmystery/ubuntu_vnc) with a desktop environment.
 
 ![Dashboard Screenshot](docs/imgs/screenshot4.png)
+
+---
+
+### 🎤 Audio Support (Input & Output)
+
+The extension fully supports real-time, low-latency audio using FFmpeg and PulseAudio under the hood. You can route complete audio output (listening to apps) or audio input (using your browser mic) seamlessly.
+
+| **Component**                 | **Role**  | **Resilience Strategy**                                              |
+|-------------------------------| --------- | -------------------------------------------------------------------- |
+| **FFmpeg**                    | Source    | Runs in an **immortal background loop** inside the target container. |
+| **MediaMTX**                  | Proxy     | Acts as an **SRT Caller**, proactively reaching out to FFmpeg.       |
+| **Electron / Docker Desktop** | Client    | Uses **Exponential Backoff** to wait for the stream to be ready.     |
+| **Networking**                | Transport | Forced **ICE-over-TCP** to ensure stability over Docker's bridge.    |
+
+> 📚 **Check out the [Audio Setup Guide](./docs/audio/README.md)** to learn how to explicitly configure Audio Support on your own custom Docker Images.
 
 ---
 

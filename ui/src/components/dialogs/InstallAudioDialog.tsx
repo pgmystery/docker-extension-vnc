@@ -9,9 +9,9 @@ import {
   DialogActions,
   DialogContent,
   DialogContentText,
-  DialogTitle,
+  DialogTitle, Divider,
   FormControlLabel,
-  FormGroup,
+  FormGroup, IconButton, Link,
   Typography
 } from '@mui/material'
 import TextStreamDialog from './TextStreamDialog'
@@ -19,6 +19,9 @@ import AnsiLogText from '../utils/AnsiLogText'
 import installAudioScript from '../../resources/files/install_audio_support.sh?raw'
 import truncate from '../../utils/truncate'
 import { VNCHandler } from '../../hooks/useVNC'
+import { Alert } from '@mui/lab'
+import eventBus from '../../libs/EventBus'
+import CloseIcon from '@mui/icons-material/Close'
 
 interface InstallAudioDialogProps {
   containerId: string
@@ -113,13 +116,31 @@ export default function InstallAudioDialog({ open, onClose, payload }: DialogPro
   }
 
   return (
-    <Dialog open={open}>
+    <Dialog open={open} onClose={() => handleClose()}>
       <DialogTitle>Install Audio Support</DialogTitle>
+      <IconButton
+        aria-label="close"
+        onClick={() => handleClose()}
+        sx={(theme) => ({
+          position: 'absolute',
+          right: 8,
+          top: 8,
+          color: theme.palette.grey[500],
+        })}
+      >
+        <CloseIcon />
+      </IconButton>
+      <Divider />
       <DialogContent>
         <DialogContentText sx={{ mb: 2 }}>
           Install PulseAudio and FFmpeg to enable audio streaming for container:
           <Typography sx={{fontWeight: 'bold'}}>{truncate(containerId, 16, '')}</Typography>
         </DialogContentText>
+        <Alert severity="info" sx={{ mb: 2 }}>
+          For more information about the audio setup process, please refer to the <Link color="inherit" component="button" onClick={() => {
+          eventBus.emit('openUrl', 'https://github.com/pgmystery/docker-extension-vnc/tree/main/docs/audio')
+        }}>Audio Setup Guide</Link>.
+        </Alert>
         <FormGroup>
           { !installedAudios.output &&
             <FormControlLabel
@@ -135,6 +156,7 @@ export default function InstallAudioDialog({ open, onClose, payload }: DialogPro
           }
         </FormGroup>
       </DialogContent>
+      <Divider />
       <DialogActions>
         <Button variant="outlined" onClick={() => handleClose()}>Cancel</Button>
         <Button

@@ -51,7 +51,7 @@ export default function AudioInput({ initValue, reset }: AudioInputProps) {
         <Tooltip title="Open Audio output Documentation">
           <IconButton
             size="small"
-            onClick={() => eventBus.emit('openUrl', 'https://github.com/pgmystery/docker-extension-vnc/blob/main/docs/audio/README.md')}
+            onClick={() => eventBus.emit('openUrl', 'https://github.com/pgmystery/docker-extension-vnc/tree/main/docs/audio#audio-input-browser-%EF%B8%8F-container')}
             sx={{ ml: 1 }}
           >
             <InfoIcon />
