@@ -1,0 +1,3 @@
+[submodule "ui/libs/selkies"]
+	path = ui/libs/selkies
+	url = git@github.com:selkies-project/selkies.git
