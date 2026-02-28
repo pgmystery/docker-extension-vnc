@@ -1,0 +1,34 @@
+services:
+  webtop:
+    image: linuxserver/webtop:ubuntu-xfce
+    container_name: webtop
+    hostname: webtop
+    environment:
+      - PUID=1000
+      - PGID=1000
+      - TZ=Etc/UTC
+      - SELKIES_MODE=webrtc
+    ports:
+      - "3001:3000"
+      - "3002:3001"
+    restart: "no"
+    networks:
+      - selkies
+
+  proxy:
+    image: pgmystery/proxy_vnc:latest
+    container_name: container-desktop-proxy
+    hostname: container-desktop-proxy
+    ports:
+      - "4433:80/tcp"
+      - "5349:5349/udp"
+    networks:
+      - selkies
+    restart: "no"
+    environment:
+      NOVNC_REMOTE_SERVER: "http://localhost"
+      SELKIES_WS_URL: "webtop:3000"
+      SELKIES_URL: "webtop:3000"
+
+networks:
+  selkies:

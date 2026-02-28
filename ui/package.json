@@ -19,7 +19,8 @@
     "react": "^18.3.1",
     "react-dom": "^18.3.1",
     "react-is": "^19.2.4",
-    "react-vnc": "^3.2.0"
+    "react-vnc": "^3.2.0",
+    "gst-web-core": "file:libs/selkies/addons/gst-web-core"
   },
   "overrides": {
     "react-vnc": {
@@ -27,7 +28,7 @@
       "react-dom": "^18.3.1"
     },
     "@toolpad/core": {
-      "glob": "^13.0.1"
+      "glob": "^13.0.6"
     }
   },
   "scripts": {
