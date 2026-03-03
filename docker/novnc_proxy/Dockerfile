@@ -1,6 +1,6 @@
-FROM golang:1.26.0-alpine AS mediamtx_builder
+FROM golang:1.25.7-alpine AS mediamtx_builder
 
-ARG MEDIAMTX_VERSION="1.16.2"
+ARG MEDIAMTX_VERSION="1.16.3"
 
 RUN wget https://github.com/bluenviron/mediamtx/archive/refs/tags/v$MEDIAMTX_VERSION.zip
 RUN unzip v$MEDIAMTX_VERSION.zip
