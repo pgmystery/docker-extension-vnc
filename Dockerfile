@@ -28,7 +28,7 @@ COPY ui /ui
 RUN npm run build
 
 FROM alpine:3.23.3
-LABEL org.opencontainers.image.title="VNC Viewer" \
+LABEL org.opencontainers.image.title="Container Desktop" \
     org.opencontainers.image.description="A Docker Desktop Extension that enables you to connect to VNC servers running inside Docker containers or on remote hosts — directly from Docker Desktop." \
     org.opencontainers.image.vendor="pgmystery" \
     com.docker.desktop.extension.api.version=">= 0.3.4" \
