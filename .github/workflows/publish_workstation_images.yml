@@ -41,8 +41,6 @@ jobs:
           labels: |
             pgmystery.vnc.extension.audio.output=true
             pgmystery.vnc.extension.audio.input=true
-          build-args: |
-            BASE_IMAGE=pgmystery/ubuntu_vnc:xfce
 
 #  build_python:
 #    name: Build and Push Python Workstation
