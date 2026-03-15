@@ -8,6 +8,11 @@ if [[ -z "${NOVNC_REMOTE_SERVER}" ]]; then
   exit 1
 fi
 
+#if [[ -n "${MTX_PATHS_VNC_SOURCE}" || "${VNC_EXTENSION_AUDIO_INPUT}" == "true" || "${VNC_EXTENSION_AUDIO_OUTPUT}" == "true" ]]; then
+#  echo "▶️ Starting MediaMTX Server..."
+#  /mediamtx /mediamtx.yml &
+#fi
+
 envsubst '${SELKIES_URL} ${SELKIES_WS_URL}' < /etc/nginx/nginx.conf.template > /etc/nginx/nginx.conf
 
 exec /usr/bin/supervisord -n -c /etc/supervisor/conf.d/supervisord.conf

@@ -14,7 +14,7 @@
     "@mui/material": "^6.5.0",
     "@toolpad/core": "^0.13.0",
     "ansi_up": "^6.0.6",
-    "dompurify": "^3.3.1",
+    "dompurify": "^3.3.3",
     "filesize": "^11.0.13",
     "react": "^18.3.1",
     "react-dom": "^18.3.1",
@@ -37,8 +37,8 @@
   },
   "devDependencies": {
     "@docker/extension-api-client-types": "0.4.2",
-    "@types/dompurify": "^3.0.5",
-    "@types/node": "^24.10.1",
+    "@types/dompurify": "^3.2.0",
+    "@types/node": "^25.5.0",
     "@types/react": "^18.3.1",
     "@types/react-dom": "^18.3.1",
     "@types/react-is": "^19.2.0",
@@ -47,9 +47,9 @@
     "gulp-cli": "^3.1.0",
     "gulp-markdown": "^8.0.0",
     "gulp-rename": "^2.1.0",
-    "marked": "^17.0.1",
+    "marked": "^17.0.4",
     "typescript": "^5.9.3",
-    "vite": "^7.3.1",
+    "vite": "^8.0.0",
     "vite-plugin-svgr": "^4.5.0"
   }
 }

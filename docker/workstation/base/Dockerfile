@@ -34,18 +34,27 @@ RUN wget -qO- https://packages.microsoft.com/keys/microsoft.asc | gpg --dearmor 
     && apt-get update && apt-get install -y code \
     && apt-get clean && rm -rf /var/lib/apt/lists/*
 
-# Install Google Chrome and additional libraries for VS Code/Electron
-RUN wget -q https://dl.google.com/linux/direct/google-chrome-stable_current_amd64.deb \
-    && apt-get update && apt-get install -y ./google-chrome-stable_current_amd64.deb \
-    libgbm1 \
-    libasound2t64 \
-    libnss3 \
-    libxss1 \
-    libxtst6 \
-    libcanberra-gtk-module \
-    libcanberra-gtk3-module \
-    && rm google-chrome-stable_current_amd64.deb \
-    && apt-get clean && rm -rf /var/lib/apt/lists/*
+ARG TARGETARCH
+
+# Install browser and additional libraries for VS Code/Electron
+RUN set -eux; \
+    apt-get update; \
+    apt-get install -y --no-install-recommends \
+      libgbm1 \
+      libasound2t64 \
+      libnss3 \
+      libxss1 \
+      libxtst6 \
+      libcanberra-gtk-module \
+      libcanberra-gtk3-module; \
+    if [ "$TARGETARCH" = "amd64" ]; then \
+      wget -q https://dl.google.com/linux/direct/google-chrome-stable_current_amd64.deb; \
+      apt-get install -y ./google-chrome-stable_current_amd64.deb; \
+      rm -f google-chrome-stable_current_amd64.deb; \
+    elif [ "$TARGETARCH" = "arm64" ]; then \
+      apt-get install -y chromium-browser || apt-get install -y chromium; \
+    fi; \
+    apt-get clean && rm -rf /var/lib/apt/lists/*
 
 # Ensure vncuser exists
 RUN id -u vncuser >/dev/null 2>&1 || (useradd -m -s /bin/bash vncuser && echo "vncuser ALL=(ALL) NOPASSWD:ALL" > /etc/sudoers.d/vncuser)
@@ -53,12 +62,18 @@ RUN id -u vncuser >/dev/null 2>&1 || (useradd -m -s /bin/bash vncuser && echo "v
 # Suppress VS Code WSL prompt and fix startup
 ENV DONT_PROMPT_WSL_INSTALL=1
 
-# Create a wrapper for VS Code and Google Chrome to always use recommended flags in Docker
+# Create a wrapper for VS Code and browser to always use recommended flags in Docker
 RUN mv /usr/bin/code /usr/bin/code.real && \
     echo '#!/bin/bash\n/usr/bin/code.real --no-sandbox --disable-gpu --user-data-dir=/home/vncuser/.config/Code "$@"' > /usr/local/bin/code && \
     chmod +x /usr/local/bin/code
 
-RUN echo '#!/bin/bash\n/usr/bin/google-chrome-stable --no-sandbox --disable-gpu --disable-dev-shm-usage "$@"' > /usr/local/bin/google-chrome && \
+RUN if [ -x /usr/bin/google-chrome-stable ]; then \
+      echo '#!/bin/bash\n/usr/bin/google-chrome-stable --no-sandbox --disable-gpu --disable-dev-shm-usage "$@"' > /usr/local/bin/google-chrome; \
+    elif [ -x /usr/bin/chromium-browser ]; then \
+      echo '#!/bin/bash\n/usr/bin/chromium-browser --no-sandbox --disable-gpu --disable-dev-shm-usage "$@"' > /usr/local/bin/google-chrome; \
+    elif [ -x /usr/bin/chromium ]; then \
+      echo '#!/bin/bash\n/usr/bin/chromium --no-sandbox --disable-gpu --disable-dev-shm-usage "$@"' > /usr/local/bin/google-chrome; \
+    fi && \
     chmod +x /usr/local/bin/google-chrome
 
 # Update desktop entries to use wrappers
@@ -83,11 +98,11 @@ RUN mkdir -p /home/vncuser/.config/xfce4 && \
 
 # Fix permissions for vncuser and add desktop shortcuts
 RUN mkdir -p /home/vncuser/.config /home/vncuser/Desktop && \
-    # Create desktop shortcuts by copying from /usr/share/applications \
     if [ -f /usr/share/applications/code.desktop ]; then cp /usr/share/applications/code.desktop /home/vncuser/Desktop/; fi && \
     if [ -f /usr/share/applications/google-chrome.desktop ]; then cp /usr/share/applications/google-chrome.desktop /home/vncuser/Desktop/; fi && \
+    if [ -f /usr/share/applications/chromium-browser.desktop ]; then cp /usr/share/applications/chromium-browser.desktop /home/vncuser/Desktop/; fi && \
+    if [ -f /usr/share/applications/chromium.desktop ]; then cp /usr/share/applications/chromium.desktop /home/vncuser/Desktop/; fi && \
     if [ -f /usr/share/applications/xfce4-terminal.desktop ]; then cp /usr/share/applications/xfce4-terminal.desktop /home/vncuser/Desktop/; fi && \
-    # Make them executable (required for XFCE desktop) \
     chmod +x /home/vncuser/Desktop/*.desktop || true && \
     chown -R vncuser:vncuser /home/vncuser
 
