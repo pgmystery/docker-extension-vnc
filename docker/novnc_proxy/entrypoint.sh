@@ -7,7 +7,7 @@ if [[ -z "${NOVNC_REMOTE_SERVER}" ]]; then
   exit 1
 fi
 
-if [[ -n "${MTX_PATHS_VNC_SOURCE}" || "${VNC_EXTENSION_AUDIO_INPUT}" == "true" ]]; then
+if [[ -n "${MTX_PATHS_VNC_SOURCE}" || "${VNC_EXTENSION_AUDIO_INPUT}" == "true" || "${VNC_EXTENSION_AUDIO_OUTPUT}" == "true" ]]; then
   echo "▶️ Starting MediaMTX Server..."
   /mediamtx /mediamtx.yml &
 fi
