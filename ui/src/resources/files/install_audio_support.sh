@@ -57,7 +57,7 @@ XDG_RUNTIME_DIR="${XDG_RUNTIME_DIR:-/tmp/runtime}"
 PULSE_RUNTIME_PATH="${XDG_RUNTIME_DIR}/pulse"
 PA_SOCKET="${PULSE_RUNTIME_PATH}/native"
 
-SCRIPT_VERSION="2.1.0"
+SCRIPT_VERSION="1.0.0"
 
 # =============================================================================
 # Logging
