@@ -9,10 +9,11 @@ interface DockerImageSearchTagInputProps {
   tag: string,
   setTag: (tag: string)=>void
   onTagIsValidChange?: (isValid: boolean)=>void
+  readonly?: boolean
 }
 
 
-export default function DockerImageSearchTagInput({ repository, tag, setTag, onTagIsValidChange }: DockerImageSearchTagInputProps) {
+export default function DockerImageSearchTagInput({ repository, tag, setTag, onTagIsValidChange, readonly }: DockerImageSearchTagInputProps) {
   const [isValidTag, setIsValidTag] = useState<boolean>(false)
   const dockerRepository = useDockerRepository(repository)
   const [tags, setTags] = useState<string[]>([])
@@ -70,7 +71,7 @@ export default function DockerImageSearchTagInput({ repository, tag, setTag, onT
       options={tags}
       loading={isSearching}
       onInputChange={handleInputChange}
-      disabled={!repository}
+      disabled={!repository || readonly}
       inputValue={tag}
       isSearching={ isSearching }
       label="Select a Image-Tag*"

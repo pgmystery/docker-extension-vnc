@@ -3,14 +3,15 @@ package main
 import (
 	"flag"
 	"fmt"
-	"github.com/gofiber/fiber/v2"
-	fiberLogger "github.com/gofiber/fiber/v2/middleware/logger"
-	"github.com/joho/godotenv"
-	"github.com/sirupsen/logrus"
 	"net"
 	"os"
 	"vnc/database"
 	"vnc/vnc"
+
+	"github.com/gofiber/fiber/v2"
+	fiberLogger "github.com/gofiber/fiber/v2/middleware/logger"
+	"github.com/joho/godotenv"
+	"github.com/sirupsen/logrus"
 )
 
 var logger = logrus.New()

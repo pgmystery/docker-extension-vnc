@@ -2,7 +2,8 @@ import React, { useContext, useEffect, useMemo, useState } from 'react'
 import { BackdropContext } from './BackdropContext'
 import { BackdropProps } from '@mui/material/Backdrop/Backdrop'
 import { Backdrop, CircularProgress } from '@mui/material'
-import * as crypto from 'node:crypto'
+import { BackdropHandlerActionType } from './useBackdropHandler'
+import { randomId } from '../../utils/randomId'
 
 
 export type BackdropComponentBackdropProps = Omit<BackdropProps, 'open'>
@@ -21,7 +22,7 @@ interface Backdrop {
 
 
 export default function useBackdrop(backdropProps: BackdropComponentBackdropProps = {}): UseBackdropHook {
-  const id = useMemo(() => crypto.randomBytes(20).toString('hex'), [])
+  const id = useMemo(() => randomId(), [])
   const backdropHandlerDispatch = useContext(BackdropContext)
 
   if (backdropHandlerDispatch === null || backdropHandlerDispatch === undefined) {
@@ -33,7 +34,7 @@ export default function useBackdrop(backdropProps: BackdropComponentBackdropProp
   useEffect(() => {
     return () => {
       backdropHandlerDispatch({
-        type: 'UNMOUNT',
+        type: BackdropHandlerActionType.UNMOUNT,
         id,
       })
     }
@@ -41,7 +42,7 @@ export default function useBackdrop(backdropProps: BackdropComponentBackdropProp
 
   useEffect(() => {
     backdropHandlerDispatch({
-      type: 'SET',
+      type: BackdropHandlerActionType.SET,
       id,
       backdrops: backdrops.map(backdrop => backdrop.props),
     })
@@ -49,8 +50,8 @@ export default function useBackdrop(backdropProps: BackdropComponentBackdropProp
 
   return useMemo(() => {
     return {
-      open: function<T> (asyncCallback: ()=>Promise<T>, currentBackdropProps: BackdropComponentBackdropProps = {}) {
-        const backdropId = crypto.randomBytes(20).toString('hex')
+      open: function <T>(asyncCallback: () => Promise<T>, currentBackdropProps: BackdropComponentBackdropProps = {}) {
+        const backdropId = randomId()
         const backdrop: Backdrop = {
           id: backdropId,
           props: {
@@ -74,7 +75,7 @@ export default function useBackdrop(backdropProps: BackdropComponentBackdropProp
 
 export function UseBackdropComponent(props: BackdropComponentBackdropProps) {
   return (
-    <Backdrop { ...props } open>
+    <Backdrop {...props} open>
       <CircularProgress />
     </Backdrop>
   )

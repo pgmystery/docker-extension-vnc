@@ -63,6 +63,9 @@ export default class TargetDockerContainer extends Target {
       )
     }
 
+    // Start audio bridge if audio support was previously installed
+    await this.startAudioIfInstalled()
+
     return super.connect(ip, port)
   }
 
@@ -99,6 +102,52 @@ export default class TargetDockerContainer extends Target {
   get optionLabels() {
     return {
       [TARGET_LABEL_STOP_AFTER_DISCONNECT]: this.options?.stopAfterDisconnect?.toString() || 'false',
+    }
+  }
+
+  /**
+   * If audio support is installed in the container, run the runtime startup
+   * script in the background. This is the reliable alternative to init-system
+   * service registration (which doesn't work in standard Docker containers).
+   * Safe to call multiple times – the script kills any stale PulseAudio before
+   * starting a fresh instance.
+   */
+  private async startAudioIfInstalled() {
+    if (!this.dockerContainer) return
+
+    try {
+      const audio = await this.hasAudio()
+
+      if (audio.output || audio.input) {
+        await this.dockerContainer.execBackground(
+          '/usr/local/bin/start-audio-support.sh'
+        )
+      }
+    }
+    catch (err) {
+      // Non-fatal: audio startup failure should not block the VNC connection
+      console.warn('[audio] startAudioIfInstalled failed:', err)
+    }
+  }
+
+  async hasAudio(): Promise<{ output: boolean, input: boolean }> {
+    if (!this.dockerContainer) {
+      return { output: false, input: false };
+    }
+
+    const [outputFile, inputFile] = await Promise.allSettled([
+      this.dockerContainer.fileExists('/etc/.vnc_ext_audio_output'),
+      this.dockerContainer.fileExists('/etc/.vnc_ext_audio_input'),
+    ])
+
+    const outputFileExists = outputFile.status === 'fulfilled' && outputFile.value === true
+    const inputFileExists = inputFile.status === 'fulfilled' && inputFile.value === true
+    const outputEnvVarExists = this.dockerContainer.getEnv(this.config.audioOutputEnvVarName) === 'true'
+    const inputEnvVarExists = this.dockerContainer.getEnv(this.config.audioInputEnvVarName) === 'true'
+
+    return {
+      output: outputFileExists || outputEnvVarExists,
+      input: inputFileExists || inputEnvVarExists,
     }
   }
 }

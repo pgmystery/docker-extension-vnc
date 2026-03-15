@@ -5,10 +5,11 @@ interface SessionNameProps extends Omit<TextFieldProps, 'value'> {
   name: string
   setName: (name: string)=>void
   required?: boolean
+  readonly?: boolean
 }
 
 
-export default function SessionName({ name, setName, required, ...props }: SessionNameProps) {
+export default function SessionName({ name, setName, required, readonly, ...props }: SessionNameProps) {
   return (
     <FormControl>
       <FormLabel required={required === undefined ? true : required}>Session Name</FormLabel>
@@ -19,6 +20,7 @@ export default function SessionName({ name, setName, required, ...props }: Sessi
         onChange={e => setName(e.target.value)}
         required={required === undefined ? true : required}
         autoFocus
+        disabled={readonly}
       />
     </FormControl>
   )

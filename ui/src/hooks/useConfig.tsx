@@ -10,8 +10,16 @@ export interface Config {
   proxyContainerLabelContainerId: string
   proxyContainerLabelTargetIp: string
   proxyContainerLabelTargetPort: string
+  proxyContainerLabelAudioOutput: string
+  proxyContainerLabelAudioInput: string
   proxyContainerLabelConnectionType: string
   proxyContainerPassword: string
+  proxyContainerLocalPortAudioTcp: number
+  proxyContainerLocalPortAudioUdp: number
+  proxyContainerLocalPortAudioSignal: number
+  proxyContainerLocalPortAudioInput: number
+  audioOutputEnvVarName: string
+  audioInputEnvVarName: string
 }
 
 type EnvVarType = string | undefined
@@ -33,8 +41,16 @@ export function loadConfig(): Config {
   const proxyContainerLabelContainerId = import.meta.env.VITE_VNC_PROXY_CONTAINER_LABEL_CONTAINER_ID as EnvVarType
   const proxyContainerLabelTargetIp = import.meta.env.VITE_VNC_PROXY_CONTAINER_LABEL_TARGET_IP as EnvVarType
   const proxyContainerLabelTargetPort = import.meta.env.VITE_VNC_PROXY_CONTAINER_LABEL_TARGET_PORT as EnvVarType
+  const proxyContainerLabelAudioOutput = import.meta.env.VITE_VNC_PROXY_CONTAINER_LABEL_AUDIO_OUTPUT as EnvVarType
+  const proxyContainerLabelAudioInput = import.meta.env.VITE_VNC_PROXY_CONTAINER_LABEL_AUDIO_INPUT as EnvVarType
   const proxyContainerLabelConnectionType = import.meta.env.VITE_VNC_PROXY_CONTAINER_LABEL_CONNECTION_TYPE as EnvVarType
   const proxyContainerPassword = import.meta.env.VITE_VNC_PROXY_CONTAINER_PASSWORD as EnvVarType
+  const proxyContainerLocalPortAudioTcp = Number(import.meta.env.VITE_VNC_PROXY_CONTAINER_LOCAL_PORT_AUDIO_TCP as EnvVarType)
+  const proxyContainerLocalPortAudioUdp = Number(import.meta.env.VITE_VNC_PROXY_CONTAINER_LOCAL_PORT_AUDIO_UDP as EnvVarType)
+  const proxyContainerLocalPortAudioInput = Number(import.meta.env.VITE_VNC_PROXY_CONTAINER_LOCAL_PORT_AUDIO_INPUT as EnvVarType)
+  const proxyContainerLocalPortAudioSignal = Number(import.meta.env.VITE_VNC_PROXY_CONTAINER_LOCAL_PORT_AUDIO_SIGNAL as EnvVarType)
+  const audioOutputEnvVarName = import.meta.env.VITE_VNC_AUDIO_OUTPUT_ENV_VAR_NAME as EnvVarType
+  const audioInputEnvVarName = import.meta.env.VITE_VNC_AUDIO_INPUT_ENV_VAR_NAME as EnvVarType
 
   if (!network)
     throw new Error('the envar "VITE_VNC_CONNECT_DOCKER_NETWORK" is not set')
@@ -63,11 +79,35 @@ export function loadConfig(): Config {
   if (!proxyContainerLabelTargetPort)
     throw new Error('the envar "VITE_VNC_PROXY_CONTAINER_LABEL_TARGET_PORT" is not set')
 
+  if (!proxyContainerLabelAudioOutput)
+    throw new Error('the envar "VITE_VNC_PROXY_CONTAINER_LABEL_AUDIO_OUTPUT" is not set')
+
+  if (!proxyContainerLabelAudioInput)
+    throw new Error('the envar "VITE_VNC_PROXY_CONTAINER_LABEL_AUDIO_INPUT" is not set')
+
   if (!proxyContainerLabelConnectionType)
     throw new Error('the envar "VITE_VNC_PROXY_CONTAINER_LABEL_CONNECTION_TYPE" is not set')
 
   if (!proxyContainerPassword)
     throw new Error('the envar "VITE_VNC_PROXY_CONTAINER_PASSWORD" is not set')
+
+  if (isNaN(proxyContainerLocalPortAudioTcp) || proxyContainerLocalPortAudioTcp === 0)
+    throw new Error('the envar "VITE_VNC_PROXY_CONTAINER_LOCAL_PORT_AUDIO_TCP" is not set or is not a number')
+
+  if (isNaN(proxyContainerLocalPortAudioUdp) || proxyContainerLocalPortAudioUdp === 0)
+    throw new Error('the envar "VITE_VNC_PROXY_CONTAINER_LOCAL_PORT_AUDIO_UDP" is not set or is not a number')
+
+  if (isNaN(proxyContainerLocalPortAudioInput) || proxyContainerLocalPortAudioInput === 0)
+    throw new Error('the envar "VITE_VNC_PROXY_CONTAINER_LOCAL_PORT_AUDIO_INPUT" is not set or is not a number')
+
+  if (isNaN(proxyContainerLocalPortAudioSignal) || proxyContainerLocalPortAudioSignal === 0)
+    throw new Error('the envar "VITE_VNC_PROXY_CONTAINER_LOCAL_PORT_AUDIO_SIGNAL" is not set or is not a number')
+
+  if (!audioOutputEnvVarName)
+    throw new Error('the envar "VITE_VNC_AUDIO_OUTPUT_ENV_VAR_NAME" is not set')
+
+  if (!audioInputEnvVarName)
+    throw new Error('the envar "VITE_VNC_AUDIO_INPUT_ENV_VAR_NAME" is not set')
 
   return {
     network,
@@ -79,7 +119,15 @@ export function loadConfig(): Config {
     proxyContainerLabelContainerId,
     proxyContainerLabelTargetIp,
     proxyContainerLabelTargetPort,
+    proxyContainerLabelAudioOutput,
+    proxyContainerLabelAudioInput,
     proxyContainerLabelConnectionType,
     proxyContainerPassword,
+    proxyContainerLocalPortAudioInput,
+    proxyContainerLocalPortAudioTcp,
+    proxyContainerLocalPortAudioUdp,
+    proxyContainerLocalPortAudioSignal,
+    audioOutputEnvVarName,
+    audioInputEnvVarName,
   }
 }

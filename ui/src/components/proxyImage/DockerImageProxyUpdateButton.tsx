@@ -43,9 +43,9 @@ export default function DockerImageProxyUpdateButton() {
              variant="extended"
              color="warning"
              sx={{
-               position: 'absolute',
-               bottom: 0,
-               right: 0,
+               position: 'fixed',
+               bottom: '10px',
+               right: '10px',
              }}
              onClick={pullProxyImage}
            >

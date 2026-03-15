@@ -13,7 +13,7 @@ export class MultipleContainersFoundError extends Error {
     this.containers = containers
   }
 }
-export class ContainerAlreadyExistError extends Error {}
+export class ContainerAlreadyExistError extends Error { }
 export class ContainerDontExistError extends Error {
   constructor() {
     super('Container don\'t exist error')
@@ -97,7 +97,7 @@ export default class Container {
     ])
   }
 
-  async delete({force}={force: false}) {
+  async delete({ force } = { force: false }) {
     if (!this.container) {
       const containerExist = await this.get()
 
@@ -121,20 +121,6 @@ export default class Container {
     if (!this.exist()) throw new ContainerDontExistError()
   }
 
-  private async waitForContainer(callback: ()=>Promise<boolean>, waitTime = 10000, maxWaitCounter = 10) {
-    let waitCounter = maxWaitCounter
-
-    while (waitCounter > 0) {
-      const check = await callback()
-      if (check) break
-
-      await new Promise(r => setTimeout(r, waitTime / 10))
-      waitCounter--
-    }
-
-    if (waitCounter === 0) throw new Error('Wait time exceeded')
-  }
-
   getLabel(labelKey: string) {
     this.withContainer()
 
@@ -146,5 +132,65 @@ export default class Container {
       )
 
     return labelValue
+  }
+
+  getEnv(envVarName: string) {
+    this.withContainer()
+
+    try {
+      return this.container?.Config.Env?.find(envVar => envVar.startsWith(envVarName + '='))?.split('=')[1]
+    }
+    catch { }
+  }
+
+  async fileExists(filePath: string) {
+    if (!this.container) {
+      const containerExist = await this.get()
+
+      if (!containerExist || !this.container) throw new ContainerDontExistError()
+    }
+
+    await this.docker.cli.exec('exec', [
+      this.container.Id,
+      'sh', '-c', `\"test -f '${filePath}'\"`
+    ])
+
+    return true
+  }
+
+  /**
+   * Run a command inside the container without waiting for it to finish.
+   * The process is detached via `nohup` so it survives the exec session.
+   */
+  async execBackground(command: string, args: string[] = []) {
+    if (!this.container) {
+      const containerExist = await this.get()
+
+      if (!containerExist || !this.container) throw new ContainerDontExistError()
+    }
+
+    const fullCmd = [command, ...args].join(' ')
+
+    // nohup + & detaches the process; sh -c wraps it for portability
+    await this.docker.cli.exec('exec', [
+      '--detach',
+      this.container.Id,
+      'sh', '-c', `"nohup ${fullCmd} >/dev/null 2>&1 &"`
+    ])
+  }
+
+
+  private async waitForContainer(callback: () => Promise<boolean>, waitTime = 10000, maxWaitCounter = 10) {
+    let waitCounter = maxWaitCounter
+
+    while (waitCounter > 0) {
+      const check = await callback()
+      if (check) break
+
+      await new Promise(r => setTimeout(r, waitTime / 10))
+      waitCounter--
+    }
+
+    if (waitCounter === 0) throw new Error('Wait time exceeded')
   }
 }

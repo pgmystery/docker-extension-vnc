@@ -1,0 +1,4 @@
+[app] (name=xterm) (class=XTerm)
+  [Maximized] {yes}
+  [Deco] {NONE}
+[end]

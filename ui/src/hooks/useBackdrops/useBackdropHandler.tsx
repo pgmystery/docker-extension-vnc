@@ -1,15 +1,19 @@
 import { useReducer } from 'react'
 import { BackdropComponentBackdropProps } from './useBackdrop'
 
+export enum BackdropHandlerActionType {
+  SET,
+  UNMOUNT,
+}
 
 interface BackdropHandlerActionSet {
-  type: 'SET'
+  type: BackdropHandlerActionType.SET
   id: string
   backdrops: BackdropComponentBackdropProps[]
 }
 
 interface BackdropHandlerActionUnmount {
-  type: 'UNMOUNT'
+  type: BackdropHandlerActionType.UNMOUNT
   id: string
 }
 
@@ -22,13 +26,13 @@ interface BackdropHandler {
 
 function backdropHandlerReducer(backdrops: BackdropHandler, action: BackdropHandlerAction) {
   switch (action.type) {
-    case 'SET':
+    case BackdropHandlerActionType.SET:
       return {
         ...backdrops,
         [action.id]: action.backdrops,
       }
 
-    case 'UNMOUNT':
+    case BackdropHandlerActionType.UNMOUNT:
       const newBackdrops = {...backdrops}
       delete newBackdrops[action.id]
 

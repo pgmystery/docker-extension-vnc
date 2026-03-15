@@ -1,10 +1,11 @@
 package routes
 
 import (
-	"github.com/gofiber/fiber/v2"
-	"github.com/google/uuid"
 	"vnc/crud"
 	"vnc/vnc"
+
+	"github.com/gofiber/fiber/v2"
+	"github.com/google/uuid"
 )
 
 func SessionRouter(apiRouter fiber.Router) {
@@ -57,7 +58,12 @@ func createSession(ctx *fiber.Ctx) error {
 		return fiber.NewError(fiber.StatusBadRequest, err.Error())
 	}
 
-	session, err := crud.CreateSession(requestSession)
+	sessionModel, err := crud.CreateSession(requestSession)
+	if err != nil {
+		return fiber.NewError(fiber.StatusInternalServerError, err.Error())
+	}
+
+	session, err := crud.GetSession(sessionModel.ID)
 	if err != nil {
 		return fiber.NewError(fiber.StatusInternalServerError, err.Error())
 	}

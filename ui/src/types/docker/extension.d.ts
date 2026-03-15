@@ -82,6 +82,27 @@ export interface DockerListContainersFilters {
   volume?: string[]
 }
 
+export interface DockerContainerUnsafe {
+  Command: string;
+  CreatedAt: string;
+  ID: string;
+  Image: string;
+  Labels: string;
+  LocalVolumes: string;
+  Mounts: string;
+  Names: string;
+  Networks: string;
+  Platform: {
+    architecture: string;
+    os: string;
+  };
+  Ports: string;
+  RunningFor: string;
+  Size: string;
+  State: string;
+  Status: string;
+}
+
 export interface DockerVolumeInspectData {
   CreatedAt: string
   Driver: string

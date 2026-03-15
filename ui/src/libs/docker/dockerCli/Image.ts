@@ -14,11 +14,25 @@ export default class DockerCliImage extends DockerCliExec {
   }
 
   async inspect(...images: string[]) {
-    const execResult = await this.exec('inspect', {
+    const execResult = await super.exec('inspect', {
+      '--type': '"image"',
       '--format': '"json"',
     }, ...images)
 
     return execResult.parseJsonObject() as DockerImageInfo[]
+  }
+
+  async getImageLabel(image: string, labelKey: string) {
+    return (await this.getImageLabels(image))?.[labelKey]
+  }
+
+  async getImageLabels(image: string) {
+    const [imageInfo] = await this.inspect(image)
+
+    if (!imageInfo)
+      return
+
+    return imageInfo.Config.Labels
   }
 
   exec(cmd: string | string[], options?: CliExecOptions, ...args: string[]): Promise<ExecResult> {

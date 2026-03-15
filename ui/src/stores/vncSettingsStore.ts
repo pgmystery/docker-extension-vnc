@@ -7,6 +7,9 @@ import { HttpService } from '@docker/extension-api-client-types/dist/v1'
 import BackendRoute from '../api/BackendRoute'
 import { ScalingDefault, ScalingSettings } from '../components/VNCView/VNCSettingForms/Scaling'
 import { PlayBellSoundDefault } from '../components/VNCView/VNCSettingForms/PlayBellSound'
+import { ShowHiddenContainerWarningDefault } from '../components/VNCView/VNCSettingForms/ShowWarnings'
+import { AudioOutputDefault, AudioOutputSettings } from '../components/VNCView/VNCSettingForms/AudioOutput'
+import { AudioInputDefault, AudioInputSettings } from '../components/VNCView/VNCSettingForms/AudioInput'
 
 
 export interface VNCSettings {
@@ -16,6 +19,11 @@ export interface VNCSettings {
   compressionLevel: number
   showDotCursor: boolean
   scaling: ScalingSettings
+  showHiddenContainerWarning: boolean
+  audio: {
+    output: AudioOutputSettings
+    input: AudioInputSettings
+  }
 }
 
 interface VNCSettingsStoreWithoutBackend {
@@ -29,7 +37,7 @@ interface VNCSettingsStore extends VNCSettingsStoreWithoutBackend {
   set: (settings: VNCSettings) => Promise<void>
   reset: ()=>Promise<void>
   api: BackendRoute
-  load: ()=>Promise<void>
+  load: ()=>Promise<VNCSettings>
   save: ()=>Promise<void>
 }
 
@@ -41,7 +49,13 @@ const defaultSettings: VNCSettings = {
   viewOnly: ViewOnlyDefault,
   scaling: ScalingDefault,
   playBell: PlayBellSoundDefault,
+  showHiddenContainerWarning: ShowHiddenContainerWarningDefault,
+  audio: {
+    output: AudioOutputDefault.default,
+    input: AudioInputDefault,
+  }
 }
+
 const ddClient = createDockerDesktopClient()
 let vncSettings: VNCSettings = defaultSettings
 let listeners: (()=>void)[] = []
@@ -89,10 +103,14 @@ export function getVNCSettingsStore(backendHttpService?: HttpService): VNCSettin
       vncSettings = await this.api.get<VNCSettings>()
 
       emitChange()
+
+      return vncSettings
     },
 
-    save() {
-      return this.api.post<void>('', vncSettings)
+    async save() {
+      await this.api.post<void>('', vncSettings)
+
+      emitChange()
     },
 
     async set(newVNCSettings: VNCSettings) {

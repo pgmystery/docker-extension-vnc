@@ -2,7 +2,7 @@ import { ChangeEvent, ReactNode, useEffect, useState } from 'react'
 import { Checkbox, CheckboxProps, FormControl, FormLabel } from '@mui/material'
 
 
-interface CheckBoxSettingProps extends CheckboxProps {
+interface BaseCheckBoxSettingProps extends CheckboxProps {
   initValue?: boolean
   reset: boolean
   name: string
@@ -10,7 +10,9 @@ interface CheckBoxSettingProps extends CheckboxProps {
   children: ReactNode
 }
 
-export default function CheckboxSetting({ initValue, reset, resetValue, children, name, ...props }: CheckBoxSettingProps) {
+export type CheckboxSettingProps = Pick<BaseCheckBoxSettingProps, 'initValue' | 'reset'>
+
+export default function CheckboxSetting({ initValue, reset, resetValue, children, name, ...props }: BaseCheckBoxSettingProps) {
   const [checked, setChecked] = useState<boolean>(initValue === undefined ? resetValue : initValue)
 
   useEffect(() => {

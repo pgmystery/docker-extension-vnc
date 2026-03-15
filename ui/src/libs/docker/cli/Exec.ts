@@ -1,7 +1,7 @@
 import { Docker as DockerClient } from '@docker/extension-api-client-types/dist/v1/docker'
 import { CliExecOptions } from '../../../types/docker/cli'
 import { ObjectValueTypes } from '../../../types/utils'
-import { RawExecResult } from '@docker/extension-api-client-types/dist/v1'
+import { RawExecResult, SpawnOptions } from '@docker/extension-api-client-types/dist/v1'
 
 
 export function isRawExecResult(rawExecResult: RawExecResult): rawExecResult is RawExecResult {
@@ -50,11 +50,13 @@ export default class DockerCliExec {
       cmd = cmd.join(' ')
     }
 
-    return this.client.cli.exec(cmd, [...optionsList, ...args])
+    return this.execCli(cmd, [...optionsList, ...args])
   }
 
-  execCli(cmd: string, args: string[] = []) {
-    return this.client.cli.exec(cmd, args)
+  execCli(cmd: string, args: string[] = [], options?: SpawnOptions) {
+    console.debug(`Executing command: ${cmd} with args: ${args.join(' ')}`)
+
+    return this.client.cli.exec(cmd, args, options)
   }
 
   private returnValueAsString(value: ObjectValueTypes<CliExecOptions>): string | undefined {

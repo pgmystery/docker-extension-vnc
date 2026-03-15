@@ -18,7 +18,7 @@ export default class BackendRoute {
   }
 
   async get<T>(url: string = '', opts?: RequestOpts) {
-    return await this.request<T>({
+    return this.request<T>({
       url,
       method: "GET",
       data: null,
@@ -27,7 +27,7 @@ export default class BackendRoute {
   }
 
   async post<T>(url: string = '', data: any, opts?: RequestOpts) {
-    return await this.request<T>({
+    return this.request<T>({
       url,
       method: "POST",
       data,
@@ -36,7 +36,7 @@ export default class BackendRoute {
   }
 
   async delete<T>(url: string = '', opts?: RequestOpts) {
-    return await this.request<T>({
+    return this.request<T>({
       url,
       method: 'DELETE',
       data: null,

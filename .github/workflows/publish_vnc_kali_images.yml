@@ -1,0 +1,80 @@
+name: Publish VNC Kali Images
+
+on:
+  push:
+    branches:
+      - main
+    paths:
+      - 'docker/vnc_kali/**'
+      - 'docker/vnc_common/**'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  build_base:
+    name: Build and Push VNC Kali Base Image
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out the repo
+        uses: actions/checkout@v4
+
+      - name: Set up QEMU
+        uses: docker/setup-qemu-action@v3
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+
+      - name: Log in to Docker Hub
+        uses: docker/login-action@v3
+        with:
+          username: ${{ secrets.DOCKERHUB_USERNAME }}
+          password: ${{ secrets.DOCKERHUB_ACCESS_TOKEN }}
+
+      - name: Build and push Base Image
+        uses: docker/build-push-action@v6
+        with:
+          context: ./docker
+          platforms: linux/amd64,linux/arm64
+          file: docker/vnc_kali/base/Dockerfile
+          push: true
+          tags: pgmystery/vnc-kali-base:latest
+
+  build_distros:
+    name: Build and Push Distro Images (${{ matrix.distro }})
+    needs: build_base
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        distro: [headless, large]
+    steps:
+      - name: Check out the repo
+        uses: actions/checkout@v4
+
+      - name: Set up QEMU
+        uses: docker/setup-qemu-action@v3
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+
+      - name: Log in to Docker Hub
+        uses: docker/login-action@v3
+        with:
+          username: ${{ secrets.DOCKERHUB_USERNAME }}
+          password: ${{ secrets.DOCKERHUB_ACCESS_TOKEN }}
+
+      - name: Build and push Distro Image
+        uses: docker/build-push-action@v6
+        with:
+          context: ./docker/vnc_kali/${{ matrix.distro }}
+          platforms: linux/amd64,linux/arm64
+          push: true
+          tags: |
+            pgmystery/kali_vnc:${{ matrix.distro }}
+          labels: |
+            pgmystery.vnc.extension.audio.output=${{ matrix.distro != 'headless' && 'true' || 'false' }}
+            pgmystery.vnc.extension.audio.input=${{ matrix.distro != 'headless' && 'true' || 'false' }}
+          build-args: |
+            BASE_IMAGE=pgmystery/vnc-kali-base:latest

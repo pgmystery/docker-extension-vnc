@@ -39,6 +39,7 @@ export default abstract class VNCConnection<T extends ConnectionType> {
     this.config = config || loadConfig()
     this.proxy = proxy || new Proxy(docker, config)
     this.target = target || new Target(docker, config)
+    this.proxy.target = this.target
   }
 
   abstract connect(sessionName: string, data: ConnectionData, labels?: {[key: string]: string}): Promise<boolean>

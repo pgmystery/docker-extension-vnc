@@ -2,6 +2,17 @@
 
 History of all released versions and changes
 
+## v1.4.0
+### Added
+- Added audio output support for specific docker images.
+- Added audio input support (microphones) for specific docker images.
+- Added a warning when connecting to a template container and the container is not getting shown by docker because of the extension settings in docker desktop.
+- Added more docker images to the example container list.
+
+### Changed
+- Remove local react-vnc submodule.
+- Change the whole dashboard with new and more templates to try as docker containers.
+
 ## v1.3.4
 ### Changed
 - Add info buttons for the docker image connection option text-fields.
