@@ -3,12 +3,9 @@ import {
   Checkbox,
   FormControlLabel,
   FormGroup,
-  IconButton,
   Stack,
   TextField,
-  Tooltip
 } from '@mui/material'
-import RefreshIcon from '@mui/icons-material/Refresh'
 import React, { useEffect, useState } from 'react'
 import { DockerDesktopClient } from '@docker/extension-api-client-types/dist/v1'
 import { ContainerInfo } from '../../../../types/docker/extension'
@@ -68,7 +65,7 @@ export default function SessionConnectionDockerContainer({ ddClient, connectionD
 
     const selectedContainer = getContainerByName(selectedContainerName)
 
-    setSelectedContainerPorts(selectedContainer?.Ports?.map(portInfo => portInfo.PrivatePort.toString()) || [])
+    setSelectedContainerPorts([...new Set(selectedContainer?.Ports?.map(portInfo => portInfo.PrivatePort.toString()) || [])])
   }, [selectedContainerName])
 
   useEffect(() => {
