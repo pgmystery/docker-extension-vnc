@@ -3,10 +3,11 @@ package crud
 import (
 	"encoding/json"
 	"errors"
-	"github.com/google/uuid"
 	"vnc/database"
 	"vnc/model"
 	"vnc/model/connections"
+
+	"github.com/google/uuid"
 )
 
 type RequestCreateSession struct {

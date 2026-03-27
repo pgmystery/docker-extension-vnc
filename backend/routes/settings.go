@@ -1,8 +1,9 @@
 package routes
 
 import (
-	"github.com/gofiber/fiber/v2"
 	"vnc/vnc"
+
+	"github.com/gofiber/fiber/v2"
 )
 
 func SettingsRouter(apiRouter fiber.Router) {

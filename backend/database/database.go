@@ -1,13 +1,14 @@
 package database
 
 import (
-	"gorm.io/driver/sqlite"
-	"gorm.io/gorm"
 	"log"
 	"os"
 	"path/filepath"
 	"vnc/model"
 	"vnc/model/connections"
+
+	"gorm.io/driver/sqlite"
+	"gorm.io/gorm"
 )
 
 type DbInstance struct {

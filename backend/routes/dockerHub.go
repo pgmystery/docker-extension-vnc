@@ -2,9 +2,10 @@ package routes
 
 import (
 	"encoding/json"
-	"github.com/gofiber/fiber/v2"
 	"io"
 	"net/http"
+
+	"github.com/gofiber/fiber/v2"
 )
 
 type ImageTagsRequest struct {
