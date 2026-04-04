@@ -129,6 +129,7 @@ export default function TemplateInfoPanel({ selected, loading, onRun }: DockerIm
           }
         }))
       })
+      .catch(_ => {})
   }, [dockerHubApi, selected.image, selected.defaultTag, tag, imageMetadata])
 
   useEffect(() => {

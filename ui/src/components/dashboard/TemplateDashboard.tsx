@@ -46,9 +46,7 @@ export default function TemplateDashboard({ checkExampleContainerExist }: Templa
             category={defaultTemplates[tab]}
             checkExampleContainerExist={checkExampleContainerExist}
           />
-        : <HubTabContent
-
-          />
+        : <HubTabContent />
       }
 
     </Container>
