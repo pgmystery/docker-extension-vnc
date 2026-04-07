@@ -1,6 +1,9 @@
 import { useEffect, useMemo } from 'react'
+import { Box, Stack } from '@mui/material'
 import useFetchRewrite from '../../hooks/useFetchRewrite'
 import useWebSocketRewrite from '../../hooks/useWebSocketRewrite'
+import VNCSessionBar from '../vncSessionBar/VNCSessionBar'
+import VNCViewSkeleton from '../VNCView/VNCViewSkeleton'
 
 export default function SelkiesView() {
   const turnConfigUrl =
@@ -64,5 +67,47 @@ export default function SelkiesView() {
     void import('gst-web-core/selkies-core.js').then(() => document.dispatchEvent(new Event('DOMContentLoaded')));
   }, [])
 
-  return <div id="app"></div>
+  return (
+    <Stack direction="column" spacing={1} sx={{height: '100%', overflow: 'hidden'}} >
+      <VNCSessionBar
+        vncScreenRef={vncScreenRef}
+        clippedViewport={isClippedViewport}
+        clipToWindowActive={vncSettings.scaling.clipToWindow}
+        onDragWindowChange={(state) => vncScreenRef.current?.rfb && (vncScreenRef.current.rfb.dragViewport = state)}
+        onFullscreenClicked={handleFullscreenClick}
+        onSettingsClicked={handleSettingsClick}
+        onOpenInBrowserClicked={handleOpenInBrowserClick}
+        onWebsocketUrlCopyClick={handleWebsocketUrlCopyClick}
+        clipboardText={clipboardText}
+        sendClipboardText={sendClipboardText}
+        sendMachineCommand={sendMachineCommand}
+        havePowerCapability={havePowerCapability}
+        viewOnly={vncSettings.viewOnly}
+        webRTCAudio={webRTCAudio}
+        micAudio={{
+          enabled: vncSettings.audio.input.enabled,
+          muted: vncSettings.audio.input.muted,
+          device: vncSettings.audio.input.device,
+          mic: micAudio,
+        }}
+        canvas={canvasElement}
+      />
+      <Box ref={vncContainerRef} sx={{
+        width: '100%',
+        height: '100%',
+        position: "relative",
+        overflow: 'hidden',
+      }}>
+        {
+          ready
+          ? <>
+            { !isConnected && <VNCViewSkeleton /> }
+            <div id="app"></div>
+          </>
+          : <VNCViewSkeleton />
+        }
+
+      </Box>
+    </Stack>
+  )
 }
