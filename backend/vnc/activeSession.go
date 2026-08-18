@@ -34,8 +34,8 @@ func (activeSessionHandler *ActiveSessionHandler) Save(data ActiveSessionData) e
 		return err
 	}
 
-	defer activeSessionHandler.fileSaveLock.Unlock()
 	activeSessionHandler.fileSaveLock.Lock()
+	defer activeSessionHandler.fileSaveLock.Unlock()
 
 	err = os.MkdirAll(activeSessionHandler.config.DataPath, os.ModePerm)
 	if err != nil {
@@ -62,8 +62,8 @@ func (activeSessionHandler *ActiveSessionHandler) Save(data ActiveSessionData) e
 }
 
 func (activeSessionHandler *ActiveSessionHandler) Reset() error {
-	defer activeSessionHandler.fileSaveLock.Unlock()
 	activeSessionHandler.fileSaveLock.Lock()
+	defer activeSessionHandler.fileSaveLock.Unlock()
 
 	err := os.MkdirAll(activeSessionHandler.config.DataPath, os.ModePerm)
 	if err != nil {
