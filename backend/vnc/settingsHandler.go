@@ -17,8 +17,8 @@ type SettingsHandler struct {
 var Settings *SettingsHandler
 
 func (vncSettings *SettingsHandler) Save(settings SettingsData) error {
-	defer vncSettings.fileSaveLock.Unlock()
 	vncSettings.fileSaveLock.Lock()
+	defer vncSettings.fileSaveLock.Unlock()
 
 	err := os.MkdirAll(vncSettings.config.DataPath, os.ModePerm)
 	if err != nil {
