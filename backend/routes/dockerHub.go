@@ -2,9 +2,11 @@ package routes
 
 import (
 	"encoding/json"
-	"github.com/gofiber/fiber/v2"
 	"io"
 	"net/http"
+	"time"
+
+	"github.com/gofiber/fiber/v2"
 )
 
 type ImageTagsRequest struct {
@@ -12,6 +14,10 @@ type ImageTagsRequest struct {
 }
 type ImageTagsResponse struct {
 	Body json.RawMessage `json:"body"`
+}
+
+var httpClient = &http.Client{
+	Timeout: 10 * time.Second,
 }
 
 func DockerHubRouter(apiRouter fiber.Router) {
@@ -62,13 +68,13 @@ func getImageTag(ctx *fiber.Ctx) error {
 }
 
 func get(ctx *fiber.Ctx, url string) error {
-	res, err := http.Get(url)
+	res, err := httpClient.Get(url)
 	if err != nil {
 		return fiber.NewError(fiber.StatusBadRequest, err.Error())
 	}
+	defer res.Body.Close()
 
 	body, err := io.ReadAll(res.Body)
-	defer res.Body.Close()
 	if err != nil {
 		return fiber.NewError(fiber.StatusInternalServerError, err.Error())
 	}
