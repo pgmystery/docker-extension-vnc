@@ -90,14 +90,14 @@ func loadActiveSessionFromFile(filePath string) *ActiveSessionData {
 		return nil
 	}
 
-	var activeSessionData *ActiveSessionData
+	var activeSessionData ActiveSessionData
 
-	err = json.Unmarshal(data, activeSessionData)
+	err = json.Unmarshal(data, &activeSessionData)
 	if err != nil {
 		return nil
 	}
 
-	return activeSessionData
+	return &activeSessionData
 }
 
 func LoadActiveSession() {
